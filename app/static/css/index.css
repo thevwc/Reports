@@ -1,0 +1,108 @@
+:root {
+    --main-bg-color: navy;
+    --main-txt-color: white;  
+    --main-padding: 10px;  
+    --calendar-background: lightgray;
+    --calendar-text:blue;
+  }
+  
+                        
+  
+#parent {
+    display: grid;
+    /* grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); */
+    grid-template-columns: auto auto auto auto 1fr 1fr ;
+    /* grid-template-rows: 100px 100px 100px 100px 100px 100px 100px; */
+    grid-template-rows: 50px 100px auto;
+    grid-template-areas:"hdgArea        hdgArea         hdgArea         hdgArea         hdgArea         hdgArea" 
+                        "locationArea   coordArea       weeksArea       rptNameArea     prtRptArea      ."
+                        ".              .               .               rptNameArea     .               ."
+                        ".    .  . . . .";
+    grid-gap:1em;
+                        /* coordArea       coordArea       prtArea         weeksArea"
+                        "filterArea     filterArea      coordArea       coordArea       .               ."
+                        "rptNameArea    prtRptArea      .               .               prtRptArea      sendToArea"
+                        "rptNameArea    prtRptArea      .               .               prtRptArea      sendToArea"
+                        "emailBodyArea  emailBodyArea   emailBodyArea   emailBodyArea   emailBodyArea   emailBodyArea"
+                        "emailBtnsArea  emailBtnsArea   emailBtnsArea   emailBtnsArea   emailBtnsArea   emailBtnsArea"; */
+    background-color:lightgray; 
+    border:2px solid white;                  
+}
+#hdg {
+    grid-area: hdgArea;
+    padding-top: 10px;
+    text-align: center;
+    background-color:navy;
+    color: var(--main-txt-color);
+    border-bottom:white 3px;
+}
+
+
+#location {
+    grid-area:locationArea;
+    padding-top:30px;
+    padding-left:20px;
+    background-color: lightgray;
+    color: navy;
+}
+
+#coordNames {
+    grid-area:coordArea;
+    padding-top:30px;
+    background-color: lightgray;
+    color:navy;
+}
+
+#weekChoices {
+    grid-area:weeksArea; 
+    padding:30px;
+    background-color: lightgray;
+    color:navy;
+}
+
+#rptChoices {
+    grid-area:rptNameArea;
+    padding-left: 20px;
+    background-color:lightgray;
+    color:navy;
+    border:1px solid navy
+}  
+/* 
+.reportsForm {
+    border:1px solid black;
+} */
+#prtReports {
+    grid-area:prtRptArea;
+    padding-top:50px;
+    padding-left:30px;
+    background-color: lightgray;
+}
+
+#sendToOptions {
+    /*grid-area:sendToArea; */
+    background-color: lightsalmon;
+}
+
+#emailBody {
+    /* grid-area:emailBodyArea; */
+    background-color: lime;
+    border: 1px solid black;
+    /* height:800px; */
+}
+
+#emailBtns {
+    /* grid-area:emailBtnsArea; */
+    background-color: magenta;
+}
+/* #settingsIcon {
+    margin-top:3px;
+    margin-left: 30px;
+    height: 30px;
+    font-size:18px;
+}
+select {
+    text-size-adjust:100 px; 
+    margin-right:20px;
+    color:blue;
+} */
+

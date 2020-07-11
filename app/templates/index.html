@@ -1,0 +1,95 @@
+{% extends 'bootstrap/base.html' %}
+
+{% block styles %}
+    {{super()}}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div id="parent">
+        <div id="hdg">
+            <h2>MONITOR COORDINATOR REPORTS</h2>  
+            <button id="settingsIcon" style="display:none"><i class="fas fa-bars" data-toggle='modal' data-target='#settingsModal'></i></button>
+            <button id="settingsBtn" style="display:none" type='button' class = 'btn btn-primary' data-toggle = 'modal' data-target = '#settingsModal'>
+                    SETTINGS  
+            </button>
+            
+        </div>
+
+        <div id="location">
+            <form class = "filterItems "></form>
+                <label for="shopChoice">Location: </label>
+                <select id="shopChoice" name="shopList" style="height: 25px;font-size: 1em;">
+                    <option id='shop1' value="RA">Rolling Acres</option>
+                    <option id='shop2' value="BW">Brownwood</option>
+                </select>
+            </form>
+        </div>
+
+        <!--coordinators names -->
+        <div id="coordNames">
+            <label for="coordinatorPicker">Coordinator: </label>
+            <select id='coordChoice' style='margin-bottom:20px; width:200px' title='Select a coordinator ...' data-live-search=true data-live-search-style="contains" data-width='auto'>
+                <option class="optName" value="All">All</option>
+                {% for c in coordNames %}
+                    <option class="optName" value='{{c.coordID}}'</option>{{c.coordName}}</option>
+                {% endfor %}
+            </select><br><br>
+        </div>
+
+            <!--weeks to select -->
+        <div id="weekChoices">
+            <label for="weekPicker">Week of: </label>
+            <select id='weekSelected' class='weekPicker' style='margin-bottom:20px' title='Select a week ...' data-live-search=true data-live-search-style="contains" data-width='auto'>
+                <option class="optWeeks" value="">Select a week ...</option>
+                {% for w in weeks %}
+                    <option  class="optWeeks" data-shop={{w.Shop_Number}} data-coordID={{w.Coordinator_ID}} value={{w.Start_Date}}>{{w.DisplayDate}}</option>
+                {% endfor %}
+            </select><br><br>
+        </div>
+       
+        <div id="rptChoices">
+            <form id='reportsFormID' class="reportsForm" action="">
+                <p>Select report(s) ...</p>
+                <input type="checkbox" id="scheduleID" name="schedule" value="rptSchedule">
+                <label for="schedule"> Schedule</label><br>
+                <input type="checkbox" id="notesID" name="notes" value="rptNotes">
+                <label for="notes"> Notes</label><br>
+                <input type="checkbox" id="contactsID" name="contacts" value="rptContacts">
+                <label for="contacts"> Contacts</label><br>
+                <input type="checkbox" id="subsID" name="subs" value="rptSubs">
+                <label for="subs"> Available subs</label><br>   
+            </form>
+        </div>   
+
+        <div id="prtReports">
+            <button type="button" id="printReportBtn" class="btn btn-primary">PRINT</button>  
+            <button type="button" id="eMailReportBtn" style="margin-left:20px" class="btn btn-primary">EMAIL</button>  
+        </div>
+
+
+        <!-- <div id="sendToOptions" class="sendToOptions">
+            <form>
+                <p>Send to:</p>
+                <input type="radio" id="coordinatorOnly" name="sendToOptions" value="1">
+                <label for="coordinatorOnly">Coordinator Only</label><br>
+                <input type="radio" id="monitorsAndCoordinator" name="sendToOptions" value="2">
+                <label for="monitorsAndCoordinator">Monitors and coordinator</label><br>
+                <input type="radio" id="specificMember" name="sendToOptions" value="3">
+                <label for="specificMember">Specific member</label>
+            </form>
+        </div> -->
+        
+
+        
+        <!-- <div id="emailBody">BODY OF EMAIL</div> -->
+
+        <!-- <div id="emailBtns">EMAIL BUTTONS</div> -->
+
+    </div>  <!-- END OF PARENT WRAPPER -->
+{% endblock %}
+
+{% block scripts %}
+    {{super()}}
+    <script src="{{ url_for('static', filename='js/index.js') }}"> </script>
+{% endblock %}

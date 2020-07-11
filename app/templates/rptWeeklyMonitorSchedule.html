@@ -1,0 +1,232 @@
+<!-- rptWeeklyMonitorSchedule.html -->
+{% extends 'bootstrap/base.html' %}
+
+{% block styles %}
+    {{super()}}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/rptWeeklyMonitorSchedule.css') }}">
+{% endblock %}
+
+{% block content %} 
+<!-- Include Print CSS -->
+<div class='wholePage'>
+
+<div class="pageButtons">
+    <button id="printWeeklyPageButton" onClick="window.print();">PRINT</button>
+    <button id="closeWeeklyPageButton" onclick="window.history.back()" >CLOSE PAGE</button>
+</div> 
+<br> 
+<!-- <title>Monitor Duty Schedule</title> -->
+<br>
+<div class="reportHdg">
+    <h1>THE VILLAGES WOODWORKERS CLUB</h1>
+    <h3>Weekly Monitor Duty Schedule - {{shopName}}</h3>
+    <h3>Week of {{ weekOfHdg }}</h3>
+    <br>
+    <h3>Coordinator: {{coordinatorsName}}</h3>
+    <h3>Email: {{coordinatorsEmail}}</h3>
+    <br>
+</div> 
+<div class='ShopMonitorSection'>
+    <div class='ShopMonitorTitle'>
+        <h2>Shop Monitor</h2>
+    </div>
+    <div>
+        <table class='SMtable'>
+            <thead>
+                <tr class='dayNames'>
+                    <th></th>
+                    <th>Monday</th>
+                    <th>Tuesday</th>
+                    <th>Wednesday</th>
+                    <th>Thursday</th>
+                    <th>Friday</th>
+                    <th>Saturday</th>
+                </tr>
+                <tr class='dayDates'>
+                    <th></th>
+                    <th>{{monDate}}</th>
+                    <th>{{tueDate}}</th>
+                    <th>{{wedDate}}</th>
+                    <th>{{thuDate}}</th>
+                    <th>{{friDate}}</th>
+                    <th>{{satDate}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in range(SMAMrows) %}
+                <tr>
+                    <td style="width:50px">AM</td>
+                    {% if SMAMtraining[r][0] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{SMAMnames[r][0]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{SMAMnames[r][0]}}</td>
+                    {% endif %}
+                    {% if SMAMtraining[r][1] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{SMAMnames[r][1]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{SMAMnames[r][1]}}</td>
+                    {% endif %}
+                    {% if SMAMtraining[r][2] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{SMAMnames[r][2]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{SMAMnames[r][2]}}</td>
+                    {% endif %}
+                    {% if SMAMtraining[r][3] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{SMAMnames[r][3]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{SMAMnames[r][3]}}</td>
+                    {% endif %}
+                    {% if SMAMtraining[r][4] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{SMAMnames[r][4]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{SMAMnames[r][4]}}</td>
+                    {% endif %}
+                    {% if SMAMtraining[r][5] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{SMAMnames[r][5]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{SMAMnames[r][5]}}</td>
+                    {% endif %}
+                </tr>    
+                {% endfor %}
+                {% for r in range(SMPMrows) %}
+                <tr>
+                    <td style="width:50px">PM</td>
+                    {% if SMPMtraining[r][0] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{SMPMnames[r][0]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{SMPMnames[r][0]}}</td>
+                    {% endif %}
+                    {% if SMPMtraining[r][1] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{SMPMnames[r][1]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{SMPMnames[r][1]}}</td>
+                    {% endif %}
+                    {% if SMPMtraining[r][2] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{SMPMnames[r][2]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{SMPMnames[r][2]}}</td>
+                    {% endif %}
+                    {% if SMPMtraining[r][3] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{SMPMnames[r][3]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{SMPMnames[r][3]}}</td>
+                    {% endif %}
+                    {% if SMPMtraining[r][4] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{SMPMnames[r][4]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{SMPMnames[r][4]}}</td>
+                    {% endif %}
+                    {% if SMPMtraining[r][5] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{SMPMnames[r][5]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{SMPMnames[r][5]}}</td>
+                    {% endif %}
+                </tr>    
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<br>
+<div class='ToolCribSection'>
+    <div class='ToolCribTitle'>
+        <h2>Tool Crib</h2>
+    </div>
+    <div>
+        <table>
+            <thead>
+                <tr class='dayNames'>
+                    <th></th>
+                    <th>Monday</th>
+                    <th>Tuesday</th>
+                    <th>Wednesday</th>
+                    <th>Thursday</th>
+                    <th>Friday</th>
+                    <th>Saturday</th>
+                </tr>
+                <tr class='dayDates'>
+                    <th></th>
+                    <th>{{monDate}}</th>
+                    <th>{{tueDate}}</th>
+                    <th>{{wedDate}}</th>
+                    <th>{{thuDate}}</th>
+                    <th>{{friDate}}</th>
+                    <th>{{satDate}}</th>
+                </tr> 
+            </thead>
+            <tbody>
+                {% for r in range(TCAMrows) %}
+                <tr>
+                    <td style="width:50px">AM</td>
+                    {% if TCAMtraining[r][0] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{TCAMnames[r][0]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{TCAMnames[r][0]}}</td>
+                    {% endif %}
+                    {% if TCAMtraining[r][1] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{TCAMnames[r][1]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{TCAMnames[r][1]}}</td>
+                    {% endif %}
+                    {% if TCAMtraining[r][2] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{TCAMnames[r][2]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{TCAMnames[r][2]}}</td>
+                    {% endif %}
+                    {% if TCAMtraining[r][3] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{TCAMnames[r][3]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{TCAMnames[r][3]}}</td>
+                    {% endif %}
+                    {% if TCAMtraining[r][4] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{TCAMnames[r][4]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{TCAMnames[r][4]}}</td>
+                    {% endif %}
+                    {% if TCAMtraining[r][5] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{TCAMnames[r][5]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{TCAMnames[r][5]}}</td>
+                    {% endif %}
+                </tr>    
+                {% endfor %}
+                {% for r in range(TCPMrows) %}
+                <tr>
+                    <td style="width:50px">PM</td>
+                    {% if TCPMtraining[r][0] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{TCPMnames[r][0]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{TCPMnames[r][0]}}</td>
+                    {% endif %}
+                    {% if TCPMtraining[r][1] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{TCPMnames[r][1]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{TCPMnames[r][1]}}</td>
+                    {% endif %}
+                    {% if TCPMtraining[r][2] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{TCPMnames[r][2]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{TCPMnames[r][2]}}</td>
+                    {% endif %}
+                    {% if TCPMtraining[r][3] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{TCPMnames[r][3]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{TCPMnames[r][3]}}</td>
+                    {% endif %}
+                    {% if TCPMtraining[r][4] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{TCPMnames[r][4]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{TCPMnames[r][4]}}</td>
+                    {% endif %}
+                    {% if TCPMtraining[r][5] == 'Y' %}
+                        <td style="text-align:center;background-color: yellow;">{{TCPMnames[r][5]}}</td>
+                    {% else %}
+                        <td style="text-align:center;background-color: white;">{{TCPMnames[r][5]}}</td>
+                    {% endif %}
+                </tr>    
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>  
+</div>
+{% endblock %} 

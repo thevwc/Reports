@@ -1,0 +1,16 @@
+
+
+{% block styles %}
+    {{super()}}
+    
+{% endblock %}
+
+{% block scripts %}
+	{{super()}}
+	
+{% endblock %}
+
+{% block title %}
+{% if title %}{{ title }} - MONITOR SCHEDULING{% else %}MONITOR SCHEDULING{% endif %}
+{% endblock %}
+
