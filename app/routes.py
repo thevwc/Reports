@@ -15,7 +15,9 @@ from datetime import date, datetime, timedelta
 
 @app.route('/test')
 def test():
-    return render_template("test.html")
+    # TRY TO DISPLAY rptWeeklyContacts.html WITHOUT PASSING ANY PARAMETERS
+    return render_template("rptWeeklyContacts.html")
+    #return render_template("test.html")
 
 @app.route('/')
 @app.route('/index', methods=['GET'])
@@ -46,10 +48,10 @@ def index():
 def printMonitorScheduleWeek():
     dateScheduled=request.args.get('dateScheduled')
     shopNumber=request.args.get('shopNumber')
-   
+    
     #  DETERMINE START OF WEEK DATE
     #  CONVERT TO DATE TYPE
-    dateScheduledDat = datetime.strptime(dateScheduled,'%Y-%m-%d')
+    dateScheduledDat = datetime.strptime(dateScheduled,'%Y%m%d')
     dayOfWeek = dateScheduledDat.weekday()
 
     beginDateDAT = dateScheduledDat - timedelta(dayOfWeek + 1)
@@ -180,7 +182,6 @@ def printMonitorScheduleWeek():
     sqlSelectSM += "LEFT JOIN tblMonitor_Schedule ON tblMonitor_Schedule.Member_ID = tblMember_Data.Member_ID "
     sqlSelectSM += "LEFT JOIN tblShop_Names ON tblMonitor_Schedule.Shop_Number = tblShop_Names.Shop_Number "
     sqlSelectSM += "WHERE Date_Scheduled between '" + beginDateSTR + "' and '" + endDateSTR + "' "
-    #sqlSelectSM += " and tblMonitor_Schedule.Duty = 'Shop Monitor' "
     sqlSelectSM += "ORDER BY dayOfWeek, AM_PM,Last_Name"
     SMschedule = db.engine.execute(sqlSelectSM)
     
@@ -278,12 +279,123 @@ def printMonitorScheduleWeek():
                 c += 1
     
     #return render_template("test.html")
+    
     return render_template("rptWeeklyMonitorSchedule.html",\
-    SMAMnames=SMAMnames,SMPMnames=SMPMnames,TCAMnames=TCAMnames,TCPMnames=TCPMnames,\
-    SMAMtraining=SMAMtraining,SMPMtraining=SMPMtraining,TCAMtraining=TCAMtraining,TCPMtraining=TCPMtraining,\
-    SMAMrows=SMAMrows,SMPMrows=SMPMrows,TCAMrows=TCAMrows,TCPMrows=TCPMrows,\
-    shopName=shopName,weekOf=beginDateSTR,coordinatorsName=coordinatorsName, coordinatorsEmail=coordinatorsEmail,\
-    todays_date=todays_dateSTR,\
-    weekOfHdg=weekOfHdg,\
-    monDate=monDate,tueDate=tueDate,wedDate=wedDate,thuDate=thuDate,friDate=friDate,satDate=satDate)
+        SMAMnames=SMAMnames,SMPMnames=SMPMnames,TCAMnames=TCAMnames,TCPMnames=TCPMnames,\
+        SMAMtraining=SMAMtraining,SMPMtraining=SMPMtraining,TCAMtraining=TCAMtraining,TCPMtraining=TCPMtraining,\
+        SMAMrows=SMAMrows,SMPMrows=SMPMrows,TCAMrows=TCAMrows,TCPMrows=TCPMrows,\
+        shopName=shopName,weekOf=beginDateSTR,coordinatorsName=coordinatorsName, coordinatorsEmail=coordinatorsEmail,\
+        todays_date=todays_dateSTR,\
+        weekOfHdg=weekOfHdg,\
+        monDate=monDate,tueDate=tueDate,wedDate=wedDate,thuDate=thuDate,friDate=friDate,satDate=satDate)
+        
+
+
+
+
+    # PRINT WEEKLY LIST OF CONTACTS FOR COORDINATOR
+@app.route("/printWeeklyMonitorContacts", methods=['GET'])
+def printWeeklyMonitorContacts():
+    dateScheduled=request.args.get('dateScheduled')
+    shopNumber=request.args.get('shopNumber')
+
+    # GET LOCATION NAME FOR REPORT HEADING
+    shopRecord = db.session.query(ShopName).filter(ShopName.Shop_Number==shopNumber).first()
+    shopName = shopRecord.Shop_Name
+    
+    #  DETERMINE START OF WEEK DATE
+    #  CONVERT TO DATE TYPE
+    dateScheduledDat = datetime.strptime(dateScheduled,'%Y-%m-%d')
+    dayOfWeek = dateScheduledDat.weekday()
+
+    # GET BEGIN, END DATES FOR REPORT HEADING
+    beginDateDAT = dateScheduledDat - timedelta(dayOfWeek + 1)
+    beginDateSTR = beginDateDAT.strftime('%m-%d-%Y')
+
+    endDateDAT = beginDateDAT + timedelta(days=6)
+    endDateSTR = endDateDAT.strftime('%m-%d-%Y')
+
+    weekOfHdg = beginDateDAT.strftime('%B %-d, %Y')
+    
+    # RETRIEVE SCHEDULE FOR SPECIFIC WEEK
+    todays_date = date.today()
+    todays_dateSTR = todays_date.strftime('%-m-%-d-%Y')
+
+    # DEFINE ARRAYS FOR EACH GROUPING
+    rows = 100 
+    cols = 6    # member name, last trained, email, home phone, cell phone and if training needed Y or N
+    SMnames = [[0 for x in range(cols)] for y in range(rows)]
+    
+    TCnames = [[0 for x in range(cols)] for y in range(rows)]
+    
+    SMrow = 0
+    TCrow = 0
+    savedSMname=''
+    savedTCname=''
+    
+    # BUILD SELECT STATEMENT TO RETRIEVE SM MEMBERS SCHEDULE FOR CURRENT YEAR FORWARD
+    sqlSelectSM = "SELECT tblMember_Data.Member_ID as memberID, "
+    sqlSelectSM += "First_Name + ' ' + Last_Name as displayName, "
+    sqlSelectSM += "Last_Monitor_Training as trainingDate, DATEPART(year,Last_Monitor_Training) as trainingYear, "
+    sqlSelectSM += "'N' as trainingNeeded,"
+    sqlSelectSM += " format(Date_Scheduled,'M/d/yyyy') as DateScheduled, DATEPART(year,Date_Scheduled) as scheduleYear, "
+    sqlSelectSM += "Duty, eMail, Home_Phone, Cell_Phone,tblMember_Data.Monitor_Duty_Waiver_Expiration_Date as waiver "
+    sqlSelectSM += "FROM tblMember_Data "
+    sqlSelectSM += "LEFT JOIN tblMonitor_Schedule ON tblMonitor_Schedule.Member_ID = tblMember_Data.Member_ID "
+    sqlSelectSM += "WHERE Date_Scheduled between '" + beginDateSTR + "' and '" + endDateSTR + "' "
+    sqlSelectSM += " and (tblMonitor_Schedule.Duty = 'Shop Monitor' or tblMonitor_Schedule.Duty = 'Tool Crib') "
+    sqlSelectSM += " and tblMonitor_Schedule.Shop_Number = " + shopNumber 
+    sqlSelectSM += "ORDER BY Duty, Last_Name, First_Name"
+    monitors = db.engine.execute(sqlSelectSM)
+    
+    # STEP THROUGH RESULT SET, DETERMINE IF TRAINING IS NEEDED, BUILD 2D ARRAY (LIST WITHIN LIST)
+    for m in monitors:
+        # IS TRAINING NEEDED?
+        if (m.waiver == None):  # if no waiver 
+            if (m.trainingYear == None):  # if last training year is blank
+                needsTraining = 'Y'
+            else:
+                intTrainingYear = int(m.trainingYear) +2  # int of last training year
+                intScheduleYear = int(m.scheduleYear) # int of schedule year
+                if (intTrainingYear <= intScheduleYear):
+                    needsTraining = 'Y'
+                else:
+                    needsTraining = 'N'
+        else:
+            needsTraining = 'N'
+
+        #   BUILD SHOP MONITOR ARRAYS
+        #   PUT DATA INTO ROW OF ARRAY (SMnames or TCnames)
+
+        #   Group - Shop Monitor; 
+        if (m.Duty == 'Shop Monitor' and m.displayName != savedSMname):  # ELIMINATE DUPLICATE NAMES
+            SMnames[SMrow][0] = m.displayName
+            savedSMname = m.displayName
+            SMnames[SMrow][1] = m.trainingYear
+            SMnames[SMrow][2] = m.eMail
+            SMnames[SMrow][3] = m.Home_Phone
+            SMnames[SMrow][4] = m.Cell_Phone
+            SMnames[SMrow][5] = needsTraining
+            SMrow += 1
+            
+        #   Group - Tool Crib;  
+        if (m.Duty == 'Tool Crib' and m.displayName != savedTCname):    # ELIMINATE DUPLICATE NAMES
+            TCnames[TCrow][0] = m.displayName
+            #print('previous name - ', savedTCname)
+            savedTCname = m.displayName 
+            TCnames[TCrow][1] = m.trainingYear
+            TCnames[TCrow][2] = m.eMail
+            TCnames[TCrow][3] = m.Home_Phone
+            TCnames[TCrow][4] = m.Cell_Phone
+            TCnames[TCrow][5] = needsTraining
+            #print(TCnames[TCrow][0])
+            #print('TC- ',TCnames[TCrow])
+            TCrow += 1
+
+    return render_template("rptWeeklyContacts.html",\
+        beginDate=beginDateSTR,endDate=endDateSTR,
+        locationName=shopName,SMnames=SMnames,TCnames=TCnames
+        )
+    
+    
     

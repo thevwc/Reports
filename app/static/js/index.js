@@ -41,6 +41,12 @@ document.getElementById("shopChoice").addEventListener("change", shopChanged);
 document.getElementById("coordChoice").addEventListener("change", coordinatorChanged);
 document.getElementById("printReportBtn").addEventListener("click",printReports);
 
+// prt = document.getElementById("printByPost")
+// address = "/printWeeklyMonitorSchedulePOST?dateScheduled="+ curWeekDate + "&shopNumber=" + curShopNumber 
+// lnk = "window.location.href='" + address +"'"
+// prt.setAttribute("onclick",lnk)
+
+
 if (!localStorage.getItem('staffID')) {
     localStorage.setItem('staffID','111111')
 }
@@ -73,15 +79,15 @@ function printReports() {
     }
     if (document.getElementById('notesID').checked) {
         reportSelected = true
-        printWeeklyMonitorNotes(curWeekDate)
+        printWeeklyMonitorNotes(curWeekDate,curShopNumber)
     }
     if (document.getElementById('contactsID').checked) {
         reportSelected = true
-        printWeeklyMonitorContacts(curWeekDate)
+        printWeeklyMonitorContacts(curWeekDate,curShopNumber)
     }
     if (document.getElementById('subsID').checked) {
         reportSelected = true
-        printWeeklyMonitorSubs(curWeekDate)
+        printWeeklyMonitorSubs(curWeekDate,curShopNumber)
     }
 
     if (reportSelected == false) {
@@ -172,8 +178,11 @@ function printWeeklyMonitorNotes() {
     alert('Routine has not been implemented.')
     return
 }
-function printWeeklyMonitorContacts() {
-    alert('Routine has not been implemented.')
+function printWeeklyMonitorContacts(beginDate,shopNumber) {
+    // SEND DATE AND SHOPNUMBER TO SERVER
+    var xhttp = new XMLHttpRequest();  
+    xhttp.open("GET", "/printWeeklyMonitorContacts?dateScheduled=" + beginDate + "&shopNumber=" + shopNumber , true);
+    xhttp.send();
     return
 }
 function printWeeklyMonitorSubs() {

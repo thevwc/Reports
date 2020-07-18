@@ -1,0 +1,51 @@
+<!-- rptMembersSchedule.html -->
+{% extends 'bootstrap/base.html' %}
+
+{% block styles %}
+    {{super()}}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/rptMemberSchedule.css') }}">
+{% endblock %}
+
+{% block content %} 
+<!-- Include Print CSS -->
+<div class='wholePage'>
+
+<div class="pageButtons">
+    <button id="printPageButton" style=margin-right:20px; onClick="window.print();">PRINT</button>
+    <button id="closePageButton" style=margin-right:20px; onclick="window.history.back()" >CLOSE PAGE</button>
+</div> 
+<br> 
+<!-- <title>Monitor Duty Schedule</title> -->
+<br>
+<div class="reportHdg">
+    <h1 class="text-center">THE VILLAGES WOODWORKERS CLUB</h1>
+    <br>
+    <h2 class="text-center">{{displayName}}</h2>
+    <br>
+    <h3 class="text-center">Monitor Duty Schedule</h3>
+    <h3 class="text-center">As of {{ todays_date }}</h3>
+    <h3 class="text-center">{{needTraining}}</h3>
+
+    <table style="display: inline block;">                      
+        <tbody>
+        <tr>
+            <th style="width:50px"> </th>
+            <th style="text-align:center">DATE</th>
+            <th style="text-align:center">SHIFT</th>
+            <th style="text-align:center">DUTY</th>
+            <th style="text-align:center">LOCATION</th>
+        </tr> 
+        <hr>   
+    {% for s in schedule %}
+    <tr>
+        <td style="width:50px"> </td>
+        <td style="text-align:center">{{s.DateScheduled}}</td>
+        <td style="text-align:center">{{s.AM_PM}}</td>
+        <td style="text-align:center">{{s.Duty}}</td>
+        <td style="text-align:center">{{s.Shop_Name}}</td>
+    </tr>    
+    {% endfor %}
+    </tbody>
+</div>  
+</div>
+{% endblock %} 

@@ -1,0 +1,64 @@
+<!-- rptMembersSchedule.html -->
+{% extends 'bootstrap/base.html' %}
+
+{% block styles %}
+    {{super()}}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/rptWeeklyMonitorSchedule.css') }}">
+{% endblock %}
+
+{% block content %} 
+<!-- Include Print CSS -->
+<div class='wholePage'>
+
+    <div class="pageButtons">
+        <button id="printPageButton" style=margin-right:20px; onClick="window.print();">PRINT</button>
+        <button id="closePageButton" style=margin-right:20px; onclick="window.history.back()" >CLOSE PAGE</button>
+    </div> 
+    <br> 
+    <!-- <title>Monitor Duty Schedule</title> -->
+    <br>
+    <div class="reportHdg">
+        <h1 class="text-center">THE VILLAGES WOODWORKERS CLUB</h1>
+        <br>
+        <h2 class="text-center">{{locationName}}</h2>
+        <br>
+        <h3 class="text-center">MONITORS FOR {{beginDate}} - {{endDate}}</h3>
+        <h3 class="text-center">As of {{ todays_date }}</h3>
+    </div>
+    
+    <div>
+        <h3>SHOP MONITOR DUTY</h3>
+        <table style="display: inline block;">                      
+            <thead>
+                <tr>
+                    <th style="width:50px"> </th>
+                    <th style="text-align:center">NAME</th>
+                    <th style="text-align:center">LAST TRAINED</th>
+                    <th style="text-align:center">EMAIL</th>
+                    <th style="text-align:center">HOME PHONE</th>
+                    <th style="text-align:center">CELL PHONE</th>
+                </tr> 
+                <hr>
+            </thead> 
+            <tbody>
+                {% for s in SMnames %}
+                    {% if s.Duty == 'Shop Monitor' %}  
+                        <tr>
+                            <td style="width:50px"> </td>
+                            {% if s.trainingNeeded == 'Y' %}
+                                <td style="text-align:center" background-color="white">{{s.displayName}}</td> <!-- name -->
+                            {% else %}
+                                <td style="text-align:center" background-color="yellow">{{s.displayName}}</td> <!-- name -->
+                            {% endif %}
+                            <td style="text-align:center">{{s.trainingYear}}</td> <!-- last trained year -->
+                            <td style="text-align:center">{{s.eMail}}</td> <!-- email -->
+                            <td style="text-align:center">{{s.Home_Phone}}</td> <!-- home phone -->
+                            <td style="text-align:center">{{s.Cell_Phone}}</td><!-- cell phone -->
+                        </tr> 
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>  
+</div>
+{% endblock %} 
