@@ -37,6 +37,8 @@ var curCoordinatorName = '' //UPDATED FROM COORDINATOR SELECTION
 
 // DEFINE EVENT LISTENERS
 document.getElementById("weekSelected").addEventListener("change", weekChanged);
+document.getElementById("weekSelected").addEventListener("click", weekChanged);
+
 document.getElementById("shopChoice").addEventListener("change", shopChanged);
 document.getElementById("coordChoice").addEventListener("change", coordinatorChanged);
 document.getElementById("printReportBtn").addEventListener("click",printReports);
@@ -79,7 +81,8 @@ function printReports() {
     }
     if (document.getElementById('notesID').checked) {
         reportSelected = true
-        printWeeklyMonitorNotes(curWeekDate,curShopNumber)
+        printWeeklyMonitorNotesGET(curWeekDate,curShopNumber)
+        //printWeeklyMonitorNotesPOST(curWeekDate,curShopNumber)
     }
     if (document.getElementById('contactsID').checked) {
         reportSelected = true
@@ -173,10 +176,39 @@ function coordinatorChanged () {
     curCoordinatorID = this.value
     filterWeeksShown()
 }
+function printWeeklyMonitorNotesGET(beginDate,shopNumber) {
+    // SEND DATE AND SHOPNUMBER TO SERVER
+    var httpRequest = new XMLHttpRequest(); 
+    httpRequest.open('GET', '/printWeeklyMonitorNotesGET?dateScheduled=' + beginDate + '&shopNumber=' + shopNumber, true);
+    httpRequest.send();
+    // END httpRequest FUNCTION    
+}
 
-function printWeeklyMonitorNotes() {
-    alert('Routine has not been implemented.')
-    return
+function printWeeklyMonitorNotesPOST(beginDate,shopNumber) {
+    // SEND DATE AND SHOPNUMBER TO SERVER
+    var httpRequest = new XMLHttpRequest(); 
+    httpRequest.open('POST', '/printWeeklyMonitorNotesPOST');
+    httpRequest.setRequestHeader('Content-Type','application/json');
+    httpRequest.onreadystatechange = function() {
+        if (httpRequest.readyState === 4 && httpRequest.status === 200) {
+            // Print response from server
+            alert (this.responseText);
+        }
+    };
+    // SEND DATE AND SHOPNUMBER TO SERVER
+    var data = {dateScheduled:beginDate,shopNumber:shopNumber}
+    httpRequest.send(JSON.stringify(data));
+    // END httpRequest FUNCTION    
+}
+
+function alertContents() {
+    if (httpRequest.readyStte === XMLHttpRequest.DONE) {
+        if (httpRequest.status === 200) {
+            alert(httpRequest.responseText);
+        } else {
+            alert('There was a problem with the request.');
+        }
+    }
 }
 function printWeeklyMonitorContacts(beginDate,shopNumber) {
     // SEND DATE AND SHOPNUMBER TO SERVER

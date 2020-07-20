@@ -1,0 +1,57 @@
+<!-- rptWeeklyMonitorNotes.html -->
+{% extends 'bootstrap/base.html' %}
+
+{% block styles %}
+    {{super()}}
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/rptWeeklyMonitorSchedule.css') }}"> -->
+{% endblock %}
+
+{% block content %} 
+<!-- Include Print CSS -->
+<div class='wholePage'>
+
+    <div class="pageButtons">
+        <button id="printPageButton" style=margin-right:20px; onClick="window.print();">PRINT</button>
+        <button id="closePageButton" style=margin-right:20px; onclick="window.history.back()" >CLOSE PAGE</button>
+    </div> 
+    <br> 
+    
+    <br>
+    <div class="reportHdg">
+        <h1 class="text-center">THE VILLAGES WOODWORKERS CLUB</h1>
+        <br>
+        <h2 class="text-center">{{locationName}}</h2>
+        <br>
+        <h3 class="text-center">MONITOR SCHEDULE NOTES</h3>
+        <h3 class="text-center">{{beginDate}} - {{endDate}}</h3>
+        <h3 class="text-center">As of {{ todays_date }}</h3>
+        <hr>
+    </div>
+    
+    <div>
+        <table style="display: inline block;">                      
+            <thead>
+                <tr>
+                    <th style="width:50px"> </th>
+                    <th style="text-align:center">DATE</th>
+                    <th style="text-align:center">TIME</th>
+                    <th style="text-align:center">NOTE</th>
+                    <th style="text-align:center">STAFF</th>
+                </tr> 
+                <hr>
+            </thead> 
+            <tbody>
+                {% for n in notes %}
+                    <tr>
+                        <td style="width:50px"> </td>
+                        <td style="text-align:center">{{n.changeDate}}</td> 
+                        <td style="text-align:center">{{n.changeTime}}</td> 
+                        <td style="text-align:center">{{n.note}}</td> 
+                        <td style="text-align:center">{{n.initials}}</td>
+                    </tr> 
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>  
+</div>
+{% endblock %}
