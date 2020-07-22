@@ -9,7 +9,7 @@
 	} 
 	
    	h1, h2, h3 {
-		color: black;
+		color: greenyellow;
 		text-align: center;
 		font-family: "Times New Roman",Times, sans-serif,serif;
    } 
@@ -47,16 +47,21 @@
 	} */
 	th, td {
 		border: 1px solid black;
+		text-align:center;
 		  
 	}
 	td {
 		font: size 10pt;
 	}
     .ShopMonitorTitle {
-		width:80%;
+		text-align: center;
+		width:100%;
+		border:1px solid black;
 	} 
 	.ToolCribTitle {
-		width:80%;
+		text-align: center;
+		width:100%;
+		border:1px solid black;
 	} 
 } 
 

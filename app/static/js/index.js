@@ -39,14 +39,16 @@ var curCoordinatorName = '' //UPDATED FROM COORDINATOR SELECTION
 document.getElementById("weekSelected").addEventListener("change", weekChanged);
 document.getElementById("weekSelected").addEventListener("click", weekChanged);
 
-document.getElementById("shopChoice").addEventListener("change", shopChanged);
+document.getElementById("shopChoice").addEventListener("click", shopClicked);
 document.getElementById("coordChoice").addEventListener("change", coordinatorChanged);
 document.getElementById("printReportBtn").addEventListener("click",printReports);
+// document.getElementById("printWeeklyMonitorNotes").addEventListener("click",printWeeklyMonitorNotes);
 
-// prt = document.getElementById("printByPost")
-// address = "/printWeeklyMonitorSchedulePOST?dateScheduled="+ curWeekDate + "&shopNumber=" + curShopNumber 
-// lnk = "window.location.href='" + address +"'"
-// prt.setAttribute("onclick",lnk)
+// var btn = document.getElementById('prtScheduleBtn');
+// btn.onclick = function() {
+// location.assign('https://localhost:5000/printWeeklyMonitorSchedule?date=2020-08-10&shop=1');
+// }
+
 
 
 if (!localStorage.getItem('staffID')) {
@@ -75,32 +77,56 @@ function printReports() {
         return 
     }
     
+    if (curShopNumber == null || curShopNumber == '') {
+        shop=document.getElementById('shopChoice').value
+        alert('A locationmust be selected')
+        return 
+    }
+    
+    var scheduleBtn = document.getElementById('printScheduleLink');
+    link='/printWeeklyMonitorSchedule?date=2020-08-09&shop=1'
+    link='/printWeeklyMonitorSchedule?date=' + curWeekDate + '&shop=' + curShopNumber
+    scheduleBtn.setAttribute('href', link)
+    
+    var notesBtn = document.getElementById('printNotesLink');
+    link='/printWeeklyMonitorNotes?date=' + curWeekDate + '&shop=' + curShopNumber
+    notesBtn.setAttribute('href', link)
+    
+    var contactsBtn = document.getElementById('printContactsLink');
+    link='/printWeeklyMonitorContacts?date=' + curWeekDate + '&shop=' + curShopNumber
+    contactsBtn.setAttribute('href', link)
+
+    var subsBtn = document.getElementById('printSubsLink');
+    link='/printWeeklyMonitorSubs?date='  + curWeekDate + '&shop=' + curShopNumber
+    subsBtn.setAttribute('href', link)
+    
     if (document.getElementById('scheduleID').checked) {
         reportSelected = true
-        printWeeklyMonitorSchedule(curWeekDate,curShopNumber)
+        scheduleBtn.click()
     }
+
     if (document.getElementById('notesID').checked) {
         reportSelected = true
-        printWeeklyMonitorNotesGET(curWeekDate,curShopNumber)
-        //printWeeklyMonitorNotesPOST(curWeekDate,curShopNumber)
+        notesBtn.click()
     }
     if (document.getElementById('contactsID').checked) {
         reportSelected = true
-        printWeeklyMonitorContacts(curWeekDate,curShopNumber)
+        contactsBtn.click()
     }
     if (document.getElementById('subsID').checked) {
         reportSelected = true
-        printWeeklyMonitorSubs(curWeekDate,curShopNumber)
+        subsBtn.click()
+
+        // printWeeklyMonitorSubs(curWeekDate,curShopNumber)
     }
 
-    if (reportSelected == false) {
-        alert('You must select at least one report.')
+    if (reportSelected != True) {
+        alert('No reports have been selected.')
         return
     }
-
 }
 
-function shopChanged() {
+function shopClicked() {
     setShopFilter(this.value)
     filterWeeksShown()
 }
@@ -161,63 +187,102 @@ function filterWeeksShown() {
 }
   
 
-function printWeeklyMonitorSchedule(beginDate,shopNumber) {
-    // SEND DATE AND SHOPNUMBER TO SERVER
-    var xhttp = new XMLHttpRequest();    
-    xhttp.open("GET", "/printWeeklyMonitorSchedule?dateScheduled=" + beginDate + "&shopNumber=" + shopNumber , true);
-    xhttp.send();
-}
+// function printWeeklyMonitorSchedule(beginDate,shopNumber) {
+//     // SEND DATE AND SHOPNUMBER TO SERVER
+//     var httpRequest = new XMLHttpRequest(); 
+//     httpRequest.onreadystatechange = function() {
+//         if (this.readyState == 4 && this.status == 200) {
+//             document.write(httpRequest.responseText)
+//             document.close()
+//             //print(httpRequest.responseText)
+//         }
+//     };
+//     httpRequest.open("GET", "/printWeeklyMonitorSchedule?date=" + beginDate + "&shop=" + shopNumber , true);
+//     httpRequest.send();
+// }
 
 function weekChanged () {
     curWeekDate = document.getElementById(this.id).value
+    // show coordinator
 }
 
 function coordinatorChanged () {
     curCoordinatorID = this.value
     filterWeeksShown()
 }
-function printWeeklyMonitorNotesGET(beginDate,shopNumber) {
-    // SEND DATE AND SHOPNUMBER TO SERVER
-    var httpRequest = new XMLHttpRequest(); 
-    httpRequest.open('GET', '/printWeeklyMonitorNotesGET?dateScheduled=' + beginDate + '&shopNumber=' + shopNumber, true);
-    httpRequest.send();
-    // END httpRequest FUNCTION    
-}
 
-function printWeeklyMonitorNotesPOST(beginDate,shopNumber) {
-    // SEND DATE AND SHOPNUMBER TO SERVER
-    var httpRequest = new XMLHttpRequest(); 
-    httpRequest.open('POST', '/printWeeklyMonitorNotesPOST');
-    httpRequest.setRequestHeader('Content-Type','application/json');
-    httpRequest.onreadystatechange = function() {
-        if (httpRequest.readyState === 4 && httpRequest.status === 200) {
-            // Print response from server
-            alert (this.responseText);
-        }
-    };
-    // SEND DATE AND SHOPNUMBER TO SERVER
-    var data = {dateScheduled:beginDate,shopNumber:shopNumber}
-    httpRequest.send(JSON.stringify(data));
-    // END httpRequest FUNCTION    
-}
 
-function alertContents() {
-    if (httpRequest.readyStte === XMLHttpRequest.DONE) {
-        if (httpRequest.status === 200) {
-            alert(httpRequest.responseText);
-        } else {
-            alert('There was a problem with the request.');
-        }
-    }
-}
-function printWeeklyMonitorContacts(beginDate,shopNumber) {
-    // SEND DATE AND SHOPNUMBER TO SERVER
-    var xhttp = new XMLHttpRequest();  
-    xhttp.open("GET", "/printWeeklyMonitorContacts?dateScheduled=" + beginDate + "&shopNumber=" + shopNumber , true);
-    xhttp.send();
-    return
-}
-function printWeeklyMonitorSubs() {
-    alert('Routine has not been implemented.')
-    return
-}
+// FOLLOWING DID NOT WORK; FETCH MAY NOT BE THE RIGHT APPROACH FOR LAUNCHING REPORT FROM JAVASCRIPT
+// function printWeeklyMonitorNotes(beginDate,shopNumber) {
+//     let data = new FormData();
+//     data.date=beginDate
+//     data.shop=shopNumber
+//     //data = {'date':'20200810','shop:1'}
+
+//     var baseurl = window.location.origin;
+//     fetch(`${baseurl}/printWeeklyMonitorNotes`,
+//     {
+//         method: "POST",
+//         headers: new Headers({
+//             //'Content-Type': 'application/x-www-form-urlencoded'
+//             'Content-Type': 'application/json'
+//         }),
+//         body:JSON.stringify(data)
+//     })
+//     .then(function(res){ return res.json(); })
+//     .then(function(data){ alert( JSON.stringify( data ))})
+//     .catch(function (error) {
+//         console.log('Request failure: ', error);
+//     });
+
+
+//     // let url = new URL('http://localhost:5000/printWeeklyMonitorNotes')
+    // url.search = new URLSearchParams({
+    //     date:{beginDate},
+    //     shop:{shopNumber}
+    // })
+    // alert('url- '+ url)
+    // fetch(url)
+//}
+
+// function printWeeklyMonitorNotes(beginDate,shopNumber) {
+//     // SEND DATE AND SHOPNUMBER TO SERVER
+//     var httpRequest = new XMLHttpRequest(); 
+//     httpRequest.onreadystatechange = function() {
+//         if (this.readyState == 4 && this.status == 200) {
+//             document.write(httpRequest.responseText)
+//         }
+//     };
+//     httpRequest.open('GET', '/printWeeklyMonitorNotes?date=' + beginDate + '&shop=' + shopNumber, true);
+//     httpRequest.send();
+//     // END httpRequest FUNCTION    
+// }
+
+
+// function alertContents() {
+//     if (httpRequest.readyStte === XMLHttpRequest.DONE) {
+//         if (httpRequest.status === 200) {
+//             alert(httpRequest.responseText);
+//         } else {
+//             alert('There was a problem with the request.');
+//         }
+//     }
+// }
+
+
+// function printWeeklyMonitorContacts(beginDate,shopNumber) {
+//     // SEND DATE AND SHOPNUMBER TO SERVER
+//     var httpRequest = new XMLHttpRequest(); 
+//     httpRequest.onreadystatechange = function() {
+//         if (this.readyState == 4 && this.status == 200) {
+//             document.write(httpRequest.responseText)
+//         }
+//     }; 
+//     httpRequest.open("GET", "/printWeeklyMonitorContacts?date=" + beginDate + "&shop=" + shopNumber , true);
+//     httpRequest.send();
+//     return
+// }
+// function printWeeklyMonitorSubs() {
+//     alert('Routine has not been implemented.')
+//     return
+// }

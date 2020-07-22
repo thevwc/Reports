@@ -1,6 +1,6 @@
 # routes.py
 
-from flask import session, render_template, flash, redirect, url_for, request, jsonify, json, make_response
+from flask import session, render_template, flash, redirect, url_for, request, jsonify, json, make_response, after_this_request
 from flask_bootstrap import Bootstrap
 from werkzeug.urls import url_parse
 from app.models import ShopName, Member, MemberActivity, MonitorSchedule, MonitorScheduleTransaction,\
@@ -16,10 +16,11 @@ from datetime import date, datetime, timedelta
 
 #mail = Mail(app)
 
-@app.route('/test')
-def test():
+# @app.route('/test')
+# def test():
     # TRY TO DISPLAY rptWeeklyContacts.html WITHOUT PASSING ANY PARAMETERS
-    return render_template("rptWeeklyContacts.html")
+    #return render_template("rptWeeklyNotes.html")
+    #return render_template("rptWeeklyContacts.html")
     #return render_template("test.html")
 
 @app.route('/')
@@ -48,22 +49,32 @@ def index():
 
 # PRINT WEEKLY MONITOR DUTY SCHEDULE FOR COORDINATOR
 @app.route("/printWeeklyMonitorSchedule", methods = ['GET'])
-def printMonitorScheduleWeek():
-    dateScheduled=request.args.get('dateScheduled')
-    shopNumber=request.args.get('shopNumber')
+def printWeeklyMonitorSchedule():
+    dateScheduled=request.args.get('date')
+    shopNumber=request.args.get('shop')
     
-    #  DETERMINE START OF WEEK DATE
+    ########  try to redirect to another page that contains the following code
+    
+    # LOOK UP SHOP NAME
+    shopRecord = db.session.query(ShopName).filter(ShopName.Shop_Number==shopNumber).first()
+    shopName = shopRecord.Shop_Name
+    
+    #  DATE SELECTED IS ALWAYS A MONDAY
     #  CONVERT TO DATE TYPE
-    dateScheduledDat = datetime.strptime(dateScheduled,'%Y%m%d')
-    dayOfWeek = dateScheduledDat.weekday()
-
-    beginDateDAT = dateScheduledDat - timedelta(dayOfWeek + 1)
+    dateScheduledDat = datetime.strptime(dateScheduled,'%Y-%m-%d')
+    #dayOfWeek = dateScheduledDat.weekday()
+    # if dayOfWeek == 6:  # if Sunday
+    #     dayOfWeek = 0
+# beginDate should always be a sunday 
+    beginDateDAT = dateScheduledDat + timedelta(days=1)
     beginDateSTR = beginDateDAT.strftime('%m-%d-%Y')
 
     endDateDAT = beginDateDAT + timedelta(days=6)
     endDateSTR = endDateDAT.strftime('%m-%d-%Y')
 
     # DEFINE COLUMN HEADING DATES
+    sunDateDAT = dateScheduledDat 
+    sunDate = sunDateDAT.strftime('%m-%d-%Y')
     monDateDAT = dateScheduledDat + timedelta(days=1)
     monDate = monDateDAT.strftime('%m-%d-%Y')
     tueDateDAT = dateScheduledDat + timedelta(days=2)
@@ -77,7 +88,6 @@ def printMonitorScheduleWeek():
     satDateDAT = dateScheduledDat + timedelta(days=6)
     satDate = satDateDAT.strftime('%m-%d-%Y')
 
-    weekOfHdg = beginDateDAT.strftime('%B %-d, %Y')
     
     # RETRIEVE SCHEDULE FOR SPECIFIC WEEK
     todays_date = date.today()
@@ -85,10 +95,11 @@ def printMonitorScheduleWeek():
 
     # GET COORDINATOR ID FROM COORDINATOR TABLE
     coordinatorRecord = db.session.query(CoordinatorsSchedule)\
-        .filter(CoordinatorsSchedule.Start_Date==beginDateDAT)\
+        .filter(CoordinatorsSchedule.Start_Date==sunDateDAT)\
         .filter(CoordinatorsSchedule.Shop_Number==shopNumber).first()
     if coordinatorRecord == None:
         coordinatorsName = 'Not Assigned'
+        coordinatorsEmail = ''
     else:
         # LOOK UP COORDINATORS NAME
         coordinatorID = coordinatorRecord.Coordinator_ID
@@ -96,14 +107,12 @@ def printMonitorScheduleWeek():
         if memberRecord == None:
             coordinatorsName = '(' + str(coordinatorID) + ')'
         else:
-            if memberRecord.NickName != '':
+            if memberRecord.NickName != None and memberRecord.NickName != '':
                 coordinatorsName = memberRecord.First_Name + ' ' + memberRecord.Last_Name + ' (' + memberRecord.NickName + ')'
             else:
-                coordinatorsName = memberRecord.First_Name + ' ' + memberRecord.Last_Name + ')'
-    coordinatorsEmail = memberRecord.eMail
+                coordinatorsName = memberRecord.First_Name + ' ' + memberRecord.Last_Name
+        coordinatorsEmail = memberRecord.eMail
     
-    shopRecord = db.session.query(ShopName).filter(ShopName.Shop_Number==shopNumber).first()
-    shopName = shopRecord.Shop_Name
 
     # DETERMINE NUMBER OF ROWS NEEDED FOR EACH GROUPING - 
     # SMAM - Shop Monitor, AM shift
@@ -281,15 +290,12 @@ def printMonitorScheduleWeek():
                     TCPMnames[r][c] = ''
                 c += 1
     
-    #return render_template("test.html")
-    
     return render_template("rptWeeklyMonitorSchedule.html",\
         SMAMnames=SMAMnames,SMPMnames=SMPMnames,TCAMnames=TCAMnames,TCPMnames=TCPMnames,\
         SMAMtraining=SMAMtraining,SMPMtraining=SMPMtraining,TCAMtraining=TCAMtraining,TCPMtraining=TCPMtraining,\
         SMAMrows=SMAMrows,SMPMrows=SMPMrows,TCAMrows=TCAMrows,TCPMrows=TCPMrows,\
         shopName=shopName,weekOf=beginDateSTR,coordinatorsName=coordinatorsName, coordinatorsEmail=coordinatorsEmail,\
         todays_date=todays_dateSTR,\
-        weekOfHdg=weekOfHdg,\
         monDate=monDate,tueDate=tueDate,wedDate=wedDate,thuDate=thuDate,friDate=friDate,satDate=satDate)
         
 
@@ -298,8 +304,8 @@ def printMonitorScheduleWeek():
 # PRINT WEEKLY LIST OF CONTACTS FOR COORDINATOR
 @app.route("/printWeeklyMonitorContacts", methods=['GET'])
 def printWeeklyMonitorContacts():
-    dateScheduled=request.args.get('dateScheduled')
-    shopNumber=request.args.get('shopNumber')
+    dateScheduled=request.args.get('date')
+    shopNumber=request.args.get('shop')
 
     # GET LOCATION NAME FOR REPORT HEADING
     shopRecord = db.session.query(ShopName).filter(ShopName.Shop_Number==shopNumber).first()
@@ -311,13 +317,13 @@ def printWeeklyMonitorContacts():
     dayOfWeek = dateScheduledDat.weekday()
 
     # GET BEGIN, END DATES FOR REPORT HEADING
-    beginDateDAT = dateScheduledDat - timedelta(dayOfWeek + 1)
+    beginDateDAT = dateScheduledDat 
     beginDateSTR = beginDateDAT.strftime('%m-%d-%Y')
 
     endDateDAT = beginDateDAT + timedelta(days=6)
     endDateSTR = endDateDAT.strftime('%m-%d-%Y')
 
-    weekOfHdg = beginDateDAT.strftime('%B %-d, %Y')
+    weekOfHdg = beginDateDAT.strftime('%B %d, %Y')
     
     # RETRIEVE SCHEDULE FOR SPECIFIC WEEK
     todays_date = date.today()
@@ -352,6 +358,7 @@ def printWeeklyMonitorContacts():
     
     # STEP THROUGH RESULT SET, DETERMINE IF TRAINING IS NEEDED, BUILD 2D ARRAY (LIST WITHIN LIST)
     for m in monitors:
+        #print(m.displayName)
         # IS TRAINING NEEDED?
         if (m.waiver == None):  # if no waiver 
             if (m.trainingYear == None):  # if last training year is blank
@@ -372,6 +379,7 @@ def printWeeklyMonitorContacts():
         #   Group - Shop Monitor; 
         if (m.Duty == 'Shop Monitor' and m.displayName != savedSMname):  # ELIMINATE DUPLICATE NAMES
             SMnames[SMrow][0] = m.displayName
+            #print(SMnames[SMrow][0])
             savedSMname = m.displayName
             SMnames[SMrow][1] = m.trainingYear
             SMnames[SMrow][2] = m.eMail
@@ -401,69 +409,69 @@ def printWeeklyMonitorContacts():
     
     
 # PRINT WEEKLY NOTES FOR COORDINATOR (POST approach)
-@app.route("/printWeeklyMonitorNotesPOST", methods=["POST"])
-def printWeeklyMonitorNotesPOST():
-    if request.method != 'POST':
-        return 'ERROR - Not a POST request.'
+# @app.route("/printWeeklyMonitorNotesPOST", methods=["POST"])
+# def printWeeklyMonitorNotesPOST():
+#     if request.method != 'POST':
+#         return 'ERROR - Not a POST request.'
 
-    parameters = request.get_json()
-    if parameters == None:
-        return 'ERROR - Missing parameters.'
+#     parameters = request.get_json()
+#     if parameters == None:
+#         return 'ERROR - Missing parameters.'
 
-    dateScheduled = parameters['dateScheduled']
-    if dateScheduled == None:
-        return 'ERROR - Missing date scheduled.'
+#     dateScheduled = parameters['date']
+#     if dateScheduled == None:
+#         return 'ERROR - Missing date scheduled.'
 
-    shopNumber = parameters['shopNumber']
-    if shopNumber == None:
-        return 'ERROR - Missing shop number.'
+#     shopNumber = parameters['shop']
+#     if shopNumber == None:
+#         return 'ERROR - Missing shop number.'
 
-    # GET LOCATION NAME FOR REPORT HEADING
-    shopRecord = db.session.query(ShopName).filter(ShopName.Shop_Number==shopNumber).first()
-    shopName = shopRecord.Shop_Name
+#     # GET LOCATION NAME FOR REPORT HEADING
+#     shopRecord = db.session.query(ShopName).filter(ShopName.Shop_Number==shopNumber).first()
+#     shopName = shopRecord.Shop_Name
     
-    #  DETERMINE START OF WEEK DATE
-    #  CONVERT TO DATE TYPE
-    dateScheduledDat = datetime.strptime(dateScheduled,'%Y-%m-%d')
-    dayOfWeek = dateScheduledDat.weekday()
+#     #  DETERMINE START OF WEEK DATE
+#     #  CONVERT TO DATE TYPE
+#     dateScheduledDat = datetime.strptime(dateScheduled,'%Y-%m-%d')
+#     dayOfWeek = dateScheduledDat.weekday()
 
-    # GET BEGIN, END DATES FOR REPORT HEADING
-    beginDateDAT = dateScheduledDat - timedelta(dayOfWeek + 1)
-    beginDateSTR = beginDateDAT.strftime('%m-%d-%Y')
+#     # GET BEGIN, END DATES FOR REPORT HEADING
+#     beginDateDAT = dateScheduledDat - timedelta(dayOfWeek + 1)
+#     beginDateSTR = beginDateDAT.strftime('%m-%d-%Y')
 
-    endDateDAT = beginDateDAT + timedelta(days=6)
-    endDateSTR = endDateDAT.strftime('%m-%d-%Y')
+#     endDateDAT = beginDateDAT + timedelta(days=6)
+#     endDateSTR = endDateDAT.strftime('%m-%d-%Y')
 
-    weekOfHdg = beginDateDAT.strftime('%B %-d, %Y')
+#     weekOfHdg = beginDateDAT.strftime('%B %-d, %Y')
     
-    # RETRIEVE SCHEDULE FOR SPECIFIC WEEK
-    todays_date = date.today()
-    todays_dateSTR = todays_date.strftime('%-m-%-d-%Y')
+#     # RETRIEVE SCHEDULE FOR SPECIFIC WEEK
+#     todays_date = date.today()
+#     todays_dateSTR = todays_date.strftime('%-m-%-d-%Y')
 
-    # BUILD SELECT STATEMENT TO RETRIEVE NOTES FOR SPECIFIED WEEK AND LOCATION
-    sqlNotes = "SELECT Date_Of_Change, convert(nvarchar,Date_Of_Change,100) as changeDateTime, "
-    sqlNotes += "convert(nvarchar,Date_Of_Change,110) as changeDate, "
-    sqlNotes += "convert(nvarchar,Date_Of_Change,108) as changeTime, "
-    sqlNotes += "Schedule_Note, Author_ID, Initials FROM monitorWeekNotes "
-    sqlNotes += "left join tblMember_Data on Author_ID = Member_ID "
-    sqlNotes += "WHERE WeekOf between '" + beginDateSTR + "' and '" + endDateSTR + "' "
-    sqlNotes += "ORDER BY Date_Of_Change"
-    notes = db.engine.execute(sqlNotes)
-    # for n in notes:
-    #     print(n.Date_Of_Change, n.changeDateTime, n.changeDate,n.changeTime, n.Initials)
-   
-    return render_template("rptWeeklyNotes.html",\
-        beginDate=beginDateSTR,endDate=endDateSTR,\
-        locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
-        todaysDate=todays_dateSTR
-        )
+#     # BUILD SELECT STATEMENT TO RETRIEVE NOTES FOR SPECIFIED WEEK AND LOCATION
+#     sqlNotes = "SELECT Date_Of_Change, convert(nvarchar,Date_Of_Change,100) as changeDateTime, "
+#     sqlNotes += "convert(nvarchar,Date_Of_Change,110) as changeDate, "
+#     sqlNotes += "convert(nvarchar,Date_Of_Change,108) as changeTime, "
+#     sqlNotes += "Schedule_Note, Author_ID, Initials FROM monitorWeekNotes "
+#     sqlNotes += "left join tblMember_Data on Author_ID = Member_ID "
+#     sqlNotes += "WHERE WeekOf between '" + beginDateSTR + "' and '" + endDateSTR + "' "
+#     sqlNotes += "ORDER BY Date_Of_Change"
+#     notes = db.engine.execute(sqlNotes)
+    
+#     return render_template("rptWeeklyNotes.html",\
+#         beginDate=beginDateSTR,endDate=endDateSTR,\
+#         locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
+#         todaysDate=todays_dateSTR
+#         )
     
 # PRINT WEEKLY NOTES FOR COORDINATOR (GET approach)
-@app.route("/printWeeklyMonitorNotesGET", methods=["GET"])
+@app.route("/printWeeklyMonitorNotes", methods=["GET"])
 def printWeeklyMonitorNotesGET():
-    dateScheduled=request.args.get('dateScheduled')
-    shopNumber=request.args.get('shopNumber')
-
+    dateScheduled=request.args.get('date')
+    shopNumber=request.args.get('shop')
+    
+    ########  try to redirect to another page that contains the following code
+    
     # GET LOCATION NAME FOR REPORT HEADING
     shopRecord = db.session.query(ShopName).filter(ShopName.Shop_Number==shopNumber).first()
     shopName = shopRecord.Shop_Name
@@ -473,14 +481,15 @@ def printWeeklyMonitorNotesGET():
     dateScheduledDat = datetime.strptime(dateScheduled,'%Y-%m-%d')
     dayOfWeek = dateScheduledDat.weekday()
 
-    # GET BEGIN, END DATES FOR REPORT HEADING
-    beginDateDAT = dateScheduledDat - timedelta(dayOfWeek + 1)
+    # GET BEGIN, END DATES FOR REPORT HEADING (Monday, Saturday)
+    beginDateDAT = dateScheduledDat + timedelta(days=1)
     beginDateSTR = beginDateDAT.strftime('%m-%d-%Y')
+    yyyymmdd = dateScheduledDat.strftime('%Y-%m-%d')
 
-    endDateDAT = beginDateDAT + timedelta(days=6)
+    endDateDAT = beginDateDAT + timedelta(days=5)
     endDateSTR = endDateDAT.strftime('%m-%d-%Y')
 
-    weekOfHdg = beginDateDAT.strftime('%B %-d, %Y')
+    weekOfHdg = dateScheduledDat.strftime('%B %d, %Y')
     
     # RETRIEVE SCHEDULE FOR SPECIFIC WEEK
     todays_date = date.today()
@@ -491,13 +500,14 @@ def printWeeklyMonitorNotesGET():
     sqlNotes += "convert(nvarchar,Date_Of_Change,110) as changeDate, "
     sqlNotes += "convert(nvarchar,Date_Of_Change,108) as changeTime, "
     sqlNotes += "Schedule_Note, Author_ID, Initials FROM monitorWeekNotes "
-    sqlNotes += "left join tblMember_Data on Author_ID = Member_ID "
-    sqlNotes += "WHERE WeekOf between '" + beginDateSTR + "' and '" + endDateSTR + "' "
+    sqlNotes += "LEFT JOIN tblMember_Data on Author_ID = Member_ID "
+    sqlNotes += "WHERE WeekOf = '" + yyyymmdd + "' "
     sqlNotes += "ORDER BY Date_Of_Change"
+    #print(sqlNotes)
+
     notes = db.engine.execute(sqlNotes)
-    # for n in notes:
-    #     print(n.Date_Of_Change, n.changeDateTime, n.changeDate,n.changeTime, n.Initials)
-   
+    #for n in notes:
+    #    print(n.Date_Of_Change,n.Schedule_Note)    
     return render_template("rptWeeklyNotes.html",\
         beginDate=beginDateSTR,endDate=endDateSTR,\
         locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
@@ -505,3 +515,77 @@ def printWeeklyMonitorNotesGET():
         )
     
     
+# PRINT WEEKLY NOTES FOR COORDINATOR (FETCH/POST approach)
+# @app.route("/printWeeklyMonitorNotes", methods=["POST"])
+# def printWeeklyMonitorNotes():
+    # @after_this_request
+    # def add_header(response):
+    #     response.headers.add('Access-Control-Allow_Origin','*')
+    #     return response
+    
+    #dateScheduled=request.args.get('date')
+    #shopNumber=request.args.get('shop')
+    # dateScheduled='2020-09-10'
+    # shopNumber = '1'
+    # if shopNumber == shopNumber:
+    #     return render_template ("test.html")
+
+    # parameters = request.get_json()
+    # if parameters == None:
+    #     return 'ERROR - Missing parameters.'
+
+    # dateScheduled = parameters['date']
+    # if dateScheduled == None:
+    #     return 'ERROR - Missing date scheduled.'
+
+    # shopNumber = parameters['shop']
+    # if shopNumber == None:
+    #     return 'ERROR - Missing shop number.'
+
+    # GET LOCATION NAME FOR REPORT HEADING
+    # shopRecord = db.session.query(ShopName).filter(ShopName.Shop_Number==shopNumber).first()
+    # shopName = shopRecord.Shop_Name
+    
+    
+    #  DETERMINE START OF WEEK DATE
+    #  CONVERT TO DATE TYPE
+    # dateScheduledDat = datetime.strptime(dateScheduled,'%Y-%m-%d')
+    # dayOfWeek = dateScheduledDat.weekday()
+
+    # GET BEGIN, END DATES FOR REPORT HEADING
+    # beginDateDAT = dateScheduledDat - timedelta(dayOfWeek + 1)
+    # beginDateSTR = beginDateDAT.strftime('%m-%d-%Y')
+
+    # endDateDAT = beginDateDAT + timedelta(days=6)
+    # endDateSTR = endDateDAT.strftime('%m-%d-%Y')
+
+    # weekOfHdg = beginDateDAT.strftime('%B %-d, %Y')
+    
+    # RETRIEVE SCHEDULE FOR SPECIFIC WEEK
+    # todays_date = date.today()
+    # todays_dateSTR = todays_date.strftime('%-m-%-d-%Y')
+
+    # BUILD SELECT STATEMENT TO RETRIEVE NOTES FOR SPECIFIED WEEK AND LOCATION
+    # sqlNotes = "SELECT Date_Of_Change, convert(nvarchar,Date_Of_Change,100) as changeDateTime, "
+    # sqlNotes += "convert(nvarchar,Date_Of_Change,110) as changeDate, "
+    # sqlNotes += "convert(nvarchar,Date_Of_Change,108) as changeTime, "
+    # sqlNotes += "Schedule_Note, Author_ID, Initials FROM monitorWeekNotes "
+    # sqlNotes += "left join tblMember_Data on Author_ID = Member_ID "
+    # sqlNotes += "WHERE WeekOf between '" + beginDateSTR + "' and '" + endDateSTR + "' "
+    # sqlNotes += "ORDER BY Date_Of_Change"
+    # notes = db.engine.execute(sqlNotes)
+    # for n in notes:
+    #     print(n.Date_Of_Change, n.changeDateTime, n.changeDate,n.changeTime, n.Initials)
+   
+    
+
+    #return render_template('test.html')
+    # return render_template("rptWeeklyNotes.html",\
+    #     beginDate=beginDateSTR,endDate=endDateSTR,\
+    #     locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
+    #     todaysDate=todays_dateSTR
+    #     )
+@app.route("/printWeeklyMonitorSubs", methods=["GET"])
+def printWeeklyMonitorSubs():
+    flash('Not implemented.')
+    return 'Not implemented.'
