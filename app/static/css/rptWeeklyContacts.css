@@ -7,9 +7,9 @@
 		float:right;
 		margin-right:20px;
 	} 
-	
+
    	h1, h2, h3 {
-		color:black;
+		color: black;
 		text-align: center;
 		font-family: "Times New Roman",Times, sans-serif,serif;
    } 
@@ -30,41 +30,25 @@
 		width:80%;
 		margin:0 auto;
 	}
-	
+	table caption {
+		text-align:center;
+		caption-side:top;
+		border:1px solid black;
+		font-weight: bold;
+		color:black;
+	}
 	th {
 		font:size 10pt;
 	}
-	th .dayNames {
-		background-color: white;
-		color:black;
-	}
-	th .dayDates {
-		background-color: white;
-		color:black;
-	}
-	/* tr:nth-child(even) {
-		background-color: #d5d2dfa6;
-	} */
+	
 	th, td {
 		border: 1px solid black;
-		text-align:center;
-		  
+		text-align:center;  
 	}
 	td {
 		font: size 10pt;
 	}
-    .ShopMonitorTitle {
-		text-align: center;
-		width:80%;
-		border:1px solid black;
-		margin: 0 auto;
-	} 
-	.ToolCribTitle {
-		text-align: center;
-		width:80%;
-		border:1px solid black;
-		margin: 0 auto;
-	} 
+    
 } 
 
 @media print {
@@ -78,33 +62,29 @@
 	}
 	
 	table {
-		width:80%;
+		width:100%;
 		margin: 0 auto;
 	} 
+
+	table caption {
+		text-align:center;
+		caption-side:top;
+		border:1px solid black;
+		font-weight: bold;
+		color:black;
+	}
 
 	th {
 		font-size: 10pt;
 	}
 
-	th .dayNames {
-		background-color: white;
-		color:black;
-	}
-
-	th .dayDates {
-		background-color: white;
-		color:black;
-	}
-
-	td {
-		border:1px solid black;
-		color: black;
-		font-size: 8pt;
-	}
 
 	th, td {
-		border: 1px solid black;
+		border:1px solid black;
+		color: black;
+		font-size: 12pt;
 	}
+
 	tfoot::after {
 		counter-increment:page;
 		content: "Page " counter(page) " of " counter(pages);
@@ -140,23 +120,12 @@
 		break-after: avoid;
 		color:black;
 	}
-	.ShopMonitorTitle {
-		text-align: center;
-		width:80%;
-		border:1px solid black;
-		margin: 0 auto;
-	} 
-	.ToolCribTitle {
-		text-align: center;
-		width:80%;
-		border:1px solid black;
-		margin: 0 auto;
-	} 
+
 }
 
 @page {
-	size: landscape;
-	orientation: landscape;
+	size: portrait;
+	orientation: portrait;
 	display:block;
 	position:relative;
 	margin: 1cm;

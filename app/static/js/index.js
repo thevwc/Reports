@@ -71,20 +71,27 @@ filterWeeksShown()
 // FUNCTIONS    
 // ------------------------------------------------------------------------------------------------------
 function printReports() {
+    curWeekDate = document.getElementById('weekSelected').value
+    if (curWeekDate == '') {
+        alert("Please select a week date.")
+        return
+    }
+
+    shopInitials = document.getElementById('shopChoice').value
+    if (shopInitials == '') {
+        alert("Please select a location.")
+        return
+    }
+    if (shopInitials == 'RA') {
+        curShopNumber = '1'
+    }
+    else {
+        curShopNumber = '2'
+    }
+
     reportSelected = false
-    if (curWeekDate == null  || curWeekDate == '') {
-        alert('You must select a date.')
-        return 
-    }
-    
-    if (curShopNumber == null || curShopNumber == '') {
-        shop=document.getElementById('shopChoice').value
-        alert('A locationmust be selected')
-        return 
-    }
     
     var scheduleBtn = document.getElementById('printScheduleLink');
-    link='/printWeeklyMonitorSchedule?date=2020-08-09&shop=1'
     link='/printWeeklyMonitorSchedule?date=' + curWeekDate + '&shop=' + curShopNumber
     scheduleBtn.setAttribute('href', link)
     
@@ -116,11 +123,9 @@ function printReports() {
     if (document.getElementById('subsID').checked) {
         reportSelected = true
         subsBtn.click()
-
-        // printWeeklyMonitorSubs(curWeekDate,curShopNumber)
     }
 
-    if (reportSelected != True) {
+    if (reportSelected != true) {
         alert('No reports have been selected.')
         return
     }

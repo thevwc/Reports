@@ -329,15 +329,7 @@ def printWeeklyMonitorContacts():
     todays_date = date.today()
     todays_dateSTR = todays_date.strftime('%-m-%-d-%Y')
 
-    # DEFINE ARRAYS FOR EACH GROUPING
-    rows = 100 
-    cols = 6    # member name, last trained, email, home phone, cell phone and if training needed Y or N
-    SMnames = [[0 for x in range(cols)] for y in range(rows)]
-    
-    TCnames = [[0 for x in range(cols)] for y in range(rows)]
-    
-    SMrow = 0
-    TCrow = 0
+    # VARIABLES FOR DUPLICATE NAME CHECK
     savedSMname=''
     savedTCname=''
     
@@ -356,9 +348,11 @@ def printWeeklyMonitorContacts():
     sqlSelectSM += "ORDER BY Duty, Last_Name, First_Name"
     monitors = db.engine.execute(sqlSelectSM)
     
+    SMmonitors = []
+    TCmonitors = []
+
     # STEP THROUGH RESULT SET, DETERMINE IF TRAINING IS NEEDED, BUILD 2D ARRAY (LIST WITHIN LIST)
     for m in monitors:
-        #print(m.displayName)
         # IS TRAINING NEEDED?
         if (m.waiver == None):  # if no waiver 
             if (m.trainingYear == None):  # if last training year is blank
@@ -378,33 +372,43 @@ def printWeeklyMonitorContacts():
 
         #   Group - Shop Monitor; 
         if (m.Duty == 'Shop Monitor' and m.displayName != savedSMname):  # ELIMINATE DUPLICATE NAMES
-            SMnames[SMrow][0] = m.displayName
-            #print(SMnames[SMrow][0])
             savedSMname = m.displayName
-            SMnames[SMrow][1] = m.trainingYear
-            SMnames[SMrow][2] = m.eMail
-            SMnames[SMrow][3] = m.Home_Phone
-            SMnames[SMrow][4] = m.Cell_Phone
-            SMnames[SMrow][5] = needsTraining
-            SMrow += 1
-            
+            SMmonitor = {'name':m.displayName,
+                'trainingYear': m.trainingYear,
+                'eMail': m.eMail,
+                'homePhone':m.Home_Phone,
+                'cellPhone':m.Cell_Phone,
+                'needsTraining':needsTraining}
+            if SMmonitor['trainingYear'] == None:
+                SMmonitor['trainingYear'] = ''
+            if SMmonitor['homePhone'] == None:
+                SMmonitor['homePhone'] = ''
+            if SMmonitor['cellPhone'] == None:
+                SMmonitor['cellPhone'] = ''
+            SMmonitors.append(SMmonitor)
+
         #   Group - Tool Crib;  
         if (m.Duty == 'Tool Crib' and m.displayName != savedTCname):    # ELIMINATE DUPLICATE NAMES
-            TCnames[TCrow][0] = m.displayName
-            #print('previous name - ', savedTCname)
             savedTCname = m.displayName 
-            TCnames[TCrow][1] = m.trainingYear
-            TCnames[TCrow][2] = m.eMail
-            TCnames[TCrow][3] = m.Home_Phone
-            TCnames[TCrow][4] = m.Cell_Phone
-            TCnames[TCrow][5] = needsTraining
-            #print(TCnames[TCrow][0])
-            #print('TC- ',TCnames[TCrow])
-            TCrow += 1
+            TCmonitor = {'name':m.displayName,
+                'trainingYear': m.trainingYear,
+                'eMail': m.eMail,
+                'homePhone':m.Home_Phone,
+                'cellPhone':m.Cell_Phone,
+                'needsTraining':needsTraining}
+            if TCmonitor['trainingYear'] == None:
+                TCmonitor['trainingYear'] = ''
+            if TCmonitor['homePhone'] == None:
+                TCmonitor['homePhone'] = ''
+            if TCmonitor['cellPhone'] == None:
+                TCmonitor['cellPhone'] = ''
+            TCmonitors.append(TCmonitor)
+            
 
     return render_template("rptWeeklyContacts.html",\
-        beginDate=beginDateSTR,endDate=endDateSTR,
-        locationName=shopName,SMnames=SMnames,TCnames=TCnames
+        beginDate=beginDateSTR,endDate=endDateSTR,todaysDate=todays_dateSTR,\
+        locationName=shopName,\
+        SMmonitors=SMmonitors,TCmonitors=TCmonitors
         )
     
     
@@ -469,9 +473,7 @@ def printWeeklyMonitorContacts():
 def printWeeklyMonitorNotesGET():
     dateScheduled=request.args.get('date')
     shopNumber=request.args.get('shop')
-    
-    ########  try to redirect to another page that contains the following code
-    
+     
     # GET LOCATION NAME FOR REPORT HEADING
     shopRecord = db.session.query(ShopName).filter(ShopName.Shop_Number==shopNumber).first()
     shopName = shopRecord.Shop_Name
