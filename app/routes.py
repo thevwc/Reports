@@ -1,6 +1,7 @@
 # routes.py
 
 from flask import session, render_template, flash, redirect, url_for, request, jsonify, json, make_response, after_this_request
+from flask-weasyprint import HTML, render_pdf
 from flask_bootstrap import Bootstrap
 from werkzeug.urls import url_parse
 from app.models import ShopName, Member, MemberActivity, MonitorSchedule, MonitorScheduleTransaction,\
@@ -12,6 +13,8 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError, DBAPIError
 
 import datetime as dt
 from datetime import date, datetime, timedelta
+
+
 #from flask_mail import Mail
 
 #mail = Mail(app)
@@ -471,9 +474,12 @@ def printWeeklyMonitorContacts():
 # PRINT WEEKLY NOTES FOR COORDINATOR (GET approach)
 @app.route("/printWeeklyMonitorNotes", methods=["GET"])
 def printWeeklyMonitorNotesGET():
+    destination='PDF'
+
     dateScheduled=request.args.get('date')
     shopNumber=request.args.get('shop')
-     
+    #destination = request.args.get('destination')
+      
     # GET LOCATION NAME FOR REPORT HEADING
     shopRecord = db.session.query(ShopName).filter(ShopName.Shop_Number==shopNumber).first()
     shopName = shopRecord.Shop_Name
@@ -509,85 +515,35 @@ def printWeeklyMonitorNotesGET():
 
     notes = db.engine.execute(sqlNotes)
     #for n in notes:
-    #    print(n.Date_Of_Change,n.Schedule_Note)    
-    return render_template("rptWeeklyNotes.html",\
-        beginDate=beginDateSTR,endDate=endDateSTR,\
-        locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
-        todaysDate=todays_dateSTR
-        )
-    
-    
-# PRINT WEEKLY NOTES FOR COORDINATOR (FETCH/POST approach)
-# @app.route("/printWeeklyMonitorNotes", methods=["POST"])
-# def printWeeklyMonitorNotes():
-    # @after_this_request
-    # def add_header(response):
-    #     response.headers.add('Access-Control-Allow_Origin','*')
-    #     return response
-    
-    #dateScheduled=request.args.get('date')
-    #shopNumber=request.args.get('shop')
-    # dateScheduled='2020-09-10'
-    # shopNumber = '1'
-    # if shopNumber == shopNumber:
-    #     return render_template ("test.html")
+    #    print(n.Date_Of_Change,n.Schedule_Note) 
+    # 
+    if (destination == 'Printer') :   
+        return render_template("rptWeeklyNotes.html",\
+            beginDate=beginDateSTR,endDate=endDateSTR,\
+            locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
+            todaysDate=todays_dateSTR
+            )
+    else:
+        html = render_template("rptWeeklyNotes.html",\
+            beginDate=beginDateSTR,endDate=endDateSTR,\
+            locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
+            todaysDate=todays_dateSTR
+            )
+        return render_pdf(HTML(string=html))
 
-    # parameters = request.get_json()
-    # if parameters == None:
-    #     return 'ERROR - Missing parameters.'
 
-    # dateScheduled = parameters['date']
-    # if dateScheduled == None:
-    #     return 'ERROR - Missing date scheduled.'
-
-    # shopNumber = parameters['shop']
-    # if shopNumber == None:
-    #     return 'ERROR - Missing shop number.'
-
-    # GET LOCATION NAME FOR REPORT HEADING
-    # shopRecord = db.session.query(ShopName).filter(ShopName.Shop_Number==shopNumber).first()
-    # shopName = shopRecord.Shop_Name
-    
-    
-    #  DETERMINE START OF WEEK DATE
-    #  CONVERT TO DATE TYPE
-    # dateScheduledDat = datetime.strptime(dateScheduled,'%Y-%m-%d')
-    # dayOfWeek = dateScheduledDat.weekday()
-
-    # GET BEGIN, END DATES FOR REPORT HEADING
-    # beginDateDAT = dateScheduledDat - timedelta(dayOfWeek + 1)
-    # beginDateSTR = beginDateDAT.strftime('%m-%d-%Y')
-
-    # endDateDAT = beginDateDAT + timedelta(days=6)
-    # endDateSTR = endDateDAT.strftime('%m-%d-%Y')
-
-    # weekOfHdg = beginDateDAT.strftime('%B %-d, %Y')
-    
-    # RETRIEVE SCHEDULE FOR SPECIFIC WEEK
-    # todays_date = date.today()
-    # todays_dateSTR = todays_date.strftime('%-m-%-d-%Y')
-
-    # BUILD SELECT STATEMENT TO RETRIEVE NOTES FOR SPECIFIED WEEK AND LOCATION
-    # sqlNotes = "SELECT Date_Of_Change, convert(nvarchar,Date_Of_Change,100) as changeDateTime, "
-    # sqlNotes += "convert(nvarchar,Date_Of_Change,110) as changeDate, "
-    # sqlNotes += "convert(nvarchar,Date_Of_Change,108) as changeTime, "
-    # sqlNotes += "Schedule_Note, Author_ID, Initials FROM monitorWeekNotes "
-    # sqlNotes += "left join tblMember_Data on Author_ID = Member_ID "
-    # sqlNotes += "WHERE WeekOf between '" + beginDateSTR + "' and '" + endDateSTR + "' "
-    # sqlNotes += "ORDER BY Date_Of_Change"
-    # notes = db.engine.execute(sqlNotes)
-    # for n in notes:
-    #     print(n.Date_Of_Change, n.changeDateTime, n.changeDate,n.changeTime, n.Initials)
-   
-    
-
-    #return render_template('test.html')
-    # return render_template("rptWeeklyNotes.html",\
-    #     beginDate=beginDateSTR,endDate=endDateSTR,\
-    #     locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
-    #     todaysDate=todays_dateSTR
-    #     )
 @app.route("/printWeeklyMonitorSubs", methods=["GET"])
 def printWeeklyMonitorSubs():
     flash('Not implemented.')
     return 'Not implemented.'
+
+@app.route("/pdfWeeklyNotes<date>/<shop>")
+def pdfWeeklyNotes(date,shop):
+    rendered = render_template('printWeeklyNotes.html',date=date,shop=shop)
+    pdf = pdfkit.from_string(rendered, False)
+
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = 'attachment; filename=output.pdf'
+
+    return response
