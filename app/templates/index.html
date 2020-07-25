@@ -47,8 +47,22 @@
                 {% endfor %}
             </select><br><br>
         </div>
-       
         <div id="rptChoices">
+            <form id='reportsFormID' class="reportsForm" action="">
+                <p>Select a report ...</p>
+                <input type="radio" id="scheduleID" name="reports" value="rptSchedule" checked>
+                <label for="schedule"> Schedule</label><br>
+                <input type="radio" id="notesID" name="reports" value="rptNotes">
+                <label for="notes"> Notes</label><br>
+                <input type="radio" id="contactsID" name="reports" value="rptContacts">
+                <label for="contacts"> Contacts</label><br>
+                <input type="radio" id="subsID" name="reports" value="rptSubs">
+                <label for="subs"> Available subs</label><br>   
+            </form>
+        </div>   
+
+
+        <!-- <div id="rptChoices">
             <form id='reportsFormID' class="reportsForm" action="">
                 <p>Select report(s) ...</p>
                 <input type="checkbox" id="scheduleID" name="schedule" value="rptSchedule">
@@ -60,7 +74,7 @@
                 <input type="checkbox" id="subsID" name="subs" value="rptSubs">
                 <label for="subs"> Available subs</label><br>   
             </form>
-        </div>   
+        </div>    -->
 
         <div id="prtReports">
             <button type="button" id="printReportBtn" class="btn btn-primary">PRINT</button>  

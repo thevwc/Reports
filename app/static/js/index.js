@@ -42,6 +42,7 @@ document.getElementById("weekSelected").addEventListener("click", weekChanged);
 document.getElementById("shopChoice").addEventListener("click", shopClicked);
 document.getElementById("coordChoice").addEventListener("change", coordinatorChanged);
 document.getElementById("printReportBtn").addEventListener("click",printReports);
+document.getElementById("eMailReportBtn").addEventListener("click",emailReports);
 // document.getElementById("printWeeklyMonitorNotes").addEventListener("click",printWeeklyMonitorNotes);
 
 // var btn = document.getElementById('prtScheduleBtn');
@@ -121,8 +122,9 @@ function printReports() {
         contactsBtn.click()
     }
     if (document.getElementById('subsID').checked) {
+        alert('This report is not available at this time.')
         reportSelected = true
-        subsBtn.click()
+        //subsBtn.click()
     }
 
     if (reportSelected != true) {
@@ -131,6 +133,9 @@ function printReports() {
     }
 }
 
+function emailReports() {
+    alert ('The EMAIL function is not available at this time.')
+}
 function shopClicked() {
     setShopFilter(this.value)
     filterWeeksShown()

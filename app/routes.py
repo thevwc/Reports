@@ -1,7 +1,9 @@
 # routes.py
 
 from flask import session, render_template, flash, redirect, url_for, request, jsonify, json, make_response, after_this_request
-from flask-weasyprint import HTML, render_pdf
+from flask_weasyprint import HTML, render_pdf
+#from python-pdf import pydf
+#from pdfkit import pdfkit
 from flask_bootstrap import Bootstrap
 from werkzeug.urls import url_parse
 from app.models import ShopName, Member, MemberActivity, MonitorSchedule, MonitorScheduleTransaction,\
@@ -13,6 +15,7 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError, DBAPIError
 
 import datetime as dt
 from datetime import date, datetime, timedelta
+
 
 
 #from flask_mail import Mail
@@ -474,7 +477,8 @@ def printWeeklyMonitorContacts():
 # PRINT WEEKLY NOTES FOR COORDINATOR (GET approach)
 @app.route("/printWeeklyMonitorNotes", methods=["GET"])
 def printWeeklyMonitorNotesGET():
-    destination='PDF'
+    #destination='PDF'
+    destination='Printer'
 
     dateScheduled=request.args.get('date')
     shopNumber=request.args.get('shop')
@@ -530,7 +534,18 @@ def printWeeklyMonitorNotesGET():
             todaysDate=todays_dateSTR
             )
         return render_pdf(HTML(string=html))
+        #rendered = render_template('rptWeeklyNotes.html',\
+        #     beginDate=beginDateSTR,endDate=endDateSTR,\
+        #     locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
+        #     todaysDate=todays_dateSTR
+        #     )
+        # pdf = pdfkit.from_string(rendered, False)
+        # response = make_response(pdf)
+        # response.headers['Content-Type'] = 'application/pdf'
+        # response.headers['Content-Disposition'] = 'attachment; filename=output.pdf'
 
+        # return response
+        
 
 @app.route("/printWeeklyMonitorSubs", methods=["GET"])
 def printWeeklyMonitorSubs():
@@ -539,11 +554,16 @@ def printWeeklyMonitorSubs():
 
 @app.route("/pdfWeeklyNotes<date>/<shop>")
 def pdfWeeklyNotes(date,shop):
-    rendered = render_template('printWeeklyNotes.html',date=date,shop=shop)
-    pdf = pdfkit.from_string(rendered, False)
+    #rendered = render_template('printWeeklyNotes.html',date=date,shop=shop)
+    
+    # python-pdf 0.37
+    # pdf = pydf.generate_pdf(rendered)
+    # with open('test_doc.pdf','wb') as f:
+    #     f.write(pdf)
 
-    response = make_response(pdf)
-    response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = 'attachment; filename=output.pdf'
+    # pdfkit
+    # response = make_response(pdf)
+    # response.headers['Content-Type'] = 'application/pdf'
+    # response.headers['Content-Disposition'] = 'attachment; filename=output.pdf'
 
     return response
