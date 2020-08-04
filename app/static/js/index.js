@@ -41,8 +41,8 @@ document.getElementById("weekSelected").addEventListener("click", weekChanged);
 
 document.getElementById("shopChoice").addEventListener("click", shopClicked);
 document.getElementById("coordChoice").addEventListener("change", coordinatorChanged);
-document.getElementById("printReportBtn").addEventListener("click",printReports);
-document.getElementById("eMailReportBtn").addEventListener("click",emailReports);
+document.getElementById("printReportBtn").addEventListener("click",printReports('PRINT'));
+document.getElementById("eMailReportBtn").addEventListener("click",printReports('PDF'));
 // document.getElementById("printWeeklyMonitorNotes").addEventListener("click",printWeeklyMonitorNotes);
 
 // var btn = document.getElementById('prtScheduleBtn');
@@ -67,11 +67,13 @@ clientLocation = localStorage.getItem('clientLocation')
 
 setShopFilter(clientLocation)
 filterWeeksShown()
-
+alert('just before functions')
 // ------------------------------------------------------------------------------------------------------
 // FUNCTIONS    
 // ------------------------------------------------------------------------------------------------------
-function printReports() {
+function printReports(destination) {
+    alert('destination - ', destination)
+
     curWeekDate = document.getElementById('weekSelected').value
     if (curWeekDate == '') {
         alert("Please select a week date.")
@@ -93,19 +95,19 @@ function printReports() {
     reportSelected = false
     
     var scheduleBtn = document.getElementById('printScheduleLink');
-    link='/printWeeklyMonitorSchedule?date=' + curWeekDate + '&shop=' + curShopNumber
+    link='/printWeeklyMonitorSchedule?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=' + destination
     scheduleBtn.setAttribute('href', link)
     
     var notesBtn = document.getElementById('printNotesLink');
-    link='/printWeeklyMonitorNotes?date=' + curWeekDate + '&shop=' + curShopNumber
+    link='/printWeeklyMonitorNotes?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=' + destination
     notesBtn.setAttribute('href', link)
-    
+
     var contactsBtn = document.getElementById('printContactsLink');
-    link='/printWeeklyMonitorContacts?date=' + curWeekDate + '&shop=' + curShopNumber
+    link='/printWeeklyMonitorContacts?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=' + destination
     contactsBtn.setAttribute('href', link)
 
     var subsBtn = document.getElementById('printSubsLink');
-    link='/printWeeklyMonitorSubs?date='  + curWeekDate + '&shop=' + curShopNumber
+    link='/printWeeklyMonitorSubs?date='  + curWeekDate + '&shop=' + curShopNumber + '&destination=' + destination
     subsBtn.setAttribute('href', link)
     
     if (document.getElementById('scheduleID').checked) {
@@ -115,7 +117,8 @@ function printReports() {
 
     if (document.getElementById('notesID').checked) {
         reportSelected = true
-        notesBtn.click()
+        pdfNotesLink.click()
+        //notesBtn.click()
     }
     if (document.getElementById('contactsID').checked) {
         reportSelected = true
@@ -134,7 +137,11 @@ function printReports() {
 }
 
 function emailReports() {
-    alert ('The EMAIL function is not available at this time.')
+    var pdfNotesLink = document.getElementById('pdfNotesLink');
+    link='/pdfWeeklyMonitorNotes?date=' + curWeekDate + '&shop=' + curShopNumber
+    pdfNotesLink.setAttribute('href', link)
+    alert ('Test of create NOTES.PDF file')
+    pdfNotesLink.click()
 }
 function shopClicked() {
     setShopFilter(this.value)
