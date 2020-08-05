@@ -1,79 +1,51 @@
-//$(document).ready (function() {
+$( document ).ready (function() {
+//    $( "p" ).text( "The DOM is now loaded and can be manipulated." );
+    // Declare global variables)
 
-// DEFINE VARIABLES
-// Color constants
-const colors = {
-    bg_NeedSM:  "#0000FF",  // Blue
-    fg_NeedSM:  "#FFFFFF",  // White 
-    bg_NeedTC:  "#00FF00",  // Green
-    fg_NeedTC:  "#000000",  // Black (#000000)
-    bg_NeedBoth:"#FF0000",  // Red (#FF0000)
-    fg_NeedBoth:"#FFFFFF",  // White (#FFFFFF)
-    bg_Filled:  "#FFFFFF",  // White (#FFFFFF)
-    fg_Filled:  "#000000",  // Black (#000000)
-    bg_Sunday:  "#cccccc",  // Light grey
-    fg_Sunday:  "#FFFFFF",  // White (#FFFFFF)
-    bg_Closed:  "#2E86C1",  // Aqua
-    fg_Closed:  "#FFFFFF",  // White (#FFFFFF)
-    bg_ToManySM:"#FAFE02",  // Yellow
-    fg_ToManySM:"#000000",  // Black
-    bg_ToManyTC:"#FE4E02",  // Orange
-    fg_ToManyTC:"#000000",  // Black
-    bg_PastDate:"#cccccc",  // Light grey
-    fg_PastDate:"#FFFFFF"   // White (#FFFFFF)
-};
+    // clientLocation, staffID will be set in localStorage within login routine
+    var clientLocation = ''
+    var todaysDate = new Date();
+    var shopNames = ['Rolling Acres', 'Brownwood']
 
-// Declare global variables)
+    var curShopNumber = ''
+    var curWeekDate = ''  //UPDATED FROM WEEK DROPDOWN 
+    var curCoordinatorID = 'All' //UPDATED FROM COORDINATOR SELECTION
+    var curCoordinatorName = '' //UPDATED FROM COORDINATOR SELECTION
 
-// clientLocation, staffID will be set in localStorage within login routine
-var clientLocation = ''
-var todaysDate = new Date();
-var shopNames = ['Rolling Acres', 'Brownwood']
+    // DEFINE EVENT LISTENERS
+    document.getElementById("weekSelected").addEventListener("change", weekChanged);
+    document.getElementById("weekSelected").addEventListener("click", weekChanged);
 
-var curShopNumber = ''
-var curWeekDate = ''  //UPDATED FROM WEEK DROPDOWN 
-var curCoordinatorID = 'All' //UPDATED FROM COORDINATOR SELECTION
-var curCoordinatorName = '' //UPDATED FROM COORDINATOR SELECTION
+    document.getElementById("shopChoice").addEventListener("click", shopClicked);
+    document.getElementById("coordChoice").addEventListener("change", coordinatorChanged);
 
-// DEFINE EVENT LISTENERS
-document.getElementById("weekSelected").addEventListener("change", weekChanged);
-document.getElementById("weekSelected").addEventListener("click", weekChanged);
+    // Note - both of these buttons link to the 'printReports' function
+    document.getElementById("printReportBtn").addEventListener("click",function(){printReports('PRINT');},false);
+    document.getElementById("eMailReportBtn").addEventListener("click",function(){printReports('PDF');},false);
 
-document.getElementById("shopChoice").addEventListener("click", shopClicked);
-document.getElementById("coordChoice").addEventListener("change", coordinatorChanged);
-document.getElementById("printReportBtn").addEventListener("click",printReports('PRINT'));
-document.getElementById("eMailReportBtn").addEventListener("click",printReports('PDF'));
-// document.getElementById("printWeeklyMonitorNotes").addEventListener("click",printWeeklyMonitorNotes);
+    if (!localStorage.getItem('staffID')) {
+        localStorage.setItem('staffID','111111')
+    }
+    staffID = localStorage.getItem('staffID')
+    
 
-// var btn = document.getElementById('prtScheduleBtn');
-// btn.onclick = function() {
-// location.assign('https://localhost:5000/printWeeklyMonitorSchedule?date=2020-08-10&shop=1');
-// }
+    // IF clientLocation IS NOT FOUND IN LOCAL STORAGE
+    // THEN PROMPT WITH MODAL FORM FOR LOCATION AND YEAR
+    if (!clientLocation) {
+        localStorage.setItem('clientLocation','RA')
+    }
+    clientLocation = localStorage.getItem('clientLocation')
+    
+    setShopFilter(clientLocation)
+    filterWeeksShown()
+    
+});
 
-
-
-if (!localStorage.getItem('staffID')) {
-    localStorage.setItem('staffID','111111')
-}
-staffID = localStorage.getItem('staffID')
- 
-
-// IF clientLocation IS NOT FOUND IN LOCAL STORAGE
-// THEN PROMPT WITH MODAL FORM FOR LOCATION AND YEAR
-if (!clientLocation) {
-    localStorage.setItem('clientLocation','RA')
-}
-clientLocation = localStorage.getItem('clientLocation')
-
-setShopFilter(clientLocation)
-filterWeeksShown()
-alert('just before functions')
 // ------------------------------------------------------------------------------------------------------
 // FUNCTIONS    
 // ------------------------------------------------------------------------------------------------------
 function printReports(destination) {
-    alert('destination - ', destination)
-
+    alert('printReports function\n' + 'Value of destination - ' + destination)
     curWeekDate = document.getElementById('weekSelected').value
     if (curWeekDate == '') {
         alert("Please select a week date.")
@@ -117,8 +89,7 @@ function printReports(destination) {
 
     if (document.getElementById('notesID').checked) {
         reportSelected = true
-        pdfNotesLink.click()
-        //notesBtn.click()
+        notesBtn.click()
     }
     if (document.getElementById('contactsID').checked) {
         reportSelected = true
@@ -137,12 +108,9 @@ function printReports(destination) {
 }
 
 function emailReports() {
-    var pdfNotesLink = document.getElementById('pdfNotesLink');
-    link='/pdfWeeklyMonitorNotes?date=' + curWeekDate + '&shop=' + curShopNumber
-    pdfNotesLink.setAttribute('href', link)
-    alert ('Test of create NOTES.PDF file')
-    pdfNotesLink.click()
+    alert('Not implemented')
 }
+
 function shopClicked() {
     setShopFilter(this.value)
     filterWeeksShown()
@@ -204,20 +172,6 @@ function filterWeeksShown() {
 }
   
 
-// function printWeeklyMonitorSchedule(beginDate,shopNumber) {
-//     // SEND DATE AND SHOPNUMBER TO SERVER
-//     var httpRequest = new XMLHttpRequest(); 
-//     httpRequest.onreadystatechange = function() {
-//         if (this.readyState == 4 && this.status == 200) {
-//             document.write(httpRequest.responseText)
-//             document.close()
-//             //print(httpRequest.responseText)
-//         }
-//     };
-//     httpRequest.open("GET", "/printWeeklyMonitorSchedule?date=" + beginDate + "&shop=" + shopNumber , true);
-//     httpRequest.send();
-// }
-
 function weekChanged () {
     curWeekDate = document.getElementById(this.id).value
     // show coordinator
@@ -227,79 +181,3 @@ function coordinatorChanged () {
     curCoordinatorID = this.value
     filterWeeksShown()
 }
-
-
-// FOLLOWING DID NOT WORK; FETCH MAY NOT BE THE RIGHT APPROACH FOR LAUNCHING REPORT FROM JAVASCRIPT
-// function printWeeklyMonitorNotes(beginDate,shopNumber) {
-//     let data = new FormData();
-//     data.date=beginDate
-//     data.shop=shopNumber
-//     //data = {'date':'20200810','shop:1'}
-
-//     var baseurl = window.location.origin;
-//     fetch(`${baseurl}/printWeeklyMonitorNotes`,
-//     {
-//         method: "POST",
-//         headers: new Headers({
-//             //'Content-Type': 'application/x-www-form-urlencoded'
-//             'Content-Type': 'application/json'
-//         }),
-//         body:JSON.stringify(data)
-//     })
-//     .then(function(res){ return res.json(); })
-//     .then(function(data){ alert( JSON.stringify( data ))})
-//     .catch(function (error) {
-//         console.log('Request failure: ', error);
-//     });
-
-
-//     // let url = new URL('http://localhost:5000/printWeeklyMonitorNotes')
-    // url.search = new URLSearchParams({
-    //     date:{beginDate},
-    //     shop:{shopNumber}
-    // })
-    // alert('url- '+ url)
-    // fetch(url)
-//}
-
-// function printWeeklyMonitorNotes(beginDate,shopNumber) {
-//     // SEND DATE AND SHOPNUMBER TO SERVER
-//     var httpRequest = new XMLHttpRequest(); 
-//     httpRequest.onreadystatechange = function() {
-//         if (this.readyState == 4 && this.status == 200) {
-//             document.write(httpRequest.responseText)
-//         }
-//     };
-//     httpRequest.open('GET', '/printWeeklyMonitorNotes?date=' + beginDate + '&shop=' + shopNumber, true);
-//     httpRequest.send();
-//     // END httpRequest FUNCTION    
-// }
-
-
-// function alertContents() {
-//     if (httpRequest.readyStte === XMLHttpRequest.DONE) {
-//         if (httpRequest.status === 200) {
-//             alert(httpRequest.responseText);
-//         } else {
-//             alert('There was a problem with the request.');
-//         }
-//     }
-// }
-
-
-// function printWeeklyMonitorContacts(beginDate,shopNumber) {
-//     // SEND DATE AND SHOPNUMBER TO SERVER
-//     var httpRequest = new XMLHttpRequest(); 
-//     httpRequest.onreadystatechange = function() {
-//         if (this.readyState == 4 && this.status == 200) {
-//             document.write(httpRequest.responseText)
-//         }
-//     }; 
-//     httpRequest.open("GET", "/printWeeklyMonitorContacts?date=" + beginDate + "&shop=" + shopNumber , true);
-//     httpRequest.send();
-//     return
-// }
-// function printWeeklyMonitorSubs() {
-//     alert('Routine has not been implemented.')
-//     return
-// }

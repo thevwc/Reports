@@ -2,8 +2,6 @@
 
 from flask import session, render_template, flash, redirect, url_for, request, jsonify, json, make_response, after_this_request
 from flask_weasyprint import HTML, render_pdf
-#from python-pdf import pydf
-#from pdfkit import pdfkit
 import pdfkit
 from flask_bootstrap import Bootstrap
 from werkzeug.urls import url_parse
@@ -17,22 +15,19 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError, DBAPIError
 import datetime as dt
 from datetime import date, datetime, timedelta
 
-
-
-#from flask_mail import Mail
-
-#mail = Mail(app)
-
-# @app.route('/test')
-# def test():
-    # TRY TO DISPLAY rptWeeklyContacts.html WITHOUT PASSING ANY PARAMETERS
-    #return render_template("rptWeeklyNotes.html")
-    #return render_template("rptWeeklyContacts.html")
-    #return render_template("test.html")
-
+from flask_mail import Mail, Message
+mail=Mail(app)
 @app.route('/')
+@app.route('/index/')
 @app.route('/index', methods=['GET'])
 def index():
+    testMail = False
+    if testMail:
+        msg = Message('Hello', sender = 'hartl1r@gmail.com', recipients = ['hartl1r@gmail.com'])
+        msg.body = "This is the email body"
+        mail.send(msg)
+        return "Sent"
+
     # GET REQUEST
     # BUILD ARRAY OF NAMES FOR DROPDOWN LIST OF COORDINATORS
     coordNames=[]
@@ -426,8 +421,6 @@ def printWeeklyMonitorContacts():
                 TCmonitor['cellPhone'] = ''
             TCmonitors.append(TCmonitor)
             
-    destination = 'PRINT'
-    print('destination is - ',destination)
     
     if (destination == 'PDF'):
         html = HTML("rptWeeklyContacts.html",\
@@ -449,7 +442,7 @@ def printWeeklyMonitorContacts():
 # PRINT WEEKLY NOTES FOR COORDINATOR (GET approach)
 @app.route("/printWeeklyMonitorNotes", methods=["GET"])
 def printWeeklyMonitorNotes():
-    print('printWeeklyMonitorNotes routine')
+    print('PRINT printWeeklyMonitorNotes routine')
     dateScheduled=request.args.get('date')
     shopNumber=request.args.get('shop')
     destination = request.args.get('destination')
@@ -489,7 +482,7 @@ def printWeeklyMonitorNotes():
     notes = db.engine.execute(sqlNotes)
     
     print('destination - ',destination)
-    if (destination == 'PRINTER') :   
+    if (destination == 'PRINT') :   
         return render_template("rptWeeklyNotes.html",\
             beginDate=beginDateSTR,endDate=endDateSTR,\
             locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
