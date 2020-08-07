@@ -17,16 +17,18 @@ from datetime import date, datetime, timedelta
 
 from flask_mail import Mail, Message
 mail=Mail(app)
+
+
 @app.route('/')
 @app.route('/index/')
 @app.route('/index', methods=['GET'])
 def index():
-    testMail = False
-    if testMail:
-        msg = Message('Hello', sender = 'hartl1r@gmail.com', recipients = ['hartl1r@gmail.com'])
-        msg.body = "This is the email body"
-        mail.send(msg)
-        return "Sent"
+    # testMail = False
+    # if testMail:
+    #     msg = Message('Hello', sender = 'hartl1r@gmail.com', recipients = ['hartl1r@gmail.com'])
+    #     msg.body = "This is the email body"
+    #     mail.send(msg)
+    #     return "Sent"
 
     # GET REQUEST
     # BUILD ARRAY OF NAMES FOR DROPDOWN LIST OF COORDINATORS
@@ -44,7 +46,14 @@ def index():
     sqlWeeks += "ORDER BY Shop_Number, Start_Date"
     weeks = db.engine.execute(sqlWeeks)
 
-    return render_template("index.html",coordNames=coordNames,weeks=weeks)
+    # EMAIL ADDRESSES OF COORDINATOR AND ALL MONITORS FOR WEEK
+    sqlEmailAddresses = "SELECT TOP 10 (Last_Name + ', ' + First_Name) as memberName, eMail FROM tblMember_Data ORDER BY Last_Name, First_Name"
+    eMails = db.engine.execute(sqlEmailAddresses)
+    # for e in eMails:
+    #     print(e.memberName,e.eMail)
+
+    # CONVERT TO DICTIONARY; ADD COORDINATOR EMAIL ??
+    return render_template("index.html",coordNames=coordNames,weeks=weeks,eMails=eMails)
    
 
 
@@ -490,17 +499,23 @@ def printWeeklyMonitorNotes():
             )
     else:
         print('begin pdf')
-        rendered = render_template("rptWeeklyNotes.html",\
-            beginDate=beginDateSTR,endDate=endDateSTR,\
-            locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
-            todaysDate=todays_dateSTR
-            )
-        pdf = pdfkit.from_string(rendered,False)
-        response = make_response(pdf)
-        response.headers['Content-Type'] = 'application/pdf'
-        response.headers["Content-Disposition"] = "inline; filename=notes.pdf"
-        print('notes response')
-        return response
+        # PDFKIT solution 
+        # rendered = render_template("rptWeeklyNotes.html",\
+        #     beginDate=beginDateSTR,endDate=endDateSTR,\
+        #     locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
+        #     todaysDate=todays_dateSTR
+        #     )
+        # pdf = pdfkit.from_string(rendered,False)
+        # response = make_response(pdf)
+        # response.headers['Content-Type'] = 'application/pdf'
+        # response.headers["Content-Disposition"] = "inline; filename=notes.pdf"
+        #return response
+        print('end of PDF routine')
+        
+        return redirect(url_for('index'))
+        
+
+
 
         # WeasyPrint solution
         # html = render_template("rptWeeklyNotes.html",\

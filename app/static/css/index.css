@@ -10,21 +10,14 @@
   
 #parent {
     display: grid;
-    /* grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); */
-    grid-template-columns: auto auto auto auto 1fr 1fr ;
-    /* grid-template-rows: 100px 100px 100px 100px 100px 100px 100px; */
-    grid-template-rows: 50px 100px auto;
+    grid-template-columns: auto auto auto auto 1fr auto;
+    grid-template-rows: 50px auto auto auto 1fr;
     grid-template-areas:"hdgArea        hdgArea         hdgArea         hdgArea         hdgArea         hdgArea" 
-                        "locationArea   coordArea       weeksArea       rptNameArea     prtRptArea      ."
-                        ".              .               .               rptNameArea     .               ."
-                        ".    .  . . . .";
+                        "locationArea   coordArea       weeksArea       rptNameArea     prtRptArea      .  "
+                        ".              .               .               rptNameArea     prtRptArea      ."
+                        "emailArea      emailArea       emailArea       emailArea       emailArea       emailArea "
+                        "emailBtnsArea  emailBtnsArea   emailBtnsArea   emailBtnsArea   emailBtnsArea   emailBtnsArea"; 
     grid-gap:1em;
-                        /* coordArea       coordArea       prtArea         weeksArea"
-                        "filterArea     filterArea      coordArea       coordArea       .               ."
-                        "rptNameArea    prtRptArea      .               .               prtRptArea      sendToArea"
-                        "rptNameArea    prtRptArea      .               .               prtRptArea      sendToArea"
-                        "emailBodyArea  emailBodyArea   emailBodyArea   emailBodyArea   emailBodyArea   emailBodyArea"
-                        "emailBtnsArea  emailBtnsArea   emailBtnsArea   emailBtnsArea   emailBtnsArea   emailBtnsArea"; */
     background-color:lightgray; 
     border:2px solid white;                  
 }
@@ -62,6 +55,7 @@
 
 #rptChoices {
     grid-area:rptNameArea;
+    width:200px;
     padding-left: 20px;
     background-color:lightgray;
     color:navy;
@@ -76,33 +70,65 @@
     padding-top:50px;
     padding-left:30px;
     background-color: lightgray;
+    color:navy;
 }
 
+
+/* EMAIL RECIPIENTS SECTION OF PAGE */
+#emailSection {
+    grid-area: emailArea;
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    grid-template-areas:"sendToArea     emailBody   emailBody   emailBody   emailButtons";
+    background-color:lightsteelblue;
+    padding-top:20px;
+    border:1px solid navy;
+}
+
+/* LEFT COLUMN */
 #sendToOptions {
-    /*grid-area:sendToArea; */
-    background-color: lightsalmon;
-}
-
-#emailBody {
-    /* grid-area:emailBodyArea; */
-    background-color: lime;
+    grid-area:sendToArea; 
     border: 1px solid black;
-    /* height:800px; */
+    padding-left:20px;
+    margin-left:20px;
+    width:275px;
+    height:150px;
+    color:navy;
 }
 
-#emailBtns {
-    /* grid-area:emailBtnsArea; */
-    background-color: magenta;
+/*  MIDDLE COLUMN */
+#eMailBody {
+    grid-area:emailBody;
+    color:navy;
+    margin-left:100px
 }
-/* #settingsIcon {
-    margin-top:3px;
-    margin-left: 30px;
-    height: 30px;
-    font-size:18px;
+#emailSubject {
+    grid-area:emailBody;
+    color:navy;
+    margin-left:30px;
+    
 }
-select {
-    text-size-adjust:100 px; 
-    margin-right:20px;
-    color:blue;
-} */
-
+#emailMessage {
+    grid-area:emailBody;
+    color:navy;
+    margin-top:10px;
+    margin-left:30px;
+    
+}
+/* RIGHT COLUMN */
+#emailButtons {
+    grid-area:emailButtons;
+    margin-top:50px;
+    margin-right:70px;
+    color:navy;
+    text-align:center;
+}
+#emailButtons button {
+    width:200px;
+}
+/* EMAIL SEND SAVE DONE BUTTONS */
+/* #emailSendBtns {
+    grid-area:emailBtnsArea;
+    background-color: lightgray;
+    color:navy; 
+}*/

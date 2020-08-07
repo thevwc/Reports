@@ -49,36 +49,22 @@
         </div>
         <div id="rptChoices">
             <form id='reportsFormID' class="reportsForm" action="">
-                <p>Select a report ...</p>
-                <input type="radio" id="scheduleID" name="reports" value="rptSchedule" checked>
+                <p>Select report(s) ...</p>
+                <input type="checkbox" id="scheduleID" name="reports" value="rptSchedule" checked>
                 <label for="schedule"> Schedule</label><br>
-                <input type="radio" id="notesID" name="reports" value="rptNotes">
+                <input type="checkbox" id="notesID" name="reports" value="rptNotes">
                 <label for="notes"> Notes</label><br>
-                <input type="radio" id="contactsID" name="reports" value="rptContacts">
+                <input type="checkbox" id="contactsID" name="reports" value="rptContacts">
                 <label for="contacts"> Contacts</label><br>
-                <input type="radio" id="subsID" name="reports" value="rptSubs">
+                <input type="checkbox" id="subsID" name="reports" value="rptSubs">
                 <label for="subs"> Available subs</label><br>   
             </form>
         </div>   
 
-
-        <!-- <div id="rptChoices">
-            <form id='reportsFormID' class="reportsForm" action="">
-                <p>Select report(s) ...</p>
-                <input type="checkbox" id="scheduleID" name="schedule" value="rptSchedule">
-                <label for="schedule"> Schedule</label><br>
-                <input type="checkbox" id="notesID" name="notes" value="rptNotes">
-                <label for="notes"> Notes</label><br>
-                <input type="checkbox" id="contactsID" name="contacts" value="rptContacts">
-                <label for="contacts"> Contacts</label><br>
-                <input type="checkbox" id="subsID" name="subs" value="rptSubs">
-                <label for="subs"> Available subs</label><br>   
-            </form>
-        </div>    -->
-
         <div id="prtReports">
-            <button type="button" id="printReportBtn" class="btn btn-primary">PRINT</button>  
-            <button type="button" id="eMailReportBtn" style="margin-left:20px" class="btn btn-primary">EMAIL</button>  
+            <button type="button" id="printReportBtn" style="width:150px;margin-left:20px"class="btn btn-primary">PRINT REPORTS</button>  
+            <br>
+            <button type="button" id="eMailReportBtn" style="width:150px;margin-left:20px;margin-top:10px" class="btn btn-primary">PREPARE EMAIL</button>  
             <!-- HIDDEN BUTTONS TO PROVIDE LINKS TO ROUTES -->
             <a id="printScheduleLink" style="display:none" href="/printWeeklyMonitorSchedule?date=2020-08-09&shop={curShopNumber}">Print Schedule</a> 
             <a id="printNotesLink" style="display:none" href="/printWeeklyMonitorNotes?date=2020-08-09&shop=1">Print Notes</a>
@@ -86,23 +72,52 @@
             <a id="printSubsLink" style="display:none" href="/printWeeklyMonitorSubs?date=2020-08-09&shop={curShopNumber}">Print Subs</a>   
         </div>
 
-
-        <!-- <div id="sendToOptions" class="sendToOptions">
-            <form>
+        <!--  EMAIL SECTION -->
+        <div id="emailSection">
+            <!-- LEFT COLUMN -->
+            <div id="sendToOptions" style="display:block" class="sendToOptions">
                 <p>Send to:</p>
-                <input type="radio" id="coordinatorOnly" name="sendToOptions" value="1">
-                <label for="coordinatorOnly">Coordinator Only</label><br>
-                <input type="radio" id="monitorsAndCoordinator" name="sendToOptions" value="2">
-                <label for="monitorsAndCoordinator">Monitors and coordinator</label><br>
-                <input type="radio" id="specificMember" name="sendToOptions" value="3">
-                <label for="specificMember">Specific member</label>
-            </form>
-        </div> -->
-        
-        <!-- <div id="emailBody">BODY OF EMAIL</div> -->
+                <form style="margin-left:20px">
+                    <input type="radio" id="coordinatorOnly" name="sendToOptions" value="1">
+                    <label for="coordinatorOnly">Coordinator Only</label><br>
+                    <input type="radio" id="monitorsAndCoordinator" name="sendToOptions" value="2">
+                    <label for="monitorsAndCoordinator">Monitors and coordinator</label><br>
+                    <input type="radio" id="specificMember" name="sendToOptions" value="3">
+                    <label for="specificMember">Specific member</label>
+                </form>
+            </div>
+            <!-- MIDDLE COLUMN -->
+            <div id="emailBody" class="row">
+                <div id="emailSubject" class="row">
+                    <div class="col-sm-1">
+                        <span>Subject:</span>
+                    </div>
+                    <div class="col-sm-9">
+                        <input type="textarea" id="emailSubject" style=width:600px>
+                    </div>
+                </div>
+                
+                <div id="emailMessage" class="row">
+                    <div class="col-sm-1">
+                        <span>Message:</span>
+                    </div>
+                    <div class="col-sm-9">
+                        <input type="textarea" id="emailMessage" style=width:600px;height:300px>
+                    </div> 
+                </div>
+            </div> 
 
-        <!-- <div id="emailBtns">EMAIL BUTTONS</div> -->
-
+            <!-- RIGHT COLUMN -->
+            <div id="emailButtons" style=margin-left:0px>
+                <button class="btn-default">SHOW RECIPIENTS</button>
+                <br>
+                <button type="button" id="clearBtn" style="margin-top:10px" class="btn btn-primary">SEND</button>  
+                <br>
+                <button type="button" id="clearBtn" style="margin-top:10px" class="btn btn-primary">SAVE DRAFT</button>  
+                <br>
+                <button type="button" id="clearBtn" style="margin-top:10px" class="btn btn-primary">DONE</button>  
+            </div>
+        </div> <!-- END OF EMAIL RECIPIENTS SECTION -->
     </div>  <!-- END OF PARENT WRAPPER -->
 {% endblock %}
 

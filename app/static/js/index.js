@@ -37,15 +37,23 @@ $( document ).ready (function() {
     clientLocation = localStorage.getItem('clientLocation')
     
     setShopFilter(clientLocation)
-    filterWeeksShown()
-    
-});
+    filterWeeksShown(curShopNumber,curCoordinatorID)
 
+    // SET EMAILSECTION TO OPAQUE
+    document.getElementById('emailSection').style.opacity=.2;
+    alert('opacity set to .2')
+    document.getElementById("emailSection").style.display=None
+});
+ 
 // ------------------------------------------------------------------------------------------------------
 // FUNCTIONS    
 // ------------------------------------------------------------------------------------------------------
 function printReports(destination) {
-    alert('printReports function\n' + 'Value of destination - ' + destination)
+    //alert('printReports') 
+    if (destination == 'PDF'){
+        document.getElementById('emailSection').opacity=1
+    }
+
     curWeekDate = document.getElementById('weekSelected').value
     if (curWeekDate == '') {
         alert("Please select a week date.")
@@ -107,9 +115,9 @@ function printReports(destination) {
     }
 }
 
-function emailReports() {
-    alert('Not implemented')
-}
+// function emailReports() {
+//     alert('Not implemented')
+// }
 
 function shopClicked() {
     setShopFilter(this.value)
@@ -156,10 +164,12 @@ function formatDate(date) {
 
  // FILTER WEEKS DROPDOWN ON SHOPNUMBER AND COORDINATOR ID
 function filterWeeksShown() {
+    //alert('shop- ' + curShopNumber + '\n' + 'curCoordinatorID- ' + curCoordinatorID)
     var weeks = document.querySelectorAll('.optWeeks')
     for (i=0; i < weeks.length; i++) {
         thisWeeksCoordID = weeks[i].getAttribute('data-coordID')
         shop = weeks[i].getAttribute('data-shop')
+        console.log(i,curShopNumber,curCoordinatorID)
         if ((shop == curShopNumber && curCoordinatorID == 'All')
         || (shop == curShopNumber && thisWeeksCoordID == curCoordinatorID)){
             weeks[i].style.display = ''
