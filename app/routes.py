@@ -6,7 +6,8 @@ import pdfkit
 from flask_bootstrap import Bootstrap
 from werkzeug.urls import url_parse
 from app.models import ShopName, Member, MemberActivity, MonitorSchedule, MonitorScheduleTransaction,\
-MonitorWeekNote, CoordinatorsSchedule, ControlVariables
+MonitorWeekNote, CoordinatorsSchedule, ControlVariables, EmailMessages
+
 from app import app
 from app import db
 from sqlalchemy import func, case, desc, extract, select, update, text
@@ -39,7 +40,8 @@ def index():
     coordNames = db.engine.execute(sqlNames)
    
     # BUILD ARRAY OF MONITOR WEEKS FOR BOTH LOCATIONS
-    sqlWeeks = "SELECT Shop_Number, Start_Date,format(Start_Date,'MMM d, yyyy') as DisplayDate, Coordinator_ID, Last_Name + ', ' + First_Name as CoordName "
+    sqlWeeks = "SELECT Shop_Number as shopNumber, Start_Date,format(Start_Date,'MMM d, yyyy') as DisplayDate, "
+    sqlWeeks += "Coordinator_ID as coordID, Last_Name + ', ' + First_Name as coordName, eMail as coordEmail "
     sqlWeeks += " FROM coordinatorsSchedule "
     sqlWeeks += "LEFT JOIN tblMember_Data ON coordinatorsSchedule.Coordinator_ID = tblMember_Data.Member_ID "
     sqlWeeks += "WHERE Start_Date >= getdate() "
@@ -47,13 +49,13 @@ def index():
     weeks = db.engine.execute(sqlWeeks)
 
     # EMAIL ADDRESSES OF COORDINATOR AND ALL MONITORS FOR WEEK
-    sqlEmailAddresses = "SELECT TOP 10 (Last_Name + ', ' + First_Name) as memberName, eMail FROM tblMember_Data ORDER BY Last_Name, First_Name"
-    eMails = db.engine.execute(sqlEmailAddresses)
+    #sqlEmailAddresses = "SELECT TOP 10 (Last_Name + ', ' + First_Name) as memberName, eMail FROM tblMember_Data ORDER BY Last_Name, First_Name"
+    #eMails = db.engine.execute(sqlEmailAddresses)
     # for e in eMails:
     #     print(e.memberName,e.eMail)
 
     # CONVERT TO DICTIONARY; ADD COORDINATOR EMAIL ??
-    return render_template("index.html",coordNames=coordNames,weeks=weeks,eMails=eMails)
+    return render_template("index.html",coordNames=coordNames,weeks=weeks)  #,eMails=eMails)
    
 
 
@@ -63,7 +65,7 @@ def index():
 def printWeeklyMonitorSchedule():
     dateScheduled=request.args.get('date')
     shopNumber=request.args.get('shop')
-    destination = request.args.get('destina tion')
+    destination = request.args.get('destination')
 
     ########  try to redirect to another page that contains the following code
     
@@ -74,10 +76,6 @@ def printWeeklyMonitorSchedule():
     #  DATE SELECTED IS ALWAYS A MONDAY
     #  CONVERT TO DATE TYPE
     dateScheduledDat = datetime.strptime(dateScheduled,'%Y-%m-%d')
-    #dayOfWeek = dateScheduledDat.weekday()
-    # if dayOfWeek == 6:  # if Sunday
-    #     dayOfWeek = 0
-# beginDate should always be a sunday 
     beginDateDAT = dateScheduledDat + timedelta(days=1)
     beginDateSTR = beginDateDAT.strftime('%m-%d-%Y')
 
@@ -563,3 +561,73 @@ def pdfWeeklyMonitorNotes():
 
     # pdfkit
     
+@app.route("/eMailCoordinator", methods=["GET","POST"])
+def eMailCoordinator():
+    # GET WEEKOF DATE
+    # RETURN COORDINATOR NAME, EMAIL, PHONE
+    weekOf = request.args.get('weekOf')
+    shopNumber = request.args.get('shopNumber')
+
+    # GET COORDINATOR ID FROM COORDINATOR TABLE
+    coordinatorRecord = db.session.query(CoordinatorsSchedule)\
+        .filter(CoordinatorsSchedule.Start_Date==weekOf)\
+        .filter(CoordinatorsSchedule.Shop_Number==shopNumber).first()
+    if coordinatorRecord == None:
+        coordID= ''
+        coordName = 'Not assigned.'
+        coordEmail = ''
+        coordPhone = ''
+    else:
+        # LOOK UP COORDINATORS NAME
+        coordinatorID = coordinatorRecord.Coordinator_ID
+        memberRecord = db.session.query(Member).filter(Member.Member_ID==coordinatorID).first()
+        if memberRecord == None:
+            coordID = ''
+            coordName = 'Not assigned.'
+            coordEmail = ''
+            coordPhone = ''
+        else:
+            coordID = memberRecord.Member_ID
+            coordName = memberRecord.First_Name + ' ' + memberRecord.Last_Name
+            coordEmail = memberRecord.eMail
+            coordPhone = memberRecord.Cell_Phone
+
+    # LOOK UP SHOP NAME
+    print('shop # - ', shopNumber)
+    shopRecord = db.session.query(ShopName).filter(ShopName.Shop_Number==shopNumber).first()
+    shopName = shopRecord.Shop_Name
+    
+    print ('shop name -',shopName)
+    
+    weekOfDat = datetime.strptime(weekOf,'%Y-%m-%d')
+    displayDate = weekOfDat.strftime('%B %d, %Y')  #'%m/%d/%Y')
+
+    # LOOK UP EMAIL MESSAGE FOR COORDINATOR
+    sqlEmailMsgs = "SELECT [Email Name] as eMailMsgName, [Email Message] as eMailMessage FROM tblEmail_Messages "
+    sqlEmailMsgs += "WHERE [Email Name] = 'Email To Coordinators'"
+    eMailMessages = db.engine.execute(sqlEmailMsgs)
+    for e in eMailMessages:
+        eMailMsg=e.eMailMessage
+    
+    return jsonify(coordID=coordID,
+        coordName=coordName,
+        coordEmail=coordEmail,
+        coordPhone=coordPhone,
+        shopName=shopName,
+        displayDate=displayDate,
+        eMailMsg=eMailMsg
+    )
+
+@app.route("/eMailCoordinatorAndMonitors", methods=["GET","POST"])
+def eMailCoordinatorAndMonitors():
+    # GET WEEKOF DATE
+    # RETURN COORDINBATOR AND MONITORS NAMES AND EMAIL ADDRESSES; COORDINATORS PHONE
+    print('/eMailCoordinatorAndMonitors')
+    return 'SUCCESS'
+
+@app.route("/eMailMember", methods=["GET","POST"])
+def eMailMember():
+    # GET WEEKOF DATE
+    # RETURN MEMBER NAME & EMAIL; COORDINATORS NAME, EMAIL, PHONE
+    print('/eMailMember')
+    return 'SUCCESS'

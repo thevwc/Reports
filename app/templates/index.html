@@ -43,14 +43,17 @@
             <select id='weekSelected' class='weekPicker' style='margin-bottom:20px' title='Select a week ...' data-live-search=true data-live-search-style="contains" data-width='auto'>
                 <option class="optWeeks" value="">Select a week ...</option>
                 {% for w in weeks %}
-                    <option  class="optWeeks" data-shop={{w.Shop_Number}} data-coordID={{w.Coordinator_ID}} value={{w.Start_Date}}>{{w.DisplayDate}}</option>
+                    <option  class="optWeeks" data-shop={{w.shopNumber}} data-coordID={{w.coordID}}
+                     data-coordName = {{w.coordName}} data-coordEmail={{w.coordEmail}} value={{w.Start_Date}}>{{w.DisplayDate}}</option>
+                    <!-- <span>{{w.coordName}}</span> -->
                 {% endfor %}
             </select><br><br>
         </div>
+
         <div id="rptChoices">
             <form id='reportsFormID' class="reportsForm" action="">
                 <p>Select report(s) ...</p>
-                <input type="checkbox" id="scheduleID" name="reports" value="rptSchedule" checked>
+                <input type="checkbox" id="scheduleID" name="reports" value="rptSchedule">
                 <label for="schedule"> Schedule</label><br>
                 <input type="checkbox" id="notesID" name="reports" value="rptNotes">
                 <label for="notes"> Notes</label><br>
@@ -75,50 +78,46 @@
         <!--  EMAIL SECTION -->
         <div id="emailSection">
             <!-- LEFT COLUMN -->
-            <div id="sendToOptions" style="display:block" class="sendToOptions">
-                <p>Send to:</p>
-                <form style="margin-left:20px">
-                    <input type="radio" id="coordinatorOnly" name="sendToOptions" value="1">
-                    <label for="coordinatorOnly">Coordinator Only</label><br>
-                    <input type="radio" id="monitorsAndCoordinator" name="sendToOptions" value="2">
-                    <label for="monitorsAndCoordinator">Monitors and coordinator</label><br>
-                    <input type="radio" id="specificMember" name="sendToOptions" value="3">
-                    <label for="specificMember">Specific member</label>
-                </form>
+            <div id="sendToOptions" class="btn-group-vertical btn-group-sm">
+                <span>Send to:</span>
+                <button id='coordinatorOnlyID' type="button" class='btn btn-primary'>Coordinator Only</button>
+                <button id='coordinatorAndMonitorsID' type="button" class='btn btn-primary' style=margin-top:5px>Coordinator And Monitors</button>
+                <button id='memberOnlyID' type="button" class='btn btn-primary' style=margin-top:5px>Member</button> 
             </div>
             <!-- MIDDLE COLUMN -->
             <div id="emailBody" class="row">
                 <div id="emailSubject" class="row">
-                    <div class="col-sm-1">
+                    <div class="col-sm-2">
                         <span>Subject:</span>
                     </div>
                     <div class="col-sm-9">
-                        <input type="textarea" id="emailSubject" style=width:600px>
+                        <input id="eMailSubjectID" type="textarea" style=width:600px>
                     </div>
                 </div>
                 
                 <div id="emailMessage" class="row">
-                    <div class="col-sm-1">
+                    <div class="col-sm-2">
                         <span>Message:</span>
                     </div>
                     <div class="col-sm-9">
-                        <input type="textarea" id="emailMessage" style=width:600px;height:300px>
+                        <textarea id='eMailMsgID' rows='30' cols='10' style=width:600px;height:300px></textarea>
                     </div> 
                 </div>
             </div> 
 
             <!-- RIGHT COLUMN -->
-            <div id="emailButtons" style=margin-left:0px>
-                <button class="btn-default">SHOW RECIPIENTS</button>
-                <br>
-                <button type="button" id="clearBtn" style="margin-top:10px" class="btn btn-primary">SEND</button>  
-                <br>
-                <button type="button" id="clearBtn" style="margin-top:10px" class="btn btn-primary">SAVE DRAFT</button>  
-                <br>
-                <button type="button" id="clearBtn" style="margin-top:10px" class="btn btn-primary">DONE</button>  
+            <div id="emailButtons" class="btn-group-vertical btn-group-sm ">
+                <span>Actions:</span>
+                <button id='showRecipientsBtn' type="button" class='btn btn-primary'>SHOW RECIPIENTS</button>
+                <button id='sendBtn' type="button" class='btn btn-primary' style=margin-top:5px>SEND</button>
+                <button id='saveBtn' type="button" class='btn btn-primary' style=margin-top:5px>SAVE DRAFT</button> 
+                <button id='doneBtn' type="button" class='btn btn-primary rounded' style=margin-top:5px>DONE</button> 
             </div>
         </div> <!-- END OF EMAIL RECIPIENTS SECTION -->
     </div>  <!-- END OF PARENT WRAPPER -->
+    <script>
+        
+        </script>
 {% endblock %}
 
 {% block scripts %}

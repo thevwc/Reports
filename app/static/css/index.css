@@ -89,13 +89,18 @@
 #sendToOptions {
     grid-area:sendToArea; 
     border: 1px solid black;
+    padding-top:5px;
+    padding-bottom: 5px;
     padding-left:20px;
     margin-left:20px;
-    width:275px;
-    height:150px;
+    width:250px;
+    height:200px;
     color:navy;
 }
-
+#sendToOptions button {
+    width:200px;
+    border-radius: 5px;
+}
 /*  MIDDLE COLUMN */
 #eMailBody {
     grid-area:emailBody;
@@ -118,17 +123,32 @@
 /* RIGHT COLUMN */
 #emailButtons {
     grid-area:emailButtons;
-    margin-top:50px;
-    margin-right:70px;
+    border: 1px solid black;
+    padding-top:5px;
+    padding-bottom: 5px;
+    padding-left:30px;
+    margin-right:100px;
+    width:260px;
+    height:200px;
     color:navy;
-    text-align:center;
+    
+    /* margin-top:0px;
+    margin-right:0px;
+    color:navy;
+    text-align:center; */
 }
 #emailButtons button {
     width:200px;
-}
+    border-radius:5px;
+} 
 /* EMAIL SEND SAVE DONE BUTTONS */
 /* #emailSendBtns {
     grid-area:emailBtnsArea;
     background-color: lightgray;
     color:navy; 
 }*/
+
+
+textarea {
+    overflow-y: scroll;
+}

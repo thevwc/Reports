@@ -152,3 +152,11 @@ class CoordinatorsSchedule(db.Model):
     Start_Date = db.Column(db.DateTime, primary_key=True)
     End_Date = db.Column(db.DateTime)
     Coordinator_ID = db.Column(db.String(6))
+
+class EmailMessages(db.Model):
+    __tablename__ = 'tblEmail_Messages'
+    __table_args__ = {"schema":"dbo"}
+    eMailMsgName = db.Column("Email Name", db.String(255),primary_key=True)
+    eMailMessage = db.Column("Email Message", db.String(255))
+
+    
