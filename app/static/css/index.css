@@ -11,10 +11,11 @@
 #parent {
     display: grid;
     grid-template-columns: auto auto auto auto 1fr auto;
-    grid-template-rows: 50px auto auto auto 1fr;
+    grid-template-rows: 50px auto auto auto auto 1fr;
     grid-template-areas:"hdgArea        hdgArea         hdgArea         hdgArea         hdgArea         hdgArea" 
                         "locationArea   coordArea       weeksArea       rptNameArea     prtRptArea      .  "
                         ".              .               .               rptNameArea     prtRptArea      ."
+                        "coordHdgArea   coordHdgArea    coordHdgArea    coordHdgArea    coordHdgArea    coordHdgArea"
                         "emailArea      emailArea       emailArea       emailArea       emailArea       emailArea "
                         "emailBtnsArea  emailBtnsArea   emailBtnsArea   emailBtnsArea   emailBtnsArea   emailBtnsArea"; 
     grid-gap:1em;
@@ -73,6 +74,13 @@
     color:navy;
 }
 
+/* COORDINATOR INFORMATION LINE */
+#coordinatorInfo {
+    grid-area:coordHdgArea;
+    text-align: center;
+    border:1px solid navy;
+    color:blue;
+}
 
 /* EMAIL RECIPIENTS SECTION OF PAGE */
 #emailSection {

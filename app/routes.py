@@ -631,3 +631,46 @@ def eMailMember():
     # RETURN MEMBER NAME & EMAIL; COORDINATORS NAME, EMAIL, PHONE
     print('/eMailMember')
     return 'SUCCESS'
+
+
+@app.route("/getCoordinatorData", methods=["GET","POST"])
+def getCoordinatorData():
+    # GET WEEKOF DATE
+    # RETURN COORDINATOR NAME, EMAIL, PHONE
+    weekOf = request.args.get('weekOf')
+    shopNumber = request.args.get('shopNumber')
+
+    weekOfDat = datetime.strptime(weekOf,'%Y-%m-%d')
+    displayDate = weekOfDat.strftime('%B %d, %Y')  #'%m/%d/%Y')
+
+    # GET COORDINATOR ID FROM COORDINATOR TABLE
+    coordinatorRecord = db.session.query(CoordinatorsSchedule)\
+        .filter(CoordinatorsSchedule.Start_Date==weekOf)\
+        .filter(CoordinatorsSchedule.Shop_Number==shopNumber).first()
+    if coordinatorRecord == None:
+        coordID= ''
+        coordName = 'Not assigned.'
+        coordEmail = ''
+        coordPhone = ''
+    else:
+        # LOOK UP COORDINATORS NAME
+        coordinatorID = coordinatorRecord.Coordinator_ID
+        memberRecord = db.session.query(Member).filter(Member.Member_ID==coordinatorID).first()
+        if memberRecord == None:
+            coordID = ''
+            coordName = 'Not assigned.'
+            coordEmail = ''
+            coordPhone = ''
+        else:
+            coordID = memberRecord.Member_ID
+            coordName = memberRecord.First_Name + ' ' + memberRecord.Last_Name
+            coordEmail = memberRecord.eMail
+            coordPhone = memberRecord.Cell_Phone
+
+    return jsonify(
+        coordID=coordID,
+        coordName=coordName,
+        coordEmail=coordEmail,
+        coordPhone=coordPhone,
+        displayDate=displayDate
+    )

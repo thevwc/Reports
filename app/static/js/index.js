@@ -8,16 +8,24 @@
     var todaysDate = new Date();
     var shopNames = ['Rolling Acres', 'Brownwood']
 
+    // UPDATED ON LOAD AND SHOP CHANGE
     var curShopNumber = ''
-    var curWeekDate = ''  //UPDATED FROM WEEK DROPDOWN 
-    
-    var curCoordinatorName = '' //UPDATED FROM COORDINATOR SELECTION
-    var curRecipient = ''
-    var curMultipleRecipients = []
+
+    //UPDATED FROM WEEK CHANGE ROUTINE
+    var curWeekDate = ''  
+    var curCoordinatorName = '' 
+    var curCoordinatorEmail = ''
+    var curCoordinatorPhone = ''
+
+    // UPDATED FROM SEND TO SELECTION OF 'COORDINATOR AND MONITORS'
+    var curPrimaryRecipientEmail = ''
+    //var curMultipleRecipients = []
+    var curMonitorsEmailAddresses = []
+    var curMonitorsNames = []
 
     // DEFINE EVENT LISTENERS
     document.getElementById("weekSelected").addEventListener("change", weekChanged);
-    document.getElementById("weekSelected").addEventListener("click", weekChanged);
+    //document.getElementById("weekSelected").addEventListener("click", weekChanged);
 
     document.getElementById("shopChoice").addEventListener("click", shopClicked);
     document.getElementById("coordChoice").addEventListener("change", coordinatorChanged);
@@ -61,10 +69,12 @@
                 shopNumber: curShopNumber},
             success: function(data, textStatus, jqXHR)
             {
-                alert(data.coordName + '\n' + data.coordID + '\n' + data.coordEmail + '\n' + data.coordPhone
-                + '\n' + data.displayDate + '\n' + data.shopName + '\n' + data.eMailMsg)
+                // alert(data.coordName + '\n' + data.coordID + '\n' + data.coordEmail + '\n' + data.coordPhone
+                // + '\n' + data.displayDate + '\n' + data.shopName + '\n' + data.eMailMsg)
+
                 // WRITE RECIPIENT
-                curRecipient = data.coordEmail
+                curPrimaryRecipientEmail = data.coordEmail
+                curRecipientName = data.coordName
 
                 // BUILD SUBJECT LINE
                 subject = "Monitor Duty for Week Of " + data.displayDate + " at " + data.shopName
@@ -97,14 +107,33 @@
                 shopNumber: curShopNumber},
             success: function(data, textStatus, jqXHR)
             {
-                alert('success from eMailCoordinatorAndMonitors')
+                
                 //data - response from server
                 // receive coordName, coordEmail, coordPhone
-                
+                // WRITE RECIPIENT
+                curPrimaryRecipientEmail = data.coordEmail
+                curRecipientName = data.coordName
+                curMonitorsEmailAddresses = data.monitorsEmailAddresses
+                curMonitorsNames = data.monitorsNames
+
+                // BUILD SUBJECT LINE
+                subject = "Monitor Duty for Week Of " + data.displayDate + " at " + data.shopName
+                document.getElementById('eMailSubjectID').value=subject 
+
+                // WRITE MESSAGE
+                message = "DO NOT SEND EMAILS REGARDING MONITOR DUTY TO THE WORKSHOP.\n\n"
+                message += "CALL OR EMAIL ACCORDING TO THE INSTRUCTIONS BELOW.\n"
+                message += "THIS SCHEDULE IS FOR THE " + data.shopName.toUpperCase() + " LOCATION\n\n"
+                message += "Please remember to contact your coordinator, " + data.coordName + ", if you make any changes or have questions.\n"
+                message += "My phone number is " + data.coordPhone + " and my Email is " + data.coordEmail + "."
+                message += '\n' + data.eMailMsg
+                alert (message)
+                document.getElementById('eMailMsgID').value=message 
+                alert('success from eMailCoordinatorAndMonitors')
             },
             error: function (jqXHR, textStatus, errorThrown)
             {
-                alert('ERROR from eMailCoordinator')
+                alert('ERROR from eMailCoordinatorAndMonitors')
             }
         });
     })
@@ -281,56 +310,43 @@ function filterWeeksShown() {
 
 function weekChanged () {
     curWeekDate = this.value
-    //coordName = 
-    //coordEmail =
+    // RETRIEVE COORDINATOR INFORMATION FROM SERVER
+    $.ajax({
+        url : "/getCoordinatorData",
+        type: "GET",
+        data : {
+            weekOf: curWeekDate,
+            shopNumber: curShopNumber},
+        success: function(data, textStatus, jqXHR)
+        {
+            curCoordinatorID = data.coordID 
+            curCoordinatorName = data.coordName
+            curCoordinatorEmail = data.coordEmail
+            curCoordinatorPhone = data.coordPhone
+           
+            // BUILD MESSAGE FOR coordinatorInfoID
+            if (curCoordinatorID != '') {
+                msg = "The coordinator for the week of " + data.displayDate + ' is ' + curCoordinatorName 
+                + ' and may be contacted at ' + curCoordinatorPhone + ' or by email at ' + curCoordinatorEmail
+            }
+            else {
+                msg = "A coordinator has not been assigned."
+            }
+            document.getElementById('coordinatorHeading').innerHTML = msg
 
-
-    // weeks = document.getElementById(weekSelected)
-    // curSelectionValue = weeks.value
-    // console.log('curSelectionValue = ', curSelectionValue)
-
-    // name1 = this.options[this.selectedIndex].getAttribute("data-coordname").value
-    // console.log('name1=', name1)
-
-    // sel = document.getElementById('weekSelected')
-    // console.log('value of selected item-',sel.value)
-    // Reference to selected option -
-    // var opt = sel.options[sel.selectedIndex]
-    // console.log(opt.value)
-
-    // Get attribute data-coordname from selected option -
-    // console.log(opt.getAttribute('data-coordname').value)
-    // document.getElementById('coordinatorsName').innerHTML = 'new name'
-
-    //console.log('@weekChanged variable curWeekDate-',curWeekDate)
-    //console.log('@ weekChanged this.value -',this.value)
-    // selectedWeek = document.getElementById(this.id)
-    // console.log('selectWeek value-', selectedWeek.value)
-    // coordNme = selectedWeek.options.getAttribute('data-coordname').value
-    // console.log('coordNme-',coordNme)
-    // document.getElementById('coordinatorsName').innerHTML = coordNme
-    //curWeekDate = document.getElementById(this.id).value;
-    
-    // x = this.options[this.selectedIndex].getAttribute('data-coordname').value
-    // console.log('x=',x)
-    //console.log('coordinator - ' + this.getAttribute('data-coordname').value)
-    //alert('coordinator - ' + this.getAttribute('data-coordname').value)
-    // show coordinator
+            //alert('success from getCoordinatorData')   
+        },
+        error: function (jqXHR, textStatus, errorThrown)
+        {
+            alert('ERROR from getCoordinatorData')
+        }
+    });
 }
 
 function coordinatorChanged () {
     curCoordinatorID = this.value
     filterWeeksShown()
 }
-
-// function coordinatorOnly() {
-//     alert('button clicked')
-//     console.log('btn clicked')
-    // var  formData = "name=ravi&age=31";  //Name value Pair
-    // or
-    // var formData = {name:"ravi",age:"31"}; //Array 
-
-
 
 function coordinatorAndMonitors() {
     alert('button coordinatorOnly clicked')
