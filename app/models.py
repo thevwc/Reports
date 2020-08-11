@@ -30,7 +30,7 @@ class ControlVariables(db.Model):
     __table_args__ = {"schema": "dbo"}
     Shop_Number = db.Column(db.Integer, primary_key=True)
     Last_Acceptable_Monitor_Training_Date = db.Column(db.DateTime)
-        
+    managersEmail = db.Column(db.String(50))   
 
 class Member(db.Model):
     __tablename__ = 'tblMember_Data'

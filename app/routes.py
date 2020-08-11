@@ -563,67 +563,69 @@ def pdfWeeklyMonitorNotes():
     
 @app.route("/eMailCoordinator", methods=["GET","POST"])
 def eMailCoordinator():
+
+    # THIS ROUTINE ONLY RETURNS THE EMAIL MESSAGE TO BE USED FOR COORDINATORS ONLY EMAILS
+    # ___________________________________________________________________________________
+
     # GET WEEKOF DATE
     # RETURN COORDINATOR NAME, EMAIL, PHONE
-    weekOf = request.args.get('weekOf')
-    shopNumber = request.args.get('shopNumber')
+    # weekOf = request.args.get('weekOf')
+    # shopNumber = request.args.get('shopNumber')
 
-    # GET COORDINATOR ID FROM COORDINATOR TABLE
-    coordinatorRecord = db.session.query(CoordinatorsSchedule)\
-        .filter(CoordinatorsSchedule.Start_Date==weekOf)\
-        .filter(CoordinatorsSchedule.Shop_Number==shopNumber).first()
-    if coordinatorRecord == None:
-        coordID= ''
-        coordName = 'Not assigned.'
-        coordEmail = ''
-        coordPhone = ''
-    else:
-        # LOOK UP COORDINATORS NAME
-        coordinatorID = coordinatorRecord.Coordinator_ID
-        memberRecord = db.session.query(Member).filter(Member.Member_ID==coordinatorID).first()
-        if memberRecord == None:
-            coordID = ''
-            coordName = 'Not assigned.'
-            coordEmail = ''
-            coordPhone = ''
-        else:
-            coordID = memberRecord.Member_ID
-            coordName = memberRecord.First_Name + ' ' + memberRecord.Last_Name
-            coordEmail = memberRecord.eMail
-            coordPhone = memberRecord.Cell_Phone
-
-    # LOOK UP SHOP NAME
-    print('shop # - ', shopNumber)
-    shopRecord = db.session.query(ShopName).filter(ShopName.Shop_Number==shopNumber).first()
-    shopName = shopRecord.Shop_Name
-    
-    print ('shop name -',shopName)
-    
-    weekOfDat = datetime.strptime(weekOf,'%Y-%m-%d')
-    displayDate = weekOfDat.strftime('%B %d, %Y')  #'%m/%d/%Y')
-
-    # LOOK UP EMAIL MESSAGE FOR COORDINATOR
+   # LOOK UP EMAIL MESSAGE FOR COORDINATOR
     sqlEmailMsgs = "SELECT [Email Name] as eMailMsgName, [Email Message] as eMailMessage FROM tblEmail_Messages "
     sqlEmailMsgs += "WHERE [Email Name] = 'Email To Coordinators'"
     eMailMessages = db.engine.execute(sqlEmailMsgs)
     for e in eMailMessages:
         eMailMsg=e.eMailMessage
-    
-    return jsonify(coordID=coordID,
-        coordName=coordName,
-        coordEmail=coordEmail,
-        coordPhone=coordPhone,
-        shopName=shopName,
-        displayDate=displayDate,
-        eMailMsg=eMailMsg
-    )
+    print(eMailMsg)
+    return jsonify(eMailMsg=eMailMsg)
 
 @app.route("/eMailCoordinatorAndMonitors", methods=["GET","POST"])
 def eMailCoordinatorAndMonitors():
     # GET WEEKOF DATE
+    weekOf = request.args.get('weekOf')
+    shopNumber = request.args.get('shopNumber')
+
+    print('weekOf - ',weekOf,type(weekOf))
+
+    weekOfDAT = datetime.strptime(weekOf,'%Y-%m-%d')
+    beginDateDAT = weekOfDAT
+    beginDateSTR = beginDateDAT.strftime('%m-%d-%Y')
+    endDateDAT = beginDateDAT + timedelta(days=6)
+    endDateSTR = endDateDAT.strftime('%m-%d-%Y')
+
     # RETURN COORDINBATOR AND MONITORS NAMES AND EMAIL ADDRESSES; COORDINATORS PHONE
-    print('/eMailCoordinatorAndMonitors')
-    return 'SUCCESS'
+    # BUILD SELECT STATEMENT TO RETRIEVE SM MEMBERS SCHEDULE FOR CURRENT YEAR FORWARD
+    sqlMonitors = "SELECT tblMember_Data.Member_ID as memberID, "
+    sqlMonitors += "First_Name + ' ' + Last_Name as displayName, eMail "
+    sqlMonitors += "FROM tblMember_Data "
+    sqlMonitors += "LEFT JOIN tblMonitor_Schedule ON tblMonitor_Schedule.Member_ID = tblMember_Data.Member_ID "
+    sqlMonitors += "WHERE Date_Scheduled between '" + beginDateSTR + "' and '" + endDateSTR + "' "
+    sqlMonitors += "ORDER BY Last_Name, First_Name"
+    print(sqlMonitors)
+    monitors = db.engine.execute(sqlMonitors)
+    monitorDict = []
+    monitorItem = []
+    for m in monitors:
+        monitorItem = {
+            'name':m.displayName,
+            'eMail': m.eMail} 
+    print(monitorItem,type(monitorItem))
+
+    monitorDict.append(monitorItem)
+    print (monitorDict,type(monitorDict))
+
+    # GET EMAIL MESSAGE FOR 'COORDINATOR AND MONITORS' OPTION
+    # LOOK UP EMAIL MESSAGE FOR COORDINATOR
+    sqlEmailMsgs = "SELECT [Email Name] as eMailMsgName, [Email Message] as eMailMessage FROM tblEmail_Messages "
+    sqlEmailMsgs += "WHERE [Email Name] = 'Email To Members'"
+    eMailMessages = db.engine.execute(sqlEmailMsgs)
+    for e in eMailMessages:
+        print(e)
+        eMailMsg=e.eMailMessage
+
+    return jsonify(monitorDict=monitorDict,eMailMsg=eMailMsg)
 
 @app.route("/eMailMember", methods=["GET","POST"])
 def eMailMember():
@@ -633,6 +635,7 @@ def eMailMember():
     return 'SUCCESS'
 
 
+# THE FOLLOWING ROUTINE IS CALLED WHEN THE USER SELECTS A WEEK
 @app.route("/getCoordinatorData", methods=["GET","POST"])
 def getCoordinatorData():
     # GET WEEKOF DATE

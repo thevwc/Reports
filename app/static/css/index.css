@@ -79,6 +79,23 @@
     grid-area:coordHdgArea;
     text-align: center;
     border:1px solid navy;
+    background-color: navy;
+    color:white;
+}
+#coordHdgBeforeDate, #coordHdgBeforeName, #coordHdgBeforePhone, #coordHdgBeforeEmail {
+    color:white;
+}
+#coordHdgDate {
+    color:yellow;
+}
+#coordHdgName {
+    color:yellow;
+}
+#coordHdgPhone {
+    color:yellow;
+}
+#coordHdgEmailLink {
+    background-color: white;
     color:blue;
 }
 
@@ -118,14 +135,14 @@
 #emailSubject {
     grid-area:emailBody;
     color:navy;
-    margin-left:30px;
+    margin-left:20px;
     
 }
 #emailMessage {
     grid-area:emailBody;
     color:navy;
     margin-top:10px;
-    margin-left:30px;
+    margin-left:20px;
     
 }
 /* RIGHT COLUMN */
@@ -134,9 +151,9 @@
     border: 1px solid black;
     padding-top:5px;
     padding-bottom: 5px;
-    padding-left:30px;
-    margin-right:100px;
-    width:260px;
+    padding-left:20px;
+    margin-right:10px;
+    width:250px;
     height:200px;
     color:navy;
     

@@ -77,8 +77,16 @@
 
         <!-- COORDINATOR INFO SECTION -->
         <div id= 'coordinatorInfo'>
-            <div>
-                <span id="coordinatorHeading">Select a week to see the coordinator information ...</span>  
+            <div id='coordinatorHeading'>
+                <span id='coordHdgBeforeDate'></span>
+                <span id='coordHdgDate'></span>
+                <span id='coordHdgBeforeName'></span>
+                <span id='coordHdgName'></span>
+                <span id='coordHdgBeforePhone'></span>
+                <span id='coordHdgPhone'></span>
+                <span id='coordHdgBeforeEmail'></span>
+                <a id='coordHdgEmailLink' href='#'></a>
+                <!-- <a href=mailto:hartl1r@gmail.com?subject="test">TEST</a> -->
             </div>
         </div>
 
@@ -92,23 +100,24 @@
                 <button id='coordinatorAndMonitorsID' type="button" class='btn btn-primary' style=margin-top:5px>Coordinator And Monitors</button>
                 <button id='memberOnlyID' type="button" class='btn btn-primary' style=margin-top:5px>Member</button> 
             </div>
+
             <!-- MIDDLE COLUMN -->
             <div id="emailBody" class="row">
                 <div id="emailSubject" class="row">
-                    <div class="col-sm-2">
+                    <div class="col-sm-2"  style=text-align:right>
                         <span>Subject:</span>
                     </div>
                     <div class="col-sm-9">
-                        <input id="eMailSubjectID" type="textarea" style=width:600px>
+                        <input id="eMailSubjectID" type="textarea" style=color:blue;width:700px>
                     </div>
                 </div>
                 
                 <div id="emailMessage" class="row">
-                    <div class="col-sm-2">
+                    <div class="col-sm-2" style=text-align:right>
                         <span>Message:</span>
                     </div>
                     <div class="col-sm-9">
-                        <textarea id='eMailMsgID' rows='30' cols='10' style=width:600px;height:300px></textarea>
+                        <textarea id='eMailMsgID' rows='20' cols='10' style=color:blue;width:700px;height:400px></textarea>
                     </div> 
                 </div>
             </div> 

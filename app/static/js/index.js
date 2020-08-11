@@ -10,12 +10,15 @@
 
     // UPDATED ON LOAD AND SHOP CHANGE
     var curShopNumber = ''
+    var curShopName = ''
 
     //UPDATED FROM WEEK CHANGE ROUTINE
-    var curWeekDate = ''  
+    var curWeekDate = '' 
+    var curWeekDisplayDate = '' 
     var curCoordinatorName = '' 
     var curCoordinatorEmail = ''
     var curCoordinatorPhone = ''
+    var curManagersEmail = ''
 
     // UPDATED FROM SEND TO SELECTION OF 'COORDINATOR AND MONITORS'
     var curPrimaryRecipientEmail = ''
@@ -56,36 +59,40 @@
     filterWeeksShown()
 
     // SET EMAILSECTION TO OPAQUE
-    //document.getElementById('emailSection').style.opacity=.2;
+    document.getElementById('emailSection').style.opacity=.2;
     //alert('opacity set to .2')
     //document.getElementById("emailSection").style.display= 'None'
     
-    $('#coordinatorOnlyID').click(function(){ 
+
+    // THE FOLLOWING ROUTINE RETRIEVES THE MESSAGE THAT IS TO BE INSERTED INTO A 'COORDINATORS ONLY' EMAIL
+    $('#coordinatorOnlyID').click(function(){
+        if (curWeekDate == ''){
+            alert("Please select a date.")
+            return 
+        } 
         $.ajax({
             url : "/eMailCoordinator",
             type: "GET",
-            data : {
-                weekOf: curWeekDate,
-                shopNumber: curShopNumber},
+            //data : {
+            //    weekOf: curWeekDate,
+            //    shopNumber: curShopNumber},
             success: function(data, textStatus, jqXHR)
             {
-                // alert(data.coordName + '\n' + data.coordID + '\n' + data.coordEmail + '\n' + data.coordPhone
-                // + '\n' + data.displayDate + '\n' + data.shopName + '\n' + data.eMailMsg)
-
+                
                 // WRITE RECIPIENT
-                curPrimaryRecipientEmail = data.coordEmail
-                curRecipientName = data.coordName
+                curPrimaryRecipientEmail = curCoordinatorEmail
+                curRecipientName = curCoordinatorName
 
                 // BUILD SUBJECT LINE
-                subject = "Monitor Duty for Week Of " + data.displayDate + " at " + data.shopName
+                subject = "Monitor Duty for Week Of " + curWeekDisplayDate + " at " + curShopName
                 document.getElementById('eMailSubjectID').value=subject 
 
                 // WRITE MESSAGE
                 message = "DO NOT SEND EMAILS REGARDING MONITOR DUTY TO THE WORKSHOP.\n\n"
                 message += "CALL OR EMAIL ACCORDING TO THE INSTRUCTIONS BELOW.\n"
-                message += "THIS SCHEDULE IS FOR THE " + data.shopName.toUpperCase() + " LOCATION\n\n"
-                message += "Please remember to contact your coordinator, " + data.coordName + ", if you make any changes or have questions.\n"
-                message += "My phone number is " + data.coordPhone + " and my Email is " + data.coordEmail + "."
+                message += "THIS SCHEDULE IS FOR THE " + curShopName.toUpperCase() + " LOCATION\n\n"
+                message += "Please remember to contact your coordinator, " + curCoordinatorName + ", if you make any changes or have questions.\n"
+                message += "My phone number is " + curCoordinatorPhone + " and my Email is " + curCoordinatorEmail + "."
                 message += '\n' + data.eMailMsg
                 alert (message)
                 document.getElementById('eMailMsgID').value=message 
@@ -98,34 +105,30 @@
         });
     })
     
-    $('#coordinatorAndMonitorsID').click(function(){ 
+    $('#coordinatorAndMonitorsID').click(function(){
+        alert('curWeekDate - ' + curWeekDate)
+        if (curWeekDate == ''){
+            alert("Please select a date.")
+            return 
+        } 
         $.ajax({
             url : "/eMailCoordinatorAndMonitors",
-            type: "POST",
+            type: "GET",
             data : {
                 weekOf: curWeekDate,
                 shopNumber: curShopNumber},
             success: function(data, textStatus, jqXHR)
             {
-                
-                //data - response from server
-                // receive coordName, coordEmail, coordPhone
-                // WRITE RECIPIENT
-                curPrimaryRecipientEmail = data.coordEmail
-                curRecipientName = data.coordName
-                curMonitorsEmailAddresses = data.monitorsEmailAddresses
-                curMonitorsNames = data.monitorsNames
-
                 // BUILD SUBJECT LINE
-                subject = "Monitor Duty for Week Of " + data.displayDate + " at " + data.shopName
+                subject = "Monitor Duty for Week Of " + curWeekDisplayDate + " at " + curShopName
                 document.getElementById('eMailSubjectID').value=subject 
 
                 // WRITE MESSAGE
                 message = "DO NOT SEND EMAILS REGARDING MONITOR DUTY TO THE WORKSHOP.\n\n"
                 message += "CALL OR EMAIL ACCORDING TO THE INSTRUCTIONS BELOW.\n"
-                message += "THIS SCHEDULE IS FOR THE " + data.shopName.toUpperCase() + " LOCATION\n\n"
-                message += "Please remember to contact your coordinator, " + data.coordName + ", if you make any changes or have questions.\n"
-                message += "My phone number is " + data.coordPhone + " and my Email is " + data.coordEmail + "."
+                message += "THIS SCHEDULE IS FOR THE " + curShopName.toUpperCase() + " LOCATION\n\n"
+                message += "Please remember to contact your coordinator, " + curCoordinatorName + ", if you make any changes or have questions.\n"
+                message += "My phone number is " + curCoordinatorPhone + " and my Email is " + curCoordinatorEmail + "."
                 message += '\n' + data.eMailMsg
                 alert (message)
                 document.getElementById('eMailMsgID').value=message 
@@ -133,12 +136,16 @@
             },
             error: function (jqXHR, textStatus, errorThrown)
             {
-                alert('ERROR from eMailCoordinatorAndMonitors')
+                alert('ERROR from eMailCoordinatorAndMonitors\n'+textStatus+'\n' + errorThrown)
             }
         });
     })
 
     $('#memberOnlyID').click(function(){ 
+        if (curWeekDate == ''){
+            alert("Please select a date.")
+            return 
+        } 
         $.ajax({
             url : "/eMailMember",
             type: "POST",
@@ -256,18 +263,21 @@ function setShopFilter(shopLocation) {
             document.getElementById("shopChoice").selectedIndex = 0; //Option Rolling Acres
             shopFilter = 'RA'
             curShopNumber = '1'
+            curShopName = shopNames[1]
             break;
         case 'BW':
             localStorage.setItem('shopFilter','BW')
             document.getElementById("shopChoice").selectedIndex = 1; //Option Brownwood
             shopFilter = 'BW'
             curShopNumber = '2'
+            curShopName = shopNames[2]
             break;
         default:
             localStorage.setItem('shopFilter','RA')
             document.getElementById("shopChoice").selectedIndex = 0; //Option Rolling Acres
             shopFilter = 'RA'
             curShopNumber = '1'
+            curShopName = shopNames[1]
     }   
 }
 
@@ -310,6 +320,10 @@ function filterWeeksShown() {
 
 function weekChanged () {
     curWeekDate = this.value
+    document.getElementById('emailSection').style.opacity=1;
+    //selectedValue = $("#weekSelected option:selected").val();
+    //alert('selectedValue - '+selectedValue)
+    alert('curWeekDate - ' + curWeekDate)
     // RETRIEVE COORDINATOR INFORMATION FROM SERVER
     $.ajax({
         url : "/getCoordinatorData",
@@ -323,17 +337,34 @@ function weekChanged () {
             curCoordinatorName = data.coordName
             curCoordinatorEmail = data.coordEmail
             curCoordinatorPhone = data.coordPhone
-           
+            curManagersEmail = data.curManagersEmail
+            curWeekDisplayDate = data.displayDate
+
             // BUILD MESSAGE FOR coordinatorInfoID
             if (curCoordinatorID != '') {
-                msg = "The coordinator for the week of " + data.displayDate + ' is ' + curCoordinatorName 
-                + ' and may be contacted at ' + curCoordinatorPhone + ' or by email at ' + curCoordinatorEmail
+                //document.getElementById('coordinatorHeading').innerHTML = ''
+                document.getElementById('coordHdgBeforeDate').innerHTML = "The coordinator for the week of " 
+                document.getElementById('coordHdgDate').innerHTML = curWeekDisplayDate 
+                document.getElementById('coordHdgBeforeName').innerHTML = ' is ' 
+                document.getElementById('coordHdgName').innerHTML = curCoordinatorName 
+                document.getElementById('coordHdgBeforePhone').innerHTML = ' and may be contacted at '
+                document.getElementById('coordHdgPhone').innerHTML = curCoordinatorPhone 
+                document.getElementById('coordHdgBeforeEmail').innerHTML = ' or by email at '
+                document.getElementById('coordHdgEmailLink').href = 'mailto:' + curCoordinatorEmail
+                document.getElementById('coordHdgEmailLink').innerHTML = curCoordinatorEmail
             }
             else {
-                msg = "A coordinator has not been assigned."
+                document.getElementById('coordHdgBeforeDate').innerHTML = "A coordinator has not been assigned for this week."
+                document.getElementById('coordHdgDate').innerHTML = ''
+                document.getElementById('coordHdgBeforeName').innerHTML = '' 
+                document.getElementById('coordHdgName').innerHTML = ''
+                document.getElementById('coordHdgBeforePhone').innerHTML = ''
+                document.getElementById('coordHdgPhone').innerHTML = ''
+                document.getElementById('coordHdgBeforeEmail').innerHTML = ''
+                document.getElementById('coordHdgEmailLink').href = '#'
+                document.getElementById('coordHdgEmailLink').innerHTML = ''
             }
-            document.getElementById('coordinatorHeading').innerHTML = msg
-
+    
             //alert('success from getCoordinatorData')   
         },
         error: function (jqXHR, textStatus, errorThrown)
