@@ -16,13 +16,17 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError, DBAPIError
 import datetime as dt
 from datetime import date, datetime, timedelta
 
+import os.path
+from os import path
+
+
 from flask_mail import Mail, Message
 mail=Mail(app)
 
 
-@app.route('/')
-@app.route('/index/')
-@app.route('/index', methods=['GET'])
+@app.route('/coordinatorReports/')
+@app.route('/coordinatorReports/index/')
+@app.route('/coordinatorReports/index', methods=['GET'])
 def index():
     # testMail = False
     # if testMail:
@@ -32,6 +36,8 @@ def index():
     #     return "Sent"
 
     # GET REQUEST
+
+
     # BUILD ARRAY OF NAMES FOR DROPDOWN LIST OF COORDINATORS
     coordNames=[]
     sqlNames = "SELECT Last_Name + ', ' + First_Name as coordName, Member_ID as coordID FROM tblMember_Data "
@@ -53,22 +59,27 @@ def index():
     #eMails = db.engine.execute(sqlEmailAddresses)
     # for e in eMails:
     #     print(e.memberName,e.eMail)
+    # MEMBER NAMES AND ID
+    sqlMembers = "SELECT top 10 Last_Name + ', ' + First_Name + ' (' + Member_ID + ')' as name, eMail FROM tblMember_Data "
+    sqlMembers += "ORDER BY Last_Name, First_Name "
+    #print ('sql - ',sqlMembers)
+    nameList = db.engine.execute(sqlMembers)
+    # for n in nameList:
+    #     print (n.name,n.eMail)
 
-    # CONVERT TO DICTIONARY; ADD COORDINATOR EMAIL ??
-    return render_template("index.html",coordNames=coordNames,weeks=weeks)  #,eMails=eMails)
+    return render_template("index.html",coordNames=coordNames,weeks=weeks,nameList=nameList)  #,eMails=eMails)
    
 
 
 
 # PRINT WEEKLY MONITOR DUTY SCHEDULE FOR COORDINATOR
-@app.route("/printWeeklyMonitorSchedule", methods = ['GET'])
+@app.route("/coordinatorReports/printWeeklyMonitorSchedule", methods = ['GET'])
 def printWeeklyMonitorSchedule():
+    print('printWeeklyMonitorSchedule routine')
     dateScheduled=request.args.get('date')
     shopNumber=request.args.get('shop')
-    destination = request.args.get('destination')
-
-    ########  try to redirect to another page that contains the following code
-    
+    destination = request.args.get('destination')  # destination is 'PRINT or 'PDF'
+ 
     # LOOK UP SHOP NAME
     shopRecord = db.session.query(ShopName).filter(ShopName.Shop_Number==shopNumber).first()
     shopName = shopRecord.Shop_Name
@@ -123,12 +134,6 @@ def printWeeklyMonitorSchedule():
                 coordinatorsName = memberRecord.First_Name + ' ' + memberRecord.Last_Name
         coordinatorsEmail = memberRecord.eMail
     
-
-    # DETERMINE NUMBER OF ROWS NEEDED FOR EACH GROUPING - 
-    # SMAM - Shop Monitor, AM shift
-    # SMPM - Shop Monitor, PM shift
-    # TCAM - Tool Crib, AM shift
-    # TCPM - Tool Crib, PM shift
     
     sqlSMAM = "SELECT Count(tblMonitor_Schedule.Member_ID) AS SMAMrows "
     sqlSMAM += "FROM tblMonitor_Schedule "
@@ -300,20 +305,9 @@ def printWeeklyMonitorSchedule():
                     TCPMnames[r][c] = ''
                 c += 1
     
-    destination = 'PRINT'
-    print('destination is - ',destination)
     
-    # if (destination == 'PDF'):
-    #     html =  render_template("rptWeeklyMonitorSchedule.html",\
-    #     SMAMnames=SMAMnames,SMPMnames=SMPMnames,TCAMnames=TCAMnames,TCPMnames=TCPMnames,\
-    #     SMAMtraining=SMAMtraining,SMPMtraining=SMPMtraining,TCAMtraining=TCAMtraining,TCPMtraining=TCPMtraining,\
-    #     SMAMrows=SMAMrows,SMPMrows=SMPMrows,TCAMrows=TCAMrows,TCPMrows=TCPMrows,\
-    #     shopName=shopName,weekOf=beginDateSTR,coordinatorsName=coordinatorsName, coordinatorsEmail=coordinatorsEmail,\
-    #     todays_date=todays_dateSTR,\
-    #     monDate=monDate,tueDate=tueDate,wedDate=wedDate,thuDate=thuDate,friDate=friDate,satDate=satDate)
-    #     return render_pdf(HTML(string=html))
-    # else:
-    return render_template("rptWeeklyMonitorSchedule.html",\
+    if (destination == 'PDF'):
+        html =  render_template("rptWeeklyMonitorSchedule.html",\
         SMAMnames=SMAMnames,SMPMnames=SMPMnames,TCAMnames=TCAMnames,TCPMnames=TCPMnames,\
         SMAMtraining=SMAMtraining,SMPMtraining=SMPMtraining,TCAMtraining=TCAMtraining,TCPMtraining=TCPMtraining,\
         SMAMrows=SMAMrows,SMPMrows=SMPMrows,TCAMrows=TCAMrows,TCPMrows=TCPMrows,\
@@ -321,11 +315,26 @@ def printWeeklyMonitorSchedule():
         todays_date=todays_dateSTR,\
         monDate=monDate,tueDate=tueDate,wedDate=wedDate,thuDate=thuDate,friDate=friDate,satDate=satDate)
         
+        # DEFINE PATH TO USE TO STORE PDF
+        currentWorkingDirectory = os.getcwd()
+        pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
+        filePath = pdfDirectoryPath + "/printWeeklyMonitorSchedule.pdf"
+        # remove the next line and the pdf will only be generated to the screen
+        #pdfkit.from_string(html,filePath)
 
-
+        return render_pdf(HTML(string=html))
+    else:
+        return render_template("rptWeeklyMonitorSchedule.html",\
+            SMAMnames=SMAMnames,SMPMnames=SMPMnames,TCAMnames=TCAMnames,TCPMnames=TCPMnames,\
+            SMAMtraining=SMAMtraining,SMPMtraining=SMPMtraining,TCAMtraining=TCAMtraining,TCPMtraining=TCPMtraining,\
+            SMAMrows=SMAMrows,SMPMrows=SMPMrows,TCAMrows=TCAMrows,TCPMrows=TCPMrows,\
+            shopName=shopName,weekOf=beginDateSTR,coordinatorsName=coordinatorsName, coordinatorsEmail=coordinatorsEmail,\
+            todays_date=todays_dateSTR,\
+            monDate=monDate,tueDate=tueDate,wedDate=wedDate,thuDate=thuDate,friDate=friDate,satDate=satDate)
+            
 
 # PRINT WEEKLY LIST OF CONTACTS FOR COORDINATOR
-@app.route("/printWeeklyMonitorContacts", methods=['GET'])
+@app.route("/coordinatorReports/printWeeklyMonitorContacts", methods=['GET'])
 def printWeeklyMonitorContacts():
     dateScheduled=request.args.get('date')
     shopNumber=request.args.get('shop')
@@ -435,6 +444,8 @@ def printWeeklyMonitorContacts():
              locationName=shopName,\
              SMmonitors=SMmonitors,TCmonitors=TCmonitors
              )
+        return render_pdf(HTML(string=html))
+        # WEASYPRINT .....
         #html.write_pdf('/contacts.pdf')
         # HTML(html).write_pdf('./contacts.pdf')
         #return redirect(url_for('index'))
@@ -447,7 +458,7 @@ def printWeeklyMonitorContacts():
     
     
 # PRINT WEEKLY NOTES FOR COORDINATOR (GET approach)
-@app.route("/printWeeklyMonitorNotes", methods=["GET"])
+@app.route("/coordinatorReports/printWeeklyMonitorNotes", methods=["GET"])
 def printWeeklyMonitorNotes():
     print('PRINT printWeeklyMonitorNotes routine')
     dateScheduled=request.args.get('date')
@@ -488,32 +499,22 @@ def printWeeklyMonitorNotes():
     
     notes = db.engine.execute(sqlNotes)
     
-    print('destination - ',destination)
-    if (destination == 'PRINT') :   
+    if (destination == 'PDF') :  
+        html =  render_template("rptWeeklyMonitorSchedule.html",\
+            beginDate=beginDateSTR,endDate=endDateSTR,\
+            locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
+            todaysDate=todays_dateSTR
+            )
+        return render_pdf(HTML(string=html))
+    else:
         return render_template("rptWeeklyNotes.html",\
             beginDate=beginDateSTR,endDate=endDateSTR,\
             locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
             todaysDate=todays_dateSTR
             )
-    else:
-        print('begin pdf')
-        # PDFKIT solution 
-        # rendered = render_template("rptWeeklyNotes.html",\
-        #     beginDate=beginDateSTR,endDate=endDateSTR,\
-        #     locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
-        #     todaysDate=todays_dateSTR
-        #     )
-        # pdf = pdfkit.from_string(rendered,False)
-        # response = make_response(pdf)
-        # response.headers['Content-Type'] = 'application/pdf'
-        # response.headers["Content-Disposition"] = "inline; filename=notes.pdf"
-        #return response
-        print('end of PDF routine')
         
-        return redirect(url_for('index'))
+        return redirect(url_for('/coordinatorReports/index'))
         
-
-
 
         # WeasyPrint solution
         # html = render_template("rptWeeklyNotes.html",\
@@ -537,31 +538,21 @@ def printWeeklyMonitorNotes():
         # pdfkit solution
         
 
-@app.route("/printWeeklyMonitorSubs", methods=["GET"])
+@app.route("/coordinatorReports/printWeeklyMonitorSubs", methods=["GET"])
 def printWeeklyMonitorSubs():
     flash('Not implemented.')
     return 'Not implemented.'
 
-@app.route("/pdfWeeklyMonitorNotes")
+@app.route("/coordinatorReports/pdfWeeklyMonitorNotes")   # NOT IMPLEMENTED
 def pdfWeeklyMonitorNotes():
     dateScheduled=request.args.get('date')
     shopNumber=request.args.get('shop')
     weekOf = request.form['date']
     shop =  request.form['shop']
-    print('weekOf-', weekOf)
-    print('shop-',shop)
-    print('pdfWeeklyMonitorNotes routine')
-    rendered = render_template('printWeeklyNotes.html',date=weekOf,shop=shop)
-    pdf = pdfkit.from_string(rendered,False)
+    return
 
-    # python-pdf 0.37
-    # pdf = pydf.generate_pdf(rendered)
-    # with open('test_doc.pdf','wb') as f:
-    #     f.write(pdf)
 
-    # pdfkit
-    
-@app.route("/eMailCoordinator", methods=["GET","POST"])
+@app.route("/coordinatorReports/eMailCoordinator", methods=["GET","POST"])
 def eMailCoordinator():
 
     # THIS ROUTINE ONLY RETURNS THE EMAIL MESSAGE TO BE USED FOR COORDINATORS ONLY EMAILS
@@ -578,16 +569,16 @@ def eMailCoordinator():
     eMailMessages = db.engine.execute(sqlEmailMsgs)
     for e in eMailMessages:
         eMailMsg=e.eMailMessage
-    print(eMailMsg)
+    #print(eMailMsg)
     return jsonify(eMailMsg=eMailMsg)
 
-@app.route("/eMailCoordinatorAndMonitors", methods=["GET","POST"])
+@app.route("/coordinatorReports/eMailCoordinatorAndMonitors", methods=["GET","POST"])
 def eMailCoordinatorAndMonitors():
     # GET WEEKOF DATE
     weekOf = request.args.get('weekOf')
     shopNumber = request.args.get('shopNumber')
 
-    print('weekOf - ',weekOf,type(weekOf))
+    #print('weekOf - ',weekOf,type(weekOf))
 
     weekOfDAT = datetime.strptime(weekOf,'%Y-%m-%d')
     beginDateDAT = weekOfDAT
@@ -595,6 +586,7 @@ def eMailCoordinatorAndMonitors():
     endDateDAT = beginDateDAT + timedelta(days=6)
     endDateSTR = endDateDAT.strftime('%m-%d-%Y')
 
+    #print('begin - ',beginDateSTR,' end - ',endDateSTR)
     # RETURN COORDINBATOR AND MONITORS NAMES AND EMAIL ADDRESSES; COORDINATORS PHONE
     # BUILD SELECT STATEMENT TO RETRIEVE SM MEMBERS SCHEDULE FOR CURRENT YEAR FORWARD
     sqlMonitors = "SELECT tblMember_Data.Member_ID as memberID, "
@@ -603,40 +595,50 @@ def eMailCoordinatorAndMonitors():
     sqlMonitors += "LEFT JOIN tblMonitor_Schedule ON tblMonitor_Schedule.Member_ID = tblMember_Data.Member_ID "
     sqlMonitors += "WHERE Date_Scheduled between '" + beginDateSTR + "' and '" + endDateSTR + "' "
     sqlMonitors += "ORDER BY Last_Name, First_Name"
-    print(sqlMonitors)
+    #print(sqlMonitors)
     monitors = db.engine.execute(sqlMonitors)
     monitorDict = []
     monitorItem = []
+    savedName = ''
+    
     for m in monitors:
+        #print(m.displayName,m.eMail)
         monitorItem = {
             'name':m.displayName,
             'eMail': m.eMail} 
-    print(monitorItem,type(monitorItem))
+        
+        if savedName != m.displayName :
+            monitorDict.append(monitorItem)
+        savedName = m.displayName
 
-    monitorDict.append(monitorItem)
-    print (monitorDict,type(monitorDict))
-
-    # GET EMAIL MESSAGE FOR 'COORDINATOR AND MONITORS' OPTION
     # LOOK UP EMAIL MESSAGE FOR COORDINATOR
     sqlEmailMsgs = "SELECT [Email Name] as eMailMsgName, [Email Message] as eMailMessage FROM tblEmail_Messages "
-    sqlEmailMsgs += "WHERE [Email Name] = 'Email To Members'"
+    sqlEmailMsgs += "WHERE [Email Name] = 'Email To Coordinator'"
     eMailMessages = db.engine.execute(sqlEmailMsgs)
     for e in eMailMessages:
-        print(e)
         eMailMsg=e.eMailMessage
 
     return jsonify(monitorDict=monitorDict,eMailMsg=eMailMsg)
 
-@app.route("/eMailMember", methods=["GET","POST"])
-def eMailMember():
-    # GET WEEKOF DATE
-    # RETURN MEMBER NAME & EMAIL; COORDINATORS NAME, EMAIL, PHONE
-    print('/eMailMember')
-    return 'SUCCESS'
+@app.route("/coordinatorReports/getMembersEmailAddress", methods=["GET","POST"])
+def getMembersEmailAddress():
+    memberID=request.args.get('memberID')
+    weekOf = request.args.get('weekOf')
+    shopNumber = request.args.get('shopNumber')
+    weekOfDat = datetime.strptime(weekOf,'%Y-%m-%d')
+    displayDate = weekOfDat.strftime('%B %d, %Y')  #'%m/%d/%Y')
+
+    # GET MEMBER'S EMAIL ADDRESS;
+    eMail=db.session.query(Member.eMail).filter(Member.Member_ID == memberID).scalar()
+
+    # LOOK UP EMAIL MESSAGE FOR MEMBER
+    eMailMsg=db.session.query(EmailMessages.eMailMessage).filter(EmailMessages.eMailMsgName == 'Email To Members').scalar()
+    
+    return jsonify(eMail=eMail,eMailMsg=eMailMsg,displayDate=displayDate)
 
 
 # THE FOLLOWING ROUTINE IS CALLED WHEN THE USER SELECTS A WEEK
-@app.route("/getCoordinatorData", methods=["GET","POST"])
+@app.route("/coordinatorReports/getCoordinatorData", methods=["GET","POST"])
 def getCoordinatorData():
     # GET WEEKOF DATE
     # RETURN COORDINATOR NAME, EMAIL, PHONE
@@ -677,3 +679,70 @@ def getCoordinatorData():
         coordPhone=coordPhone,
         displayDate=displayDate
     )
+
+@app.route("/coordinatorReports/sendOrSaveEmail", methods=["GET","POST"])
+def sendOrSaveEmail():
+    # DETERMINE PATH TO PDF FILES
+    currentWorkingDirectory = os.getcwd()
+    pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
+    filePath = pdfDirectoryPath + "/printWeeklyMonitorSchedule.pdf"
+   
+    # GET ACTION
+    action = request.args.get('action')
+    recipient = request.args.get('recipient')
+ 
+    # FOR TESTING PURPOSES ..............................
+    #recipient = ("Richard Hartley", "hartl1r@gmail.com")
+    recipientList = []
+    recipientList.append(recipient)
+    # ...................................................
+
+    subject = request.args.get('subject')
+    message = request.args.get('message')
+    msg = Message('Hello', sender = 'hartl1r@gmail.com', recipients = recipientList)
+    msg.subject = subject
+    msg.body = message
+
+
+    testingAttachments = False
+
+    # ADD ATTACHMENTS
+    if testingAttachments:
+        print ('.........................  ADD ATTACHMENTS  ............................')
+        # DETERMINE PATH TO PDF FILES
+        currentWorkingDirectory = os.getcwd()
+        pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
+        
+        # CHECK FOR A SCHEDULE REPORT
+        filePath = pdfDirectoryPath + "/printWeeklyMonitorSchedule.pdf"
+        if (path.exists(filePath)):
+            print(filePath + ' exists.')
+            msg.attach(filename=filePath,disposition="attachment",content_type="application/pdf")
+
+        # CHECK FOR A CONTACTS REPORT
+        filePath = pdfDirectoryPath + "/printWeeklyMonitorContacts.pdf"
+        if (path.exists(filePath)):
+            print(filePath + ' exists.')
+            msg.attach(filename=filePath,disposition="attachment",content_type="application/pdf")
+
+        # CHECK FOR A NOTES REPORT
+        filePath = pdfDirectoryPath + "/printWeeklyMonitorNotes.pdf"
+        if (path.exists(filePath)):
+            print(filePath + ' exists.')
+            msg.attach(filename=filePath,disposition="attachment",content_type="application/pdf")
+
+        # CHECK FOR A SUBS REPORT
+        filePath = pdfDirectoryPath + "/printWeeklyMonitorSubs.pdf"
+        if (path.exists(filePath)):
+            print(filePath + ' exists.')
+            msg.attach(filename=filePath,disposition="attachment",content_type="application/pdf")
+        
+    # EITHER 'SEND' THE EMAIL OR 'SAVE AS DRAFT'
+    if (action == 'SEND'):
+        mail.send(msg)
+    else:
+        #  save draft is not working 
+        #mail.Display(True)
+        #mail.Save(msg)
+        mail.save(msg)
+    return 'SUCCESS'

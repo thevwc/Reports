@@ -1,5 +1,5 @@
 //$( document ).ready (function() {
-//    $( "p" ).text( "The DOM is now loaded and can be manipulated." );
+//  PAGE LOAD ROUTINES
     // Declare global variables)
 
     // clientLocation, staffID will be set in localStorage within login routine
@@ -21,168 +21,193 @@
     var curManagersEmail = ''
 
     // UPDATED FROM SEND TO SELECTION OF 'COORDINATOR AND MONITORS'
-    var curPrimaryRecipientEmail = ''
-    //var curMultipleRecipients = []
     var curMonitorsEmailAddresses = []
     var curMonitorsNames = []
 
+
+    // SET INITIAL PAGE VALUES
+    // SET BACKGROUND TO OPAQUE FOR:  REPORT CHOICES, PRINT/EMAIL CHOICE, SEND TO options, and EMAIL SEND/SAVE/CLEAR options
+    //clearEmailData()
+
     // DEFINE EVENT LISTENERS
     document.getElementById("weekSelected").addEventListener("change", weekChanged);
-    //document.getElementById("weekSelected").addEventListener("click", weekChanged);
-
-    document.getElementById("shopChoice").addEventListener("click", shopClicked);
+    document.getElementById("shopChoice").addEventListener("change", shopChanged);
     document.getElementById("coordChoice").addEventListener("change", coordinatorChanged);
+    document.getElementById("selectpicker").addEventListener("change",memberSelectedRtn)
 
     // Note - both of these buttons link to the 'printReports' function
     document.getElementById("printReportBtn").addEventListener("click",function(){printReports('PRINT');},false);
     document.getElementById("eMailReportBtn").addEventListener("click",function(){printReports('PDF');},false);
 
-    //document.getElementById("coordinatorOnly").addEventListener("click",coordinatorOnly);
-    //document.getElementById("coordinatorAndMonitors").addEventListener("click",coordinatorAndMonitors);
-    //document.getElementById("memberOnly").addEventListener("click",memberOnly);
+    // TOGGLE ACTIVE CLASS FOR 'PRINT' AND 'Email PDFs' BUTTONS
+    $('.prtOrEmailBtn').click(function() {
+        $('button.prtOrEmailBtn.active').removeClass('active');
+        $(this).addClass('active');
+    })
     
-
+    // GET STAFFID THAT WAS STORED BY THE LOGIN ROUTINE
     if (!localStorage.getItem('staffID')) {
-        localStorage.setItem('staffID','111111')
+        alert("local storage for 'staffID' is missing; 604875 is being used.")
+        localStorage.setItem('staffID','604875')
     }
     staffID = localStorage.getItem('staffID')
     
 
-    // IF clientLocation IS NOT FOUND IN LOCAL STORAGE
-    // THEN PROMPT WITH MODAL FORM FOR LOCATION AND YEAR
-    if (!clientLocation) {
+    // GET clientLocation THAT WAS STORED BY THE LOGIN ROUTINE
+    if (!localStorage.getItem('clientLocation')) {
+        alert("local storage for 'clientLocation' is missing; RA assumed.")
         localStorage.setItem('clientLocation','RA')
     }
     clientLocation = localStorage.getItem('clientLocation')
-    console.log('on page load the variable curCoordinatorID-',curCoordinatorID)
+
+    // SET DROP DOWN MENU INITIAL VALUES
     setShopFilter(clientLocation)
-    filterWeeksShown()
+    filterTheWeeksShown()
+// END PAGE LOAD ROUTINES
 
-    // SET EMAILSECTION TO OPAQUE
-    document.getElementById('emailSection').style.opacity=.2;
-    //alert('opacity set to .2')
-    //document.getElementById("emailSection").style.display= 'None'
-    
 
-    // THE FOLLOWING ROUTINE RETRIEVES THE MESSAGE THAT IS TO BE INSERTED INTO A 'COORDINATORS ONLY' EMAIL
-    $('#coordinatorOnlyID').click(function(){
-        if (curWeekDate == ''){
-            alert("Please select a date.")
-            return 
-        } 
-        $.ajax({
-            url : "/eMailCoordinator",
-            type: "GET",
-            //data : {
-            //    weekOf: curWeekDate,
-            //    shopNumber: curShopNumber},
-            success: function(data, textStatus, jqXHR)
-            {
-                
-                // WRITE RECIPIENT
-                curPrimaryRecipientEmail = curCoordinatorEmail
-                curRecipientName = curCoordinatorName
 
-                // BUILD SUBJECT LINE
-                subject = "Monitor Duty for Week Of " + curWeekDisplayDate + " at " + curShopName
-                document.getElementById('eMailSubjectID').value=subject 
+// BEGIN FUNCTIONS
 
-                // WRITE MESSAGE
-                message = "DO NOT SEND EMAILS REGARDING MONITOR DUTY TO THE WORKSHOP.\n\n"
-                message += "CALL OR EMAIL ACCORDING TO THE INSTRUCTIONS BELOW.\n"
-                message += "THIS SCHEDULE IS FOR THE " + curShopName.toUpperCase() + " LOCATION\n\n"
-                message += "Please remember to contact your coordinator, " + curCoordinatorName + ", if you make any changes or have questions.\n"
-                message += "My phone number is " + curCoordinatorPhone + " and my Email is " + curCoordinatorEmail + "."
-                message += '\n' + data.eMailMsg
-                alert (message)
-                document.getElementById('eMailMsgID').value=message 
-
-            },
-            error: function (jqXHR, textStatus, errorThrown)
-            {
-                alert('ERROR from eMailCoordinator')
-            }
-        });
-    })
-    
-    $('#coordinatorAndMonitorsID').click(function(){
-        alert('curWeekDate - ' + curWeekDate)
-        if (curWeekDate == ''){
-            alert("Please select a date.")
-            return 
-        } 
-        $.ajax({
-            url : "/eMailCoordinatorAndMonitors",
-            type: "GET",
-            data : {
-                weekOf: curWeekDate,
-                shopNumber: curShopNumber},
-            success: function(data, textStatus, jqXHR)
-            {
-                // BUILD SUBJECT LINE
-                subject = "Monitor Duty for Week Of " + curWeekDisplayDate + " at " + curShopName
-                document.getElementById('eMailSubjectID').value=subject 
-
-                // WRITE MESSAGE
-                message = "DO NOT SEND EMAILS REGARDING MONITOR DUTY TO THE WORKSHOP.\n\n"
-                message += "CALL OR EMAIL ACCORDING TO THE INSTRUCTIONS BELOW.\n"
-                message += "THIS SCHEDULE IS FOR THE " + curShopName.toUpperCase() + " LOCATION\n\n"
-                message += "Please remember to contact your coordinator, " + curCoordinatorName + ", if you make any changes or have questions.\n"
-                message += "My phone number is " + curCoordinatorPhone + " and my Email is " + curCoordinatorEmail + "."
-                message += '\n' + data.eMailMsg
-                alert (message)
-                document.getElementById('eMailMsgID').value=message 
-                alert('success from eMailCoordinatorAndMonitors')
-            },
-            error: function (jqXHR, textStatus, errorThrown)
-            {
-                alert('ERROR from eMailCoordinatorAndMonitors\n'+textStatus+'\n' + errorThrown)
-            }
-        });
-    })
-
-    $('#memberOnlyID').click(function(){ 
-        if (curWeekDate == ''){
-            alert("Please select a date.")
-            return 
-        } 
-        $.ajax({
-            url : "/eMailMember",
-            type: "POST",
-            data : {
-                memberID:curMemberID,
-                weekOf: curWeekDate,
-                shopNumber: curShopNumber
-            },
-            success: function(data, textStatus, jqXHR)
-            {
-                alert('success from eMailMember')
-                //data - response from server
-                // receive coordName, coordEmail, coordPhone
-                
-            },
-            error: function (jqXHR, textStatus, errorThrown)
-            {
-                alert('ERROR from eMailCoordinator')
-            }
-        });
-    })
-    
-    
- 
-// ------------------------------------------------------------------------------------------------------
-// FUNCTIONS    
-// ------------------------------------------------------------------------------------------------------
-function printReports(destination) {
-    console.log("printReports")
-    //alert('printReports') 
-    if (destination == 'PDF'){
-        console.log('set opacity = 1')
-        //document.getElementById('emailSection').opacity=1
-        document.getElementById('emailSection').style.opacity=1
+// THE FOLLOWING ROUTINE RETRIEVES THE MESSAGE THAT IS TO BE INSERTED INTO A 'COORDINATORS ONLY' EMAIL
+$('#coordinatorOnlyID').click(function(){
+    // THE FOLLOWING LINE IS TEMPORARY;  THE VARIABLE curWeekDate IS BEING RESET BECAUSE AFTER THE THE WINDOW.PRINT COMMAND THE PAGE IS RELOADED
+    curWeekDate = document.getElementById('weekSelected').value
+    if (curWeekDate == ''){
+        alert("Please select a date.")
+        return 
     }
+    clearEmailData() 
+    $.ajax({
+        url : "/coordinatorReportseMailCoordinator",
+        type: "GET",
+        data : {
+            weekOf: curWeekDate,
+            shopNumber: curShopNumber},
+        success: function(data, textStatus, jqXHR)
+        {
+            // INSERT RECIPIENT
+            document.getElementById('eMailRecipientID').value = curCoordinatorEmail
+            
+            // BUILD SUBJECT LINE
+            subject = "Monitor Duty for Week Of " + curWeekDisplayDate + " at " + curShopName
+            document.getElementById('eMailSubjectID').value=subject 
 
-    //curWeekDate = document.getElementById('weekSelected').value
+            // WRITE MESSAGE
+            message = "DO NOT SEND EMAILS REGARDING MONITOR DUTY TO THE WORKSHOP.\n\n"
+            message += "CALL OR EMAIL ACCORDING TO THE INSTRUCTIONS BELOW.\n"
+            message += "THIS SCHEDULE IS FOR THE " + curShopName.toUpperCase() + " LOCATION\n\n"
+            message += "Please remember to contact your coordinator, " + curCoordinatorName + ", if you make any changes or have questions.\n"
+            message += "My phone number is " + curCoordinatorPhone + " and my Email is " + curCoordinatorEmail + "."
+            message += '\n' + data.eMailMsg
+            document.getElementById('eMailMsgID').value=message 
+
+        },
+        error: function (jqXHR, textStatus, errorThrown)
+        {
+            alert('ERROR from eMailCoordinator')
+        }
+    });
+})
+
+$('#coordinatorAndMonitorsID').click(function(){
+    // THE FOLLOWING LINE IS TEMPORARY;  THE VARIABLE curWeekDate IS BEING RESET BECAUSE AFTER THE THE WINDOW.PRINT COMMAND THE PAGE IS RELOADED
+    curWeekDate = document.getElementById('weekSelected').value
+    if (curWeekDate == ''){
+        alert("Please select a date.")
+        return 
+    } 
+
+    clearEmailData()
+    $.ajax({
+        url : "/coordinatorReportseMailCoordinatorAndMonitors",
+        type: "GET",
+        data : {
+            weekOf: curWeekDate,
+            shopNumber: curShopNumber},
+        success: function(data, textStatus, jqXHR)
+        {
+            // COPY LIST OF MONITORS TO GLOBAL VARIABLE
+            curMonitorsEmailAddresses = data.monitorDict
+
+            // INSERT COORDINATOR'S EMAIL INTO 'TO' LINE
+            document.getElementById('eMailRecipientID').value = curCoordinatorEmail
+            
+
+            // BUILD SUBJECT LINE
+            subject = "Monitor Duty for Week Of " + curWeekDisplayDate + " at " + curShopName
+            document.getElementById('eMailSubjectID').value=subject 
+
+            // BUILD MESSAGE
+            message = "CALL OR EMAIL ACCORDING TO THE INSTRUCTIONS BELOW.\n"
+            message += "Coordinators: Please copy the email addresses below into the 'To... ' field of your email.  "
+            message += "Then delete them from the text below and send the email out.\n"
+
+            // APPEND MONITOR EMAIL ADDRESSES TO END OF MESSAGE (COORDINATORS WILL COPY THEN PASTE INTO A NEW EMAIL)
+            for (i=0; i < curMonitorsEmailAddresses.length; i++) {
+                message += curMonitorsEmailAddresses[i]['eMail'] + ';'
+            }
+
+            // APPEND REST OF MSG TO 'MESSAGE'
+            message += "\n\nDO NOT SEND EMAILS REGARDING MONITOR DUTY TO THE WORKSHOP.\n\n"
+            message += "CALL OR EMAIL ACCORDING TO THE INSTRUCTIONS BELOW"
+            message += "THIS SCHEDULE IS FOR THE " + curShopName.toUpperCase() + " LOCATION\n\n"
+            message += "Please remember to contact your coordinator, " + curCoordinatorName + ", if you make any changes or have questions.\n"
+            message += "My phone number is " + curCoordinatorPhone + " and my Email is " + curCoordinatorEmail + "."
+            message += '\n' + data.eMailMsg + '\n'
+            // COPY 'MESSAGE' TO FORM
+            document.getElementById('eMailMsgID').value=message 
+
+        },
+        error: function (jqXHR, textStatus, errorThrown)
+        {
+            alert('ERROR from eMailCoordinatorAndMonitors\n'+textStatus+'\n' + errorThrown)
+        }
+    });
+})
+    
+// RESPOND TO CLICK OF ONE OF THE EMAIL BUTTONS
+// SET ACTIVE BUTTON; EXECUTE 'SEND', 'SAVE', OR 'CLEAR' FUNCTION
+// DEPENDING ON WHICH BUTTON WAS CLICKED
+$('.eMailBtn').click(function() {
+    
+    // REMOVE 'ACTIVE' FROM BUTTONS
+    $('button.eMailBtn.active').removeClass('active');
+    
+    // ADD ACTIVE TO BUTTON JUST CLICKED
+    $(this).addClass('active');
+
+    // CALL APPROPRIATE FUNCTION
+    if (this.id == 'sendBtn') {
+        console.log('sendBtn')
+        sendOrSaveEmail('SEND')
+    }
+    if (this.id == 'saveBtn') {
+        console.log('saveBtn')
+        sendOrSaveEmail('SAVE')
+    }
+    if (this.id == 'clearBtn') {
+        console.log('clearBtn')
+        clearEmailData()
+    }
+})
+
+
+// CLEAR THE EMAIL FORM; SET OPACITY TO .2
+function clearEmailData() {
+    curMonitorEmailAddresses = []
+    document.getElementById('eMailRecipientID').value = ''
+    document.getElementById('eMailSubjectID').value=''
+    document.getElementById('eMailMsgID').value=''
+    hideEmailForm()
+}
+
+function printReports(destination) {
+    if (destination == 'PDF'){
+        showEmailForm()
+    }
+    // THE FOLLOWING LINE IS TEMPORARY;  THE VARIABLE curWeekDate IS BEING RESET BECAUSE AFTER THE THE WINDOW.PRINT COMMAND THE PAGE IS RELOADED
+    curWeekDate = document.getElementById('weekSelected').value
     if (curWeekDate == '') {
         alert("Please select a week date.")
         return
@@ -202,20 +227,21 @@ function printReports(destination) {
 
     reportSelected = false
     
+    // SET UP APPROPRIATE LINKS FOR scheduleBtn, notesBtn, contactsBtn, and subsBtn
     var scheduleBtn = document.getElementById('printScheduleLink');
-    link='/printWeeklyMonitorSchedule?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=' + destination
+    link='/coordinatorReports/printWeeklyMonitorSchedule?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=' + destination
     scheduleBtn.setAttribute('href', link)
     
     var notesBtn = document.getElementById('printNotesLink');
-    link='/printWeeklyMonitorNotes?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=' + destination
+    link='/coordinatorReports/printWeeklyMonitorNotes?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=' + destination
     notesBtn.setAttribute('href', link)
 
     var contactsBtn = document.getElementById('printContactsLink');
-    link='/printWeeklyMonitorContacts?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=' + destination
+    link='/coordinatorReports/printWeeklyMonitorContacts?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=' + destination
     contactsBtn.setAttribute('href', link)
 
     var subsBtn = document.getElementById('printSubsLink');
-    link='/printWeeklyMonitorSubs?date='  + curWeekDate + '&shop=' + curShopNumber + '&destination=' + destination
+    link='/coordinatorReports/printWeeklyMonitorSubs?date='  + curWeekDate + '&shop=' + curShopNumber + '&destination=' + destination
     subsBtn.setAttribute('href', link)
     
     if (document.getElementById('scheduleID').checked) {
@@ -251,34 +277,37 @@ function myFunction() {
 //     alert('Not implemented')
 // }
 
-function shopClicked() {
+function shopChanged() {
     setShopFilter(this.value)
-    filterWeeksShown()
+    filterTheWeeksShown()
 }
 
 function setShopFilter(shopLocation) {
+    //alert('setShopFilter contains - '+ shopLocation)
     switch(shopLocation){
         case 'RA':
             localStorage.setItem('shopFilter','RA')
-            document.getElementById("shopChoice").selectedIndex = 0; //Option Rolling Acres
+            document.getElementById("shopChoice").selectedIndex = 0; //optItemion Rolling Acres
             shopFilter = 'RA'
             curShopNumber = '1'
-            curShopName = shopNames[1]
+            curShopName = shopNames[0]
             break;
         case 'BW':
             localStorage.setItem('shopFilter','BW')
-            document.getElementById("shopChoice").selectedIndex = 1; //Option Brownwood
+            document.getElementById("shopChoice").selectedIndex = 1; //optItemion Brownwood
             shopFilter = 'BW'
             curShopNumber = '2'
-            curShopName = shopNames[2]
+            curShopName = shopNames[1]
             break;
         default:
+            alert('Missing local storage variable for shop location; RA assumed')
             localStorage.setItem('shopFilter','RA')
-            document.getElementById("shopChoice").selectedIndex = 0; //Option Rolling Acres
+            document.getElementById("shopChoice").selectedIndex = 0; //optItemion Rolling Acres
             shopFilter = 'RA'
             curShopNumber = '1'
-            curShopName = shopNames[1]
-    }   
+            curShopName = shopNames[0]
+    } 
+    //alert('shopName is now - '+ curShopName)  
 }
 
 
@@ -295,17 +324,12 @@ function formatDate(date) {
     return yyyymmdd;
 }
 
-
-
  // FILTER WEEKS DROPDOWN ON SHOPNUMBER AND COORDINATOR ID
-function filterWeeksShown() {
-    console.log('@filterWeeksShown the variable curCoordinatorID contains -', curCoordinatorID)
-    //alert('shop- ' + curShopNumber + '\n' + 'curCoordinatorID- ' + curCoordinatorID)
+function filterTheWeeksShown() {
     var weeks = document.querySelectorAll('.optWeeks')
     for (i=0; i < weeks.length; i++) {
         thisWeeksCoordID = weeks[i].getAttribute('data-coordID')
         shop = weeks[i].getAttribute('data-shop')
-        console.log(i,curShopNumber, curCoordinatorID)
         if ((shop == curShopNumber && curCoordinatorID == 'All')
         || (shop == curShopNumber && thisWeeksCoordID == curCoordinatorID)){
             weeks[i].style.display = ''
@@ -320,13 +344,11 @@ function filterWeeksShown() {
 
 function weekChanged () {
     curWeekDate = this.value
-    document.getElementById('emailSection').style.opacity=1;
-    //selectedValue = $("#weekSelected option:selected").val();
-    //alert('selectedValue - '+selectedValue)
-    alert('curWeekDate - ' + curWeekDate)
+    showEmailForm()
+
     // RETRIEVE COORDINATOR INFORMATION FROM SERVER
     $.ajax({
-        url : "/getCoordinatorData",
+        url : "/coordinatorReports/getCoordinatorData",
         type: "GET",
         data : {
             weekOf: curWeekDate,
@@ -372,25 +394,87 @@ function weekChanged () {
             alert('ERROR from getCoordinatorData')
         }
     });
+    }
+
+    function coordinatorChanged () {
+        curCoordinatorID = this.value
+        filterTheWeeksShown()
+    }
+
+    function memberSelectedRtn() {
+        selectedMember = this.value
+        lastEight = selectedMember.slice(-8)
+        curMemberID= lastEight.slice(1,7)
+
+        // THE FOLLOWING LINE IS TEMPORARY;  THE VARIABLE curWeekDate IS BEING RESET BECAUSE AFTER THE THE WINDOW.PRINT COMMAND THE PAGE IS RELOADED
+        curWeekDate = document.getElementById('weekSelected').value
+        
+        // REQUEST MEMBER's EMAIL ADDRESS FROM SERVER
+        $.ajax({
+            url : "/coordinatorReports/getMembersEmailAddress",
+            type: "GET",
+            data : {memberID: curMemberID,
+                    weekOf: curWeekDate,
+                    shopNumber: curShopNumber},
+
+            success: function(data, textStatus, jqXHR)
+            { 
+                clearEmailData() 
+                // INSERT RECIPIENT EMAIL ADDRESS
+                document.getElementById('eMailRecipientID').value = data.eMail
+
+                // BUILD SUBJECT LINE
+                subject = "Monitor Duty for Week Of " + curWeekDisplayDate + " at " + curShopName
+                document.getElementById('eMailSubjectID').value=subject 
+
+                // BUILD MESSAGE
+                message = data.eMailMsg
+                document.getElementById('eMailMsgID').value=message 
+
+            },
+            
+            error: function (jqXHR, textStatus, errorThrown)
+            {
+                alert('ERROR from getMembersEmailAddress\n'+textStatus+'\n' + errorThrown)
+            }
+        })
+    }
+
+
+    function sendOrSaveEmail(action) {
+        $.ajax({
+            url : "/coordinatorReportssendOrSaveEmail",
+            type: "GET",
+            data : {
+                action: action,
+                recipient:document.getElementById('eMailRecipientID').value,
+                subject:document.getElementById('eMailSubjectID').value,
+                message:document.getElementById('eMailMsgID').value
+            },
+            success: function(data, textStatus, jqXHR)
+            {
+                alert(data)
+
+            },
+            error: function (jqXHR, textStatus, errorThrown)
+            {
+                alert('ERROR from eMailCoordinator')
+            }
+        });
+    }
+    
+
+function showEmailForm() {
+    document.getElementById('rptChoices').style.opacity=1;
+    document.getElementById('prtReports').style.opacity=1;
+    document.getElementById('sendToOptions').style.opacity=1;
+    document.getElementById('emailButtons').style.opacity=1;
 }
 
-function coordinatorChanged () {
-    curCoordinatorID = this.value
-    filterWeeksShown()
+function hideEmailForm() {
+    document.getElementById('rptChoices').style.opacity=.2;
+    document.getElementById('prtReports').style.opacity=.2;
+    document.getElementById('sendToOptions').style.opacity=.2;
+    document.getElementById('emailButtons').style.opacity=.2;
 }
-
-function coordinatorAndMonitors() {
-    alert('button coordinatorOnly clicked')
-}
-
-function memberOnly() {
-    alert('memberOnly function')
-}
-
-// CLICK ON ONE OF THREE SEND TO BUTTONS
-// $('.sendToOptions button').click(function(){
-//     alert('jquery button clicked -' + this.value)
-//     alert('jquery button id - ' + this.id)   
-// })
-
-//});
+// END OF FUNCTIONS

@@ -73,6 +73,15 @@
     background-color: lightgray;
     color:navy;
 }
+#prtReports .active {
+    transform: translateY(3px);
+    filter:saturate(50%);
+    /* background-color: red;
+    color: white; */
+  }
+#prtReports button {
+    border-radius: 5px;
+}
 
 /* COORDINATOR INFORMATION LINE */
 #coordinatorInfo {
@@ -114,10 +123,10 @@
 #sendToOptions {
     grid-area:sendToArea; 
     border: 1px solid black;
-    padding-top:5px;
-    padding-bottom: 5px;
+    padding-top:15px;
+    padding-bottom: 40px;
     padding-left:20px;
-    margin-left:20px;
+    margin-right:10px;
     width:250px;
     height:200px;
     color:navy;
@@ -125,31 +134,51 @@
 #sendToOptions button {
     width:200px;
     border-radius: 5px;
+    margin-top:5px;
 }
+#sendToOptions .active {
+    transform: translateY(3px);
+    filter:saturate(50%);
+    /* background-color: red;
+    color: white; */
+  }
+
+
 /*  MIDDLE COLUMN */
 #eMailBody {
     grid-area:emailBody;
-    color:navy;
     margin-left:100px
 }
-#emailSubject {
+
+#emailRecipient {
     grid-area:emailBody;
     color:navy;
     margin-left:20px;
-    
-}
-#emailMessage {
+} 
+
+#emailSubject{
     grid-area:emailBody;
     color:navy;
     margin-top:10px;
     margin-left:20px;
     
 }
+#emailMessage {
+    grid-area:emailBody;
+    color:black;
+    margin-top:10px;
+    margin-left:20px;   
+}
+#eMailMsgID {
+    border:1px solid navy;
+    padding:10px;
+}
+
 /* RIGHT COLUMN */
 #emailButtons {
     grid-area:emailButtons;
     border: 1px solid black;
-    padding-top:5px;
+    padding-top:0px;
     padding-bottom: 5px;
     padding-left:20px;
     margin-right:10px;
@@ -165,7 +194,20 @@
 #emailButtons button {
     width:200px;
     border-radius:5px;
-} 
+    margin-top:5px;
+}
+
+#emailButtons .active {
+    transform: translateY(3px);
+    filter:saturate(50%);
+    /* background-color: red;
+    color: white; */
+  }
+
+.emailClass:active {
+    transform: translateY(1px);
+    filter:saturate(150%);
+}
 /* EMAIL SEND SAVE DONE BUTTONS */
 /* #emailSendBtns {
     grid-area:emailBtnsArea;
@@ -176,4 +218,20 @@
 
 textarea {
     overflow-y: scroll;
+}
+#modalLookupID {
+    height:600px;
+}
+#memberSelectID {
+    width:200px;
+    height:600px;
+
+}
+.modal-dialog {
+    width:360px;
+    height:600px !important;
+}
+.modal-content {
+    height:60%;
+    background-color:#BBD6EC;
 }
