@@ -1,8 +1,10 @@
 # routes.py
 
 from flask import session, render_template, flash, redirect, url_for, request, jsonify, json, make_response, after_this_request
-from flask_weasyprint import HTML, render_pdf
+#from flask_weasyprint import HTML, render_pdf
 import pdfkit
+
+
 from flask_bootstrap import Bootstrap
 from werkzeug.urls import url_parse
 from app.models import ShopName, Member, MemberActivity, MonitorSchedule, MonitorScheduleTransaction,\
@@ -320,9 +322,9 @@ def printWeeklyMonitorSchedule():
         pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
         filePath = pdfDirectoryPath + "/printWeeklyMonitorSchedule.pdf"
         # remove the next line and the pdf will only be generated to the screen
-        #pdfkit.from_string(html,filePath)
-
-        return render_pdf(HTML(string=html))
+        pdfkit.from_string(html,filePath)
+        return 'SUCCESS'
+        #return render_pdf(html(string=html))
     else:
         return render_template("rptWeeklyMonitorSchedule.html",\
             SMAMnames=SMAMnames,SMPMnames=SMPMnames,TCAMnames=TCAMnames,TCPMnames=TCPMnames,\
@@ -439,12 +441,21 @@ def printWeeklyMonitorContacts():
             
     
     if (destination == 'PDF'):
-        html = HTML("rptWeeklyContacts.html",\
-             beginDate=beginDateSTR,endDate=endDateSTR,todaysDate=todays_dateSTR,\
-             locationName=shopName,\
-             SMmonitors=SMmonitors,TCmonitors=TCmonitors
-             )
-        return render_pdf(HTML(string=html))
+        #html =  render_template("rptWeeklyMonitorSchedule.h
+        html = render_template("rptWeeklyContacts.html",\
+            beginDate=beginDateSTR,endDate=endDateSTR,todaysDate=todays_dateSTR,\
+            locationName=shopName,\
+            SMmonitors=SMmonitors,TCmonitors=TCmonitors
+            )
+        # DEFINE PATH TO USE TO STORE PDF
+        currentWorkingDirectory = os.getcwd()
+        pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
+        filePath = pdfDirectoryPath + "/printWeeklyContacts.pdf"
+        # remove the next line and the pdf will only be generated to the screen
+        pdfkit.from_string(html,filePath)
+        return 'SUCCESS'
+        
+        #return render_pdf(HTML(string=html))
         # WEASYPRINT .....
         #html.write_pdf('/contacts.pdf')
         # HTML(html).write_pdf('./contacts.pdf')
