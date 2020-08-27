@@ -1,0 +1,100 @@
+{% extends 'bootstrap/base.html' %}
+
+{% block styles %}
+    {{super()}}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/rptSubList.css') }}">
+{% endblock %}
+
+{% block content %} 
+<div class='wholePage'>
+    <div class="reportHdg">
+        <div class=reportHdgLine1>
+            <div class=reportHdgLine1Title>
+                <h1 class="text-center">THE VILLAGES WOODWORKERS CLUB</h1>
+            </div>
+            <div class=reportHdgLine1Buttons>
+                <button id="printPageButton"  onClick="window.print();">PRINT</button>
+                <button id="closePageButton"  onclick="window.history.back()" >CLOSE PAGE</button>
+            </div>
+        </div>
+        <div class=reportHdgLine2>
+            <h3 class="text-center">MONITOR SUB LIST</h3>
+        </div>
+        <div class=reportHdgLine3>
+            <h3 class="text-center">As of {{todaysDate}}</h3>
+        </div>   
+    </div>  
+    <br>
+    <div class="row colHdg">
+        <div id="nameHdg">
+            <span>Name/ID</span>
+        </div>    
+        <div id="phoneHdg">
+            <span>Cell/Home</span>
+        </div>
+        <div id="emailHdg">
+            <span>E-Mail</span>
+        </div>
+    </div>
+    <hr style="border:1px solid red">
+
+    {% for subItem in subDict %} 
+        <div class = detailSection>
+            <div id="detailRow1" class="row">
+                <div id="nameDtl">
+                    <span>{{subItem['name']}}</span>
+                </div>
+                <div id="cellPhoneDtl">
+                    <span>{{subItem['cellPhone']}}</span>
+                </div>
+                <div id="emailDtl">
+                    <span>{{subItem['eMail']}}</span>
+                </div>
+                <div id="shiftsDtl">
+                    <span>Future slots: {{subItem['futureShifts']}}
+                        &nbsp&nbsp&nbsp&nbspCompleted slots: {{subItem['completedShifts']}}</span>
+                </div>
+                <div id=monthsDtl>
+                    <span><pre>{{subItem['monthsStr']}}</pre></span>
+                </div>
+                
+            </div>
+                
+        <div id="detailRow2" class="row">
+            <div id=memberIDDtl>
+                <span>({{subItem['memberID']}})</span>
+            </div>
+            <div id=homePhoneDtl>
+                <span>{{subItem['homePhone']}}</span> 
+            </div>
+            <div id=certifiedDtl>
+                <span>Certified (RA):&nbsp{% if subItem['certifiedRA'] == True %}&#10004;{% else %}&nbsp;{% endif %}
+                &nbsp&nbsp&nbspDate:&nbsp</span>
+                <input value={{subItem['dateCertifiedRA']}}></input>
+                <span>&nbsp&nbsp&nbspCertified (BW): {% if subItem['certifiedBW'] == True %}&#10004;{% else %}&nbsp;{% endif %} 
+                &nbsp&nbsp&nbsp Date:&nbsp</span>
+                <input value={{subItem['dateCertifiedBW']}}></input>
+            </div>
+            <div id=trainingDtl>
+                <span>{{subItem['trainingNeeded']}}</span>
+            </div>
+        </div>
+        
+        <div id="detailRow3" class="row">
+            <div>
+                <span style="text-align:left;color:red">{{subItem['restricted']}}&nbsp&nbsp
+                {{subItem['reasonRestricted']}}</span> 
+            </div>
+            <div>
+                <span style="text-align:left;color:red">{{subItem['toolCribRequested']}}</span>
+            </div> 
+            <div>
+                <span style="text-align:left;color:green">{{subItem['monitorDutyNotes']}}</span>
+            </div>   
+        </div>
+        <hr style="border:1px solid red"> 
+                        
+    {% endfor %} 
+    </div>  
+</div>
+{% endblock %}

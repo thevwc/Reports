@@ -60,28 +60,29 @@ def index():
     #sqlEmailAddresses = "SELECT TOP 10 (Last_Name + ', ' + First_Name) as memberName, eMail FROM tblMember_Data ORDER BY Last_Name, First_Name"
     #eMails = db.engine.execute(sqlEmailAddresses)
     # for e in eMails:
-    #     print(e.memberName,e.eMail)
+    #    #print(e.memberName,e.eMail)
     # MEMBER NAMES AND ID
-    sqlMembers = "SELECT top 10 Last_Name + ', ' + First_Name + ' (' + Member_ID + ')' as name, eMail FROM tblMember_Data "
+    sqlMembers = "SELECT Last_Name + ', ' + First_Name + ' (' + Member_ID + ')' as name, eMail FROM tblMember_Data "
     sqlMembers += "ORDER BY Last_Name, First_Name "
     #print ('sql - ',sqlMembers)
     nameList = db.engine.execute(sqlMembers)
     # for n in nameList:
-    #     print (n.name,n.eMail)
+    #    #print (n.name,n.eMail)
 
     return render_template("index.html",coordNames=coordNames,weeks=weeks,nameList=nameList)  #,eMails=eMails)
    
 
 
 
-# PRINT WEEKLY MONITOR DUTY SCHEDULE FOR COORDINATOR
+##print WEEKLY MONITOR DUTY SCHEDULE FOR COORDINATOR
 @app.route("/coordinatorReports/printWeeklyMonitorSchedule", methods = ['GET'])
 def printWeeklyMonitorSchedule():
+    # flash ('printWeeklyMonitorSchedule')
     print('printWeeklyMonitorSchedule routine')
     dateScheduled=request.args.get('date')
     shopNumber=request.args.get('shop')
     destination = request.args.get('destination')  # destination is 'PRINT or 'PDF'
- 
+    print('shopNumber - ',shopNumber)
     # LOOK UP SHOP NAME
     shopRecord = db.session.query(ShopName).filter(ShopName.Shop_Number==shopNumber).first()
     shopName = shopRecord.Shop_Name
@@ -128,13 +129,15 @@ def printWeeklyMonitorSchedule():
         coordinatorID = coordinatorRecord.Coordinator_ID
         memberRecord = db.session.query(Member).filter(Member.Member_ID==coordinatorID).first()
         if memberRecord == None:
+            coordinatorsEmail = ''
             coordinatorsName = '(' + str(coordinatorID) + ')'
         else:
+            coordinatorsEmail = memberRecord.eMail
             if memberRecord.NickName != None and memberRecord.NickName != '':
                 coordinatorsName = memberRecord.First_Name + ' ' + memberRecord.Last_Name + ' (' + memberRecord.NickName + ')'
             else:
                 coordinatorsName = memberRecord.First_Name + ' ' + memberRecord.Last_Name
-        coordinatorsEmail = memberRecord.eMail
+        
     
     
     sqlSMAM = "SELECT Count(tblMonitor_Schedule.Member_ID) AS SMAMrows "
@@ -214,7 +217,7 @@ def printWeeklyMonitorSchedule():
     sqlSelectSM += "ORDER BY dayOfWeek, AM_PM,Last_Name"
     SMschedule = db.engine.execute(sqlSelectSM)
     
-    # BUILD SELECT STATEMENT TO RETRIEVE SM MEMBERS SCHEDULE FOR CURRENT YEAR FORWARD
+    # BUILD SELECT STATEMENT TO RETRIEVE TC MEMBERS SCHEDULE FOR CURRENT YEAR FORWARD
     sqlSelectTC = "SELECT tblMember_Data.Member_ID as memberID, "
     sqlSelectTC += "First_Name + ' ' + Last_Name as displayName, tblShop_Names.Shop_Name, "
     sqlSelectTC += "Last_Monitor_Training as trainingDate, DATEPART(year,Last_Monitor_Training) as trainingYear, "
@@ -307,7 +310,7 @@ def printWeeklyMonitorSchedule():
                     TCPMnames[r][c] = ''
                 c += 1
     
-    
+    print('PDF or PRINT? ',destination)
     if (destination == 'PDF'):
         html =  render_template("rptWeeklyMonitorSchedule.html",\
         SMAMnames=SMAMnames,SMPMnames=SMPMnames,TCAMnames=TCAMnames,TCPMnames=TCPMnames,\
@@ -321,11 +324,17 @@ def printWeeklyMonitorSchedule():
         currentWorkingDirectory = os.getcwd()
         pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
         filePath = pdfDirectoryPath + "/printWeeklyMonitorSchedule.pdf"
-        # remove the next line and the pdf will only be generated to the screen
-        pdfkit.from_string(html,filePath)
-        return 'SUCCESS'
+        options = { 
+            "enable-local-file-access": None
+        }
+        pdfkit.from_string(html,filePath, options=options)
+        return redirect(url_for('index'))
+        
+        # USE THE FOLLOWING TO RENDER PDF TO SCREEN
         #return render_pdf(html(string=html))
     else:
+        #print('render schedule report to printer')
+        #response = make_response(
         return render_template("rptWeeklyMonitorSchedule.html",\
             SMAMnames=SMAMnames,SMPMnames=SMPMnames,TCAMnames=TCAMnames,TCPMnames=TCPMnames,\
             SMAMtraining=SMAMtraining,SMPMtraining=SMPMtraining,TCAMtraining=TCAMtraining,TCPMtraining=TCPMtraining,\
@@ -333,11 +342,13 @@ def printWeeklyMonitorSchedule():
             shopName=shopName,weekOf=beginDateSTR,coordinatorsName=coordinatorsName, coordinatorsEmail=coordinatorsEmail,\
             todays_date=todays_dateSTR,\
             monDate=monDate,tueDate=tueDate,wedDate=wedDate,thuDate=thuDate,friDate=friDate,satDate=satDate)
+        #return response
             
 
-# PRINT WEEKLY LIST OF CONTACTS FOR COORDINATOR
+##print WEEKLY LIST OF CONTACTS FOR COORDINATOR
 @app.route("/coordinatorReports/printWeeklyMonitorContacts", methods=['GET'])
 def printWeeklyMonitorContacts():
+    print('print contacts routine')
     dateScheduled=request.args.get('date')
     shopNumber=request.args.get('shop')
     destination = request.args.get('destination')
@@ -451,15 +462,11 @@ def printWeeklyMonitorContacts():
         currentWorkingDirectory = os.getcwd()
         pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
         filePath = pdfDirectoryPath + "/printWeeklyContacts.pdf"
-        # remove the next line and the pdf will only be generated to the screen
-        pdfkit.from_string(html,filePath)
-        return 'SUCCESS'
-        
-        #return render_pdf(HTML(string=html))
-        # WEASYPRINT .....
-        #html.write_pdf('/contacts.pdf')
-        # HTML(html).write_pdf('./contacts.pdf')
-        #return redirect(url_for('index'))
+        options = { 
+            "enable-local-file-access": None
+        }
+        pdfkit.from_string(html,filePath, options=options)
+        return redirect(url_for('index'))
     else:
         return render_template("rptWeeklyContacts.html",\
             beginDate=beginDateSTR,endDate=endDateSTR,todaysDate=todays_dateSTR,\
@@ -468,14 +475,14 @@ def printWeeklyMonitorContacts():
             )
     
     
-# PRINT WEEKLY NOTES FOR COORDINATOR (GET approach)
+##print WEEKLY NOTES FOR COORDINATOR (GET approach)
 @app.route("/coordinatorReports/printWeeklyMonitorNotes", methods=["GET"])
 def printWeeklyMonitorNotes():
-    print('PRINT printWeeklyMonitorNotes routine')
+    print('printWeeklyMonitorNotes routine')
     dateScheduled=request.args.get('date')
     shopNumber=request.args.get('shop')
     destination = request.args.get('destination')
-      
+    print('destination - ',destination)
     # GET LOCATION NAME FOR REPORT HEADING
     shopRecord = db.session.query(ShopName).filter(ShopName.Shop_Number==shopNumber).first()
     shopName = shopRecord.Shop_Name
@@ -509,58 +516,242 @@ def printWeeklyMonitorNotes():
     sqlNotes += "ORDER BY Date_Of_Change"
     
     notes = db.engine.execute(sqlNotes)
+
     
-    if (destination == 'PDF') :  
+    if (destination == 'PDF') : 
+        print('begin notes PDF creation') 
         html =  render_template("rptWeeklyMonitorSchedule.html",\
             beginDate=beginDateSTR,endDate=endDateSTR,\
             locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
             todaysDate=todays_dateSTR
             )
-        return render_pdf(HTML(string=html))
+        print('finish creating html')
+        currentWorkingDirectory = os.getcwd()
+        pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
+        filePath = pdfDirectoryPath + "/printWeeklyNotes.pdf"    
+        options = {"enable-local-file-access": None}
+        print('before pdfkit statement')
+        pdfkit.from_string(html,filePath, options=options)
+        print('created pdf of notes')
+        return redirect(url_for('index'))
     else:
+        print('before render_template - notes')
         return render_template("rptWeeklyNotes.html",\
             beginDate=beginDateSTR,endDate=endDateSTR,\
             locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
             todaysDate=todays_dateSTR
             )
-        
-        return redirect(url_for('/coordinatorReports/index'))
-        
-
-        # WeasyPrint solution
-        # html = render_template("rptWeeklyNotes.html",\
-        #     beginDate=beginDateSTR,endDate=endDateSTR,\
-        #     locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
-        #     todaysDate=todays_dateSTR
-        #     )
-        # return render_pdf(HTML(string=html))
-        #rendered = render_template('rptWeeklyNotes.html',\
-        #     beginDate=beginDateSTR,endDate=endDateSTR,\
-        #     locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
-        #     todaysDate=todays_dateSTR
-        #     )
-        # pdf = pdfkit.from_string(rendered, False)
-        # response = make_response(pdf)
-        # response.headers['Content-Type'] = 'application/pdf'
-        # response.headers['Content-Disposition'] = 'attachment; filename=output.pdf'
-
-        # return response
-
-        # pdfkit solution
+        #return redirect(url_for('/coordinatorReports/index'))
         
 
-@app.route("/coordinatorReports/printWeeklyMonitorSubs", methods=["GET"])
-def printWeeklyMonitorSubs():
-    flash('Not implemented.')
-    return 'Not implemented.'
+@app.route("/coordinatorReports/printSubList", methods=["GET"])
+def printSubList():
+    print('begin printSubList routine ')
+    destination = request.args.get('destination')
+    #todays_date = date.today()
+    todays_date = date.today()
+    todays_dateSTR = todays_date.strftime('%-m-%-d-%Y')
+    thisYear = todays_date.strftime('%Y')
+    janFirstSTR = thisYear + '0101'
+    janFirst = datetime.strptime(janFirstSTR,'%Y%m%d')
 
-@app.route("/coordinatorReports/pdfWeeklyMonitorNotes")   # NOT IMPLEMENTED
-def pdfWeeklyMonitorNotes():
-    dateScheduled=request.args.get('date')
-    shopNumber=request.args.get('shop')
-    weekOf = request.form['date']
-    shop =  request.form['shop']
-    return
+    # BUILD ARRAY OF NAMES OF MONITOR SUBS
+    #coordNames=[]
+    sqlSubs = "SELECT Last_Name, First_Name, Nickname, Member_ID,"
+    sqlSubs += " Cell_Phone, Home_Phone, eMail, Last_Monitor_Training, Monitor_Duty_Waiver_Expiration_Date,"
+    sqlSubs += " format(Monitor_Duty_Waiver_Expiration_Date,'yyyy-MM-dd') as Waiver_Expiration_Date, Restricted_From_Shop,"
+    sqlSubs += " Reason_For_Restricted_From_Shop, Requires_Tool_Crib_Duty,"
+    sqlSubs += " Certified, Certification_Training_Date, Certified_2, Certification_Training_Date_2,"
+    sqlSubs += " Monitor_Duty_Notes,"
+    sqlSubs += " Jan_Resident as Jan, Feb_Resident as Feb, Mar_Resident as Mar,"
+    sqlSubs += " Apr_Resident as Apr, May_Resident as May, Jun_Resident as Jun,"
+    sqlSubs += " Jul_Resident as Jul, Aug_Resident as Aug, Sep_Resident as Sep,"
+    sqlSubs += " Oct_Resident as Oct, Nov_Resident as Nov, Dec_Resident as Dec"
+    sqlSubs += " FROM tblMember_Data"
+    sqlSubs += " WHERE Monitor_Sub = 1 and Dues_Paid = 1"
+    sqlSubs += " ORDER BY Last_Name, First_Name " 
+    subs = db.engine.execute(sqlSubs)
+    
+    subDict = []
+    subItem = []
+    
+    for s in subs:
+        memberID = s.Member_ID
+        #print('waiver date - ',s.Monitor_Duty_Waiver_Expiration_Date)
+        # CONCATENATE NICKNAME WITH LAST AND FIRST NAME
+        displayName = s.Last_Name + ', ' + s.First_Name
+        if s.Nickname != None:
+            displayName += ' ('+s.Nickname+')'
+
+        # DETERMINE IF TRAINING IS NEEDED
+        #print('Monitor_Duty_Waiver_Expiration_Date - ',s.Waiver_Expiration_Date)
+        hasWaiver = False
+        if (s.Waiver_Expiration_Date != None):
+            waiverDate = s.Monitor_Duty_Waiver_Expiration_Date.date()
+            if (waiverDate > todays_date):
+                hasWaiver = True
+                trainingNeededTxt=''
+            #print(waiverDate,hasWaiver)
+
+        if hasWaiver == False:
+            if TrainingNeeded(s.Last_Monitor_Training):
+                trainingNeededTxt='TRAINING NEEDED'
+            else:
+                trainingNeededTxt=''
+                
+        # CHECK IF TOOL CRIB DUTY REQUIRED
+        if s.Requires_Tool_Crib_Duty:
+            toolCribRequested='TOOL CRIB REQUESTED'
+        else:
+            toolCribRequested=''
+
+        # CHECK IF RESTRICTED FROM SHOP
+        if s.Restricted_From_Shop:
+            restricted = 'RESTRICTED'
+        else:
+            restricted = ''
+        if s.Reason_For_Restricted_From_Shop == None:
+            reasonRestricted = ''
+        else:
+            reasonRestricted = s.Reason_For_Restricted_From_Shop
+
+        #print(s.Restricted_From_Shop,' reason - ',s.Reason_For_Restricted_From_Shop)
+        # FORMAT DATE CERTIFIED
+        if s.Certification_Training_Date == None:
+            certifiedDateRA = ' '
+        else:
+            certifiedDateRA = s.Certification_Training_Date.strftime('%m/%d/%Y')
+        if s.Certification_Training_Date_2 == None:
+            certifiedDateBW = ' '
+        else:
+            certifiedDateBW = s.Certification_Training_Date_2.strftime('%m/%d/%Y')
+
+        # CHECK FOR MONITOR DUTY NOTES
+        if s.Monitor_Duty_Notes:
+            monitorDutyNotes = s.Monitor_Duty_Notes
+        else:
+            monitorDutyNotes = ''
+
+        # COMBINE MONTHS IN VILLAGES
+        monthsStr = ''
+        if s.Jan == True:
+            monthsStr =' Jan '
+        else:
+            monthsStr = ' -  '
+        if s.Feb == True:
+            monthsStr +='Feb '
+        else:
+            monthsStr += ' -  '
+        if s.Mar == True:
+            monthsStr +='Mar '
+        else:
+            monthsStr += ' -  '
+        if s.Apr == True:
+            monthsStr +='Apr '
+        else:
+            monthsStr += ' -  '
+        if s.May == True:
+            monthsStr +='May '
+        else:
+            monthsStr += ' -  '
+        if s.Jun == True:
+            monthsStr +='Jun '
+        else:
+            monthsStr += ' -  '
+        if s.Jul == True:
+            monthsStr +='Jul '
+        else:
+            monthsStr += ' -  '
+        if s.Aug == True:
+            monthsStr +='Aug '
+        else:
+            monthsStr += ' -  '
+        if s.Sep == True:
+            monthsStr +='Sep '
+        else:
+            monthsStr += ' -  '
+        if s.Oct == True:
+            monthsStr +='Oct '
+        else:
+            monthsStr += ' -  '
+        if s.Nov == True:
+            monthsStr +='Nov '
+        else:
+            monthsStr += ' -  '
+        if s.Dec == True:
+            monthsStr +='Dec '
+        else:
+            monthsStr += ' -  '
+        
+        #print('monthsStr - ',monthsStr)
+
+
+        # GET NUMBER OF PAST MONITOR DUTY ASSIGNMENTS
+        completedShifts = db.session.query(func.count(MonitorSchedule.Member_ID))\
+            .filter(MonitorSchedule.Member_ID == memberID)\
+            .filter(MonitorSchedule.No_Show == False)\
+            .filter(MonitorSchedule.Date_Scheduled < todays_date)\
+            .filter(MonitorSchedule.Date_Scheduled > janFirst).scalar()
+            
+        #print('completedShifts - ',completedShifts)
+
+        # GET NUMBER OF FUTURE MONITOR DUTY ASSIGNMENTS (SINCE JANUARY 1)
+        futureShifts = db.session.query(func.count(MonitorSchedule.Member_ID))\
+            .filter(MonitorSchedule.Member_ID == memberID)\
+            .filter(MonitorSchedule.Date_Scheduled > todays_date).scalar()
+
+        # BUILD DICTIONARY OF MEMBERS AND RELATED DATA
+        subItem = {
+            'name':displayName,
+            'memberID':memberID,
+            'eMail': s.eMail,
+            'cellPhone':s.Cell_Phone,
+            'homePhone':s.Home_Phone,
+            'trainingNeeded':trainingNeededTxt,
+            'restricted':restricted,
+            'reasonRestricted':reasonRestricted,
+            'toolCribRequested':toolCribRequested,
+            'certifiedRA':s.Certified,
+            'dateCertifiedRA':certifiedDateRA,
+            'certifiedBW':s.Certified_2,
+            'dateCertifiedBW':certifiedDateBW,
+            'completedShifts':completedShifts,
+            'futureShifts':futureShifts,
+            'monitorDutyNotes':monitorDutyNotes,
+            'monthsStr':monthsStr,
+            'Jan':s.Jan,
+            'Feb':s.Feb,
+            'Mar':s.Mar,
+            'Apr':s.Apr,
+            'May':s.May,
+            'Jun':s.Jun,
+            'Jul':s.Jul,
+            'Aug':s.Aug,
+            'Sep':s.Sep,
+            'Oct':s.Oct,
+            'Nov':s.Nov,
+            'Dec':s.Dec,}
+        subDict.append(subItem)
+        
+    if (destination == 'PDF') :  
+        html =  render_template("rptSubList.html",\
+            todaysDate=todays_dateSTR,subDict=subDict
+            )
+        currentWorkingDirectory = os.getcwd()
+        pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
+        filePath = pdfDirectoryPath + "/rptSubList.pdf"
+        options = {"enable-local-file-access": None}
+        print('subList filePath - ',filePath)
+        pdfkit.from_string(html,filePath, options=options)
+        return redirect(url_for('index'))  
+        
+    else:
+        return render_template("rptSubList.html",\
+            todaysDate=todays_dateSTR,subDict=subDict
+            )
+        
+    return redirect(url_for('/coordinatorReports/index'))
+    
 
 
 @app.route("/coordinatorReports/eMailCoordinator", methods=["GET","POST"])
@@ -655,7 +846,7 @@ def getCoordinatorData():
     # RETURN COORDINATOR NAME, EMAIL, PHONE
     weekOf = request.args.get('weekOf')
     shopNumber = request.args.get('shopNumber')
-
+    print('weekOf - ',weekOf)
     weekOfDat = datetime.strptime(weekOf,'%Y-%m-%d')
     displayDate = weekOfDat.strftime('%B %d, %Y')  #'%m/%d/%Y')
 
@@ -693,6 +884,8 @@ def getCoordinatorData():
 
 @app.route("/coordinatorReports/sendOrSaveEmail", methods=["GET","POST"])
 def sendOrSaveEmail():
+    print('begin sendOrSaveEmail routine')
+
     # DETERMINE PATH TO PDF FILES
     currentWorkingDirectory = os.getcwd()
     pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
@@ -701,7 +894,8 @@ def sendOrSaveEmail():
     # GET ACTION
     action = request.args.get('action')
     recipient = request.args.get('recipient')
- 
+    print('recipient - ',recipient)
+
     # FOR TESTING PURPOSES ..............................
     #recipient = ("Richard Hartley", "hartl1r@gmail.com")
     recipientList = []
@@ -719,7 +913,7 @@ def sendOrSaveEmail():
 
     # ADD ATTACHMENTS
     if testingAttachments:
-        print ('.........................  ADD ATTACHMENTS  ............................')
+        #print ('.........................  ADD ATTACHMENTS  ............................')
         # DETERMINE PATH TO PDF FILES
         currentWorkingDirectory = os.getcwd()
         pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
@@ -727,33 +921,97 @@ def sendOrSaveEmail():
         # CHECK FOR A SCHEDULE REPORT
         filePath = pdfDirectoryPath + "/printWeeklyMonitorSchedule.pdf"
         if (path.exists(filePath)):
-            print(filePath + ' exists.')
+            #print(filePath + ' exists.')
             msg.attach(filename=filePath,disposition="attachment",content_type="application/pdf")
 
         # CHECK FOR A CONTACTS REPORT
         filePath = pdfDirectoryPath + "/printWeeklyMonitorContacts.pdf"
         if (path.exists(filePath)):
-            print(filePath + ' exists.')
+           #print(filePath + ' exists.')
             msg.attach(filename=filePath,disposition="attachment",content_type="application/pdf")
 
         # CHECK FOR A NOTES REPORT
         filePath = pdfDirectoryPath + "/printWeeklyMonitorNotes.pdf"
         if (path.exists(filePath)):
-            print(filePath + ' exists.')
+           #print(filePath + ' exists.')
             msg.attach(filename=filePath,disposition="attachment",content_type="application/pdf")
 
         # CHECK FOR A SUBS REPORT
         filePath = pdfDirectoryPath + "/printWeeklyMonitorSubs.pdf"
         if (path.exists(filePath)):
-            print(filePath + ' exists.')
+           #print(filePath + ' exists.')
             msg.attach(filename=filePath,disposition="attachment",content_type="application/pdf")
         
     # EITHER 'SEND' THE EMAIL OR 'SAVE AS DRAFT'
     if (action == 'SEND'):
+        print('sending msg')
         mail.send(msg)
+        # flash ('Message sent.')
     else:
         #  save draft is not working 
         #mail.Display(True)
         #mail.Save(msg)
+        print('saving msg')
         mail.save(msg)
+        # flash ('Draft saved.')
+    return redirect(url_for('index'))
+    #return 'SUCCESS'
+
+
+    # REMOVE PDF FILES
+    testingRemove = False
+    if testingRemove :
+        print ('REMOVE PDF FILES ROUTINE')
+
+        filePath = pdfDirectoryPath + "/printWeeklyMonitorSchedule.pdf"
+        if (os.path.exists(filePath)):
+            os.remove(filePath)
+        
+        filePath = pdfDirectoryPath + "/printWeeklyMonitorContacts.pdf"
+        if (os.path.exists(filePath)):
+            os.remove(filePath)
+
+        filePath = pdfDirectoryPath + "/printWeeklyMonitorNotes.pdf"
+        if (os.path.exists(filePath)):
+            os.remove(filePath)
+
+        filePath = pdfDirectoryPath + "/printWeeklyMonitorSubs.pdf"
+        if (os.path.exists(filePath)):
+            os.remove(filePath)
+
+def TrainingNeeded(lastTrainingDate):
+    #print('lastTrainingDate - ',lastTrainingDate,type(lastTrainingDate))
+    
+    todays_date = date.today()
+    todays_dateSTR = todays_date.strftime('%-m-%-d-%Y')
+    thisYear = todays_date.strftime("%Y")
+    lastAcceptableTrainingYear = int(thisYear) - 2
+    
+    if lastTrainingDate == None:
+        return True
+    #print('thisYear - ',thisYear,type(thisYear))
+    try:
+        lastTrainingYear = lastTrainingDate.strftime("%Y")
+        #print(type(lastTrainingYear),type(lastAcceptableTrainingYear))
+
+        if int(lastTrainingYear) <= lastAcceptableTrainingYear:
+            return True
+        else:
+            return False
+    except:
+        print ('Error in TrainingNeeded routine using - ', lastTrainingDate)
+        return True
+
+@app.route("/coordinatorReports/testDateCompare")
+def testDateCompare():
+    sqlSelect = "SELECT top 10 Member_ID, Date_Scheduled FROM tblMonitor_Schedule ORDER BY ID desc"
+    members = db.session.execute(sqlSelect)
+    todaysDate = date.today()
+    for m in members:
+        print (m.Date_Scheduled)
+        scheduledDate = m.Date_Scheduled.date()
+        if scheduledDate < todaysDate:
+            print ('less than')
+        else:
+            print ('not less than')
     return 'SUCCESS'

@@ -13,8 +13,8 @@
     grid-template-columns: auto auto auto auto 1fr auto;
     grid-template-rows: 50px auto auto auto auto 1fr;
     grid-template-areas:"hdgArea        hdgArea         hdgArea         hdgArea         hdgArea         hdgArea" 
-                        "locationArea   coordArea       weeksArea       rptNameArea     prtRptArea      .  "
-                        ".              .               .               rptNameArea     prtRptArea      ."
+                        "locationArea   coordArea       weeksArea       prtRptArea      rptNameArea     .  "
+                        ".              .               .               prtRptArea      rptNameArea     ."
                         "coordHdgArea   coordHdgArea    coordHdgArea    coordHdgArea    coordHdgArea    coordHdgArea"
                         "emailArea      emailArea       emailArea       emailArea       emailArea       emailArea "
                         "emailBtnsArea  emailBtnsArea   emailBtnsArea   emailBtnsArea   emailBtnsArea   emailBtnsArea"; 
@@ -54,6 +54,38 @@
     color:navy;
 }
 
+#prtReports {
+    grid-area:prtRptArea;
+    width:200px;
+    padding-top:30px;
+    padding-left:0px;
+    margin-right:40px;
+    background-color: lightgray;
+    color:navy;
+    border:1px solid navy;
+}
+/* #prtReports .active {
+    transform: translateY(3px);
+    filter:saturate(50%);
+  } */
+#prtReports ul {
+    padding-left:0px;
+    margin-left:25px;
+    padding-right:0px;
+    margin-right:0px;
+}
+#prtReports li {
+    padding-right:20px;
+    margin-right:20px;
+}
+#prtReports button {
+    border-radius: 5px;
+    margin-bottom:5px;
+    width:150px;
+    margin-right:20px;
+    padding-right:0px;
+}
+
 #rptChoices {
     grid-area:rptNameArea;
     width:200px;
@@ -61,28 +93,18 @@
     background-color:lightgray;
     color:navy;
     border:1px solid navy
-}  
+} 
+#rptChoices form button {
+    width:130px;
+    margin-top:10px;
+    margin-bottom:20px;
+    margin-left:15px;
+    border-radius: 5px; 
+} 
 /* 
 .reportsForm {
     border:1px solid black;
 } */
-#prtReports {
-    grid-area:prtRptArea;
-    padding-top:50px;
-    padding-left:30px;
-    background-color: lightgray;
-    color:navy;
-}
-#prtReports .active {
-    transform: translateY(3px);
-    filter:saturate(50%);
-    /* background-color: red;
-    color: white; */
-  }
-#prtReports button {
-    border-radius: 5px;
-}
-
 /* COORDINATOR INFORMATION LINE */
 #coordinatorInfo {
     grid-area:coordHdgArea;

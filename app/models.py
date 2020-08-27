@@ -54,6 +54,7 @@ class Member(db.Model):
     Dues_Paid=db.Column(db.Boolean)
     NonMember_Volunteer=db.Column(db.Boolean)
     Restricted_From_Shop = db.Column(db.Boolean)
+    Reason_For_Restricted_From_Shop = db.Column(db.String(255))
     Last_Monitor_Training = db.Column(db.DateTime)
     Jan_resident = db.Column(db.Boolean)
     Feb_resident = db.Column(db.Boolean)
@@ -71,7 +72,9 @@ class Member(db.Model):
     Requires_Tool_Crib_Duty = db.Column(db.Boolean)
     Member_Notes = db.Column(db.String(255))
     Monitor_Coordinator = db.Column(db.Boolean)
-    
+    Monitor_Sub = db.Column(db.Boolean)
+    Monitor_Duty_Waiver_Expiration_Date = db.Column(db.Boolean)
+     
     fullName = column_property(First_Name + " " + Last_Name)
     # Relationships
     #activities = db.relationship('MemberActivity', backref='member')

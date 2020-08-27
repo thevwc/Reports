@@ -5,15 +5,14 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 {% endblock %}
 
-{% block content %}
+{% block content %} 
     <div id="parent">
         <div id="hdg">
             <h2>MONITOR COORDINATOR REPORTS</h2>  
-            <button id="settingsIcon" style="display:none"><i class="fas fa-bars" data-toggle='modal' data-target='#settingsModal'></i></button>
+            <!-- <button id="settingsIcon" style="display:none"><i class="fas fa-bars" data-toggle='modal' data-target='#settingsModal'></i></button>
             <button id="settingsBtn" style="display:none" type='button' class = 'btn btn-primary' data-toggle = 'modal' data-target = '#settingsModal'>
                     SETTINGS  
-            </button>
-            
+            </button>     -->
         </div>
 
         <div id="location">
@@ -50,30 +49,39 @@
             </select><br><br>
         </div>
 
+        <div id="prtReports">
+            <!-- <button type="button" id="printReportBtn" style="width:150px;margin-left:20px"class="prtOrEmailBtn btn-sm btn-primary">PRINT</button>   -->
+            <!-- PRINT BUTTONS TO PROVIDE LINKS TO ROUTES -->
+            <ul style="list-style-type:none;">
+                <li><button id='sendEmail' type="button" class='btn btn-sm btn-success'>SEND EMAIL</button></li>                
+                <li><button id='printMonitorScheduleID' type="button" class='btn btn-sm btn-primary'>Print Schedule</button></li>
+                <li><button id='printMonitorNotesID' type="button" class='btn btn-sm btn-primary'>Print Notes</button></li>
+                <li><button id='printMonitorContactsID' type="button" class='btn btn-sm btn-primary'>Print Contacts</button></li>
+                <li><button id='printMonitorSubListID' type="button" class='btn btn-sm btn-primary'>Print Sub List</button></li>
+                <!-- <li><button id='testDateCompareID' type="button" class='btn btn-sm btn-primary'>Test Date Compare</button></li> -->
+            </ul>
+            <!-- <a id="printScheduleLink" class="btn btn-primary" style="display:block" href="/printWeeklyMonitorSchedule?date=2020-08-09&shop={curShopNumber}">Print Schedule</a>
+            <a id="printNotesLink" style="display:block" href="/printWeeklyMonitorNotes?date=2020-08-09&shop=1">Print Notes</a>
+            <a id="printContactsLink" style="display:block" href="/printWeeklyMonitorContacts?date=2020-08-09&shop={curShopNumber}">Print Contacts</a>
+            <a id="printSubsLink" style="display:block" href="/printWeeklyMonitorSubs?date=2020-08-09&shop={curShopNumber}">Print Subs</a>    -->
+        </div>
+        
         <div id="rptChoices">
             <form id='reportsFormID' class="reportsForm" action="">
-                <p>Select report(s) ...</p>
+                <p>Report(s) to email ...</p>
                 <input type="checkbox" id="scheduleID" name="reports" value="rptSchedule">
                 <label for="schedule"> Schedule</label><br>
                 <input type="checkbox" id="notesID" name="reports" value="rptNotes">
                 <label for="notes"> Notes</label><br>
                 <input type="checkbox" id="contactsID" name="reports" value="rptContacts">
                 <label for="contacts"> Contacts</label><br>
-                <input type="checkbox" id="subsID" name="reports" value="rptSubs">
-                <label for="subs"> Available subs</label><br>   
+                <input type="checkbox" id="subListID" name="reports" value="rptSubs">
+                <label for="subs"> Available subs</label><br> 
+                <button type="button" id="eMailReportBtn" class="prtOrEmailBtn btn btn-sm btn-primary">PREPARE EMAIL</button>   
             </form>
         </div>   
 
-        <div id="prtReports">
-            <button type="button" id="printReportBtn" style="width:150px;margin-left:20px"class="prtOrEmailBtn btn-sm btn-primary">PRINT</button>  
-            <br>
-            <button type="button" id="eMailReportBtn" style="width:150px;margin-left:20px;margin-top:10px" class="prtOrEmailBtn btn btn-sm btn-primary">Email PDF's</button>  
-            <!-- HIDDEN BUTTONS TO PROVIDE LINKS TO ROUTES -->
-            <a id="printScheduleLink" style="display:none" href="/printWeeklyMonitorSchedule?date=2020-08-09&shop={curShopNumber}">Print Schedule</a> 
-            <a id="printNotesLink" style="display:none" href="/printWeeklyMonitorNotes?date=2020-08-09&shop=1">Print Notes</a>
-            <a id="printContactsLink" style="display:none" href="/printWeeklyMonitorContacts?date=2020-08-09&shop={curShopNumber}">Print Contacts</a>
-            <a id="printSubsLink" style="display:none" href="/printWeeklyMonitorSubs?date=2020-08-09&shop={curShopNumber}">Print Subs</a>   
-        </div>
+        
 
         <!-- COORDINATOR INFO SECTION -->
         <div id= 'coordinatorInfo'>
@@ -141,7 +149,6 @@
             <!-- RIGHT COLUMN -->
             <div id="emailButtons" class="emailClass btn-group-vertical btn-group">
                 <span>Actions:</span>
-                <!-- <button id='showRecipientsBtn' type="button" class='eMailBtn btn-sm btn-primary'>Show Recipients</button> -->
                 <button id='sendBtn' type="button" name='emailOption' class='eMailBtn btn-sm btn-primary'>Send</button>
                 <button id='saveBtn' type="button" name='emailOption' class='eMailBtn btn-sm btn-primary'>Save Draft</button> 
                 <button id='clearBtn' type="button" name='emailOption' class='eMailBtn btn-sm btn-primary rounded'>Clear</button> 
@@ -149,29 +156,6 @@
         </div> <!-- END OF EMAIL RECIPIENTS SECTION -->
     </div>  <!-- END OF PARENT WRAPPER -->
 
-    <!-- MODAL FORMS -->
-
-    <!-- MODAL FORM FOR SELECTING MEMBER -->
-<!-- <div id="memberLookupID" class="modal fade" tabindex="-1" role="dialog"  aria-hidden="true">
-	<div class="modal-dialog modal-lg" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title" id="searchModalLabel">MEMBER SEARCH</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-				<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-			<div class="modal-body">
-                <select id="memberSelectID" class='selectpicker' style='margin-bottom:20px' title='Find a member ...'
-                data-live-search=true data-live-search-style='contains' data-width='auto'>
-                </select>
-			</div>
-		<div class="modal-footer">
-		<button id='saveSelectedMemberID' type="button" class="btn btn-primary">Save changes</button>
-		</div>
-		</div>
-	</div>
-</div> -->
 
 {% endblock %}
 

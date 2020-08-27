@@ -1,0 +1,77 @@
+{% extends 'bootstrap/base.html' %}
+
+{% block styles %}
+    {{super()}}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/rptSubList.css') }}">
+{% endblock %}
+
+{% block content %} 
+<div class='wholePage'>
+
+    <div class="pageButtons">
+        <button id="printPageButton" style=margin-right:20px; onClick="window.print();">PRINT</button>
+        <button id="closePageButton" style=margin-right:20px; onclick="window.history.back()" >CLOSE PAGE</button>
+    </div> 
+    <br> 
+    
+    <br>
+    <div class="reportHdg">
+        <h1 class="text-center">THE VILLAGES WOODWORKERS CLUB</h1>
+        <br>
+        <h2 class="text-center">MONITOR SUB LIST</h2>
+        <h2 class="text-center"> AS OF {{todaysDate}}</h2>
+        <hr>
+    </div>
+    
+    <div>
+        <table style="display: inline block">                      
+            <thead>
+                <tr>
+                    <th style="text-align:center">Name/ID</th>
+                    <th style="text-align:center">Cell/Home</th>
+                    <th style="text-align:center">E-Mail</th>
+                    <th style="text-align:center">Monitor Duty Notes</th>
+                    <th> </th>
+                    <th>J F M A M J J A S O N D </th>
+                    
+                    
+                </tr> 
+                <hr style:border 3px black>
+            </thead> 
+            <tbody>
+                {% for subItem in subDict %} 
+                    <tr>
+                        <td style="text-align:left;width:200px">{{subItem['name']}}</td>
+                        <td style="text-align:left;width:150px">{{subItem['cellPhone']}}</td> 
+                        <td style="text-align:left;width:250px">{{subItem['eMail']}}</td> 
+                        <td style="text-align:left">Future slots: {{subItem['futureShifts']}}</td>
+                        <td></td>
+                        <td>{{subItem['monthsStr']}}</td> 
+                         <td style="text-align:left;color:red">{{subItem['trainingNeeded']}}</td> 
+                        
+                    </tr>
+                    <tr>
+                        <td style="text-align:left">({{subItem['memberID']}})</td>
+                        <td style="text-align:left">{{subItem['homePhone']}}</td> 
+                        <td style="text-align:left">Certified (RA):{% if subItem['certifiedRA'] == True %}&#10004;{% else %}&nbsp;{% endif %}</td>
+                        <td style="text-align:left">Date:{{subItem['dateCertifiedRA']}}</td> 
+                        <td style="text-align:left">Certified (BW): {% if subItem['certifiedBW'] == True %}&#10004;{% else %}&nbsp;{% endif %}</td> 
+                        <td style="text-align:left">{{subItem['dateCertifiedBW']}}</td> 
+                        <td style="text-align:left;width:300px">{{subItem['monitorDutyNotes']}}</td> 
+
+                    </tr> 
+                   
+                    <tr>
+                        <td></td>
+                        <td style="text-align:left;color:red">{{subItem['restricted']}}</td>
+                        <td style="text-align:left">{{subItem['reasonRestricted']}}</td> 
+                        <td style="text-align:left;color:red">{{subItem['toolCribRequested']}}</td>
+                        
+                    </tr>
+                    
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>  
+</div>
+{% endblock %}
