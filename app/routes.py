@@ -482,6 +482,8 @@ def printWeeklyMonitorNotes():
     dateScheduled=request.args.get('date')
     shopNumber=request.args.get('shop')
     destination = request.args.get('destination')
+    print('date - ', dateScheduled)
+    print('shop - ', shopNumber)
     print('destination - ',destination)
     # GET LOCATION NAME FOR REPORT HEADING
     shopRecord = db.session.query(ShopName).filter(ShopName.Shop_Number==shopNumber).first()
@@ -505,7 +507,7 @@ def printWeeklyMonitorNotes():
     # RETRIEVE SCHEDULE FOR SPECIFIC WEEK
     todays_date = date.today()
     todays_dateSTR = todays_date.strftime('%-m-%-d-%Y')
-
+    print('todays_dateSTR - ',todays_dateSTR, ' type -', type(todays_dateSTR))
     # BUILD SELECT STATEMENT TO RETRIEVE NOTES FOR SPECIFIED WEEK AND LOCATION
     sqlNotes = "SELECT Date_Of_Change, convert(nvarchar,Date_Of_Change,100) as changeDateTime, "
     sqlNotes += "convert(nvarchar,Date_Of_Change,110) as changeDate, "
@@ -846,7 +848,7 @@ def getCoordinatorData():
     # RETURN COORDINATOR NAME, EMAIL, PHONE
     weekOf = request.args.get('weekOf')
     shopNumber = request.args.get('shopNumber')
-    print('weekOf - ',weekOf)
+    #print('weekOf - ',weekOf)
     weekOfDat = datetime.strptime(weekOf,'%Y-%m-%d')
     displayDate = weekOfDat.strftime('%B %d, %Y')  #'%m/%d/%Y')
 

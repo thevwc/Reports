@@ -324,7 +324,7 @@ function clearEmailData() {
 
 // THIS ROUTINE IS BEING REPLACED ....................................................
 function printReports(destination) {
-    print('printReports routine')
+    alert('printReports routine')
     // THE FOLLOWING LINE IS TEMPORARY;  THE VARIABLE curWeekDate IS BEING RESET BECAUSE AFTER THE THE WINDOW.PRINT COMMAND THE PAGE IS RELOADED
     curWeekDate = document.getElementById('weekSelected').value
     if (curWeekDate == '') {
@@ -392,7 +392,7 @@ function printReports(destination) {
         window.location.href = '/coordinatorReports/printWeeklyMonitorContacts?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PDF' 
         console.log(' ... after ... contacts PDF ...')
     }
-    if (document.getElementById('subsID').checked) {
+    if (document.getElementById('subListID').checked) {
         reportSelected = true
         console.log(' ... before href to sub list PDF ...')
         window.location.href = '/coordinatorReports/printWeeklyMonitorSubList?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PDF' 
@@ -419,7 +419,7 @@ function shopChanged() {
 }
 
 function setShopFilter(shopLocation) {
-    console.log('setShopFilter contains - '+ shopLocation)
+    //console.log('setShopFilter contains - '+ shopLocation)
     switch(shopLocation){
         case 'RA':
             localStorage.setItem('shopFilter','RA')
