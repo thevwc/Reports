@@ -381,6 +381,7 @@ function printReports(destination) {
     }
 
     if (document.getElementById('notesID').checked) {
+        alert('printWeeklyMonitorNotes (printReports)')
         reportSelected = true
         console.log(' ... before href to notes PDF ...')
         window.location.href = '/coordinatorReports/printWeeklyMonitorNotes?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PDF' 
@@ -395,7 +396,7 @@ function printReports(destination) {
     if (document.getElementById('subListID').checked) {
         reportSelected = true
         console.log(' ... before href to sub list PDF ...')
-        window.location.href = '/coordinatorReports/printWeeklyMonitorSubList?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PDF' 
+        window.location.href = '/coordinatorReports/printSubList?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PDF' 
         console.log(' ... after ... sub list PDF ...')
     }
 

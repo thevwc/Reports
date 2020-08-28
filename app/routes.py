@@ -323,7 +323,7 @@ def printWeeklyMonitorSchedule():
         # DEFINE PATH TO USE TO STORE PDF
         currentWorkingDirectory = os.getcwd()
         pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
-        filePath = pdfDirectoryPath + "/printWeeklyMonitorSchedule.pdf"
+        filePath = pdfDirectoryPath + "/rptWeeklyMonitorSchedule.pdf"
         options = { 
             "enable-local-file-access": None
         }
@@ -461,7 +461,7 @@ def printWeeklyMonitorContacts():
         # DEFINE PATH TO USE TO STORE PDF
         currentWorkingDirectory = os.getcwd()
         pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
-        filePath = pdfDirectoryPath + "/printWeeklyContacts.pdf"
+        filePath = pdfDirectoryPath + "/rptWeeklyContacts.pdf"
         options = { 
             "enable-local-file-access": None
         }
@@ -522,7 +522,7 @@ def printWeeklyMonitorNotes():
     
     if (destination == 'PDF') : 
         print('begin notes PDF creation') 
-        html =  render_template("rptWeeklyMonitorSchedule.html",\
+        html =  render_template("rptWeeklyNotes.html",\
             beginDate=beginDateSTR,endDate=endDateSTR,\
             locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
             todaysDate=todays_dateSTR
@@ -530,7 +530,7 @@ def printWeeklyMonitorNotes():
         print('finish creating html')
         currentWorkingDirectory = os.getcwd()
         pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
-        filePath = pdfDirectoryPath + "/printWeeklyNotes.pdf"    
+        filePath = pdfDirectoryPath + "/rptWeeklyNotes.pdf"    
         options = {"enable-local-file-access": None}
         print('before pdfkit statement')
         pdfkit.from_string(html,filePath, options=options)
@@ -911,43 +911,47 @@ def sendOrSaveEmail():
     msg.body = message
 
 
-    testingAttachments = False
+    testingAttachments = True 
 
     # ADD ATTACHMENTS
-    if testingAttachments:
-        #print ('.........................  ADD ATTACHMENTS  ............................')
+    print('testingAttachments - ',testingAttachments, ' type - ',type(testingAttachments))
+
+    if (testingAttachments == True):
+        print ('.........................  ADD ATTACHMENTS  ............................')
         # DETERMINE PATH TO PDF FILES
         currentWorkingDirectory = os.getcwd()
         pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
         
         # CHECK FOR A SCHEDULE REPORT
-        filePath = pdfDirectoryPath + "/printWeeklyMonitorSchedule.pdf"
+        filePath = pdfDirectoryPath + "/rptWeeklyMonitorSchedule.pdf"
         if (path.exists(filePath)):
-            #print(filePath + ' exists.')
+            print(filePath + ' exists.')
             msg.attach(filename=filePath,disposition="attachment",content_type="application/pdf")
 
         # CHECK FOR A CONTACTS REPORT
-        filePath = pdfDirectoryPath + "/printWeeklyMonitorContacts.pdf"
+        filePath = pdfDirectoryPath + "/rptWeeklyContacts.pdf"
         if (path.exists(filePath)):
-           #print(filePath + ' exists.')
+            print(filePath + ' exists.')
             msg.attach(filename=filePath,disposition="attachment",content_type="application/pdf")
 
         # CHECK FOR A NOTES REPORT
-        filePath = pdfDirectoryPath + "/printWeeklyMonitorNotes.pdf"
+        filePath = pdfDirectoryPath + "/rptWeeklyNotes.pdf"
         if (path.exists(filePath)):
-           #print(filePath + ' exists.')
+            print(filePath + ' exists.')
             msg.attach(filename=filePath,disposition="attachment",content_type="application/pdf")
 
         # CHECK FOR A SUBS REPORT
-        filePath = pdfDirectoryPath + "/printWeeklyMonitorSubs.pdf"
+        filePath = pdfDirectoryPath + "/rptSubList.pdf"
         if (path.exists(filePath)):
-           #print(filePath + ' exists.')
+            print(filePath + ' exists.')
             msg.attach(filename=filePath,disposition="attachment",content_type="application/pdf")
-        
+
+    
     # EITHER 'SEND' THE EMAIL OR 'SAVE AS DRAFT'
     if (action == 'SEND'):
         print('sending msg')
         mail.send(msg)
+        #RemovePDFfiles(pdfDirectoryPath)
         # flash ('Message sent.')
     else:
         #  save draft is not working 
@@ -955,31 +959,30 @@ def sendOrSaveEmail():
         #mail.Save(msg)
         print('saving msg')
         mail.save(msg)
+        #RemovePDFfiles(pdfDirectoryPath)
         # flash ('Draft saved.')
     return redirect(url_for('index'))
     #return 'SUCCESS'
 
 
+def RemovePDFfiles(pdfDirectoryPath):
     # REMOVE PDF FILES
-    testingRemove = False
-    if testingRemove :
-        print ('REMOVE PDF FILES ROUTINE')
+    
+    filePath = pdfDirectoryPath + "/rptWeeklyMonitorSchedule.pdf"
+    if (os.path.exists(filePath)):
+        os.remove(filePath)
+    
+    filePath = pdfDirectoryPath + "/rptWeeklyContacts.pdf"
+    if (os.path.exists(filePath)):
+        os.remove(filePath)
 
-        filePath = pdfDirectoryPath + "/printWeeklyMonitorSchedule.pdf"
-        if (os.path.exists(filePath)):
-            os.remove(filePath)
-        
-        filePath = pdfDirectoryPath + "/printWeeklyMonitorContacts.pdf"
-        if (os.path.exists(filePath)):
-            os.remove(filePath)
+    filePath = pdfDirectoryPath + "/rptWeeklyNotes.pdf"
+    if (os.path.exists(filePath)):
+        os.remove(filePath)
 
-        filePath = pdfDirectoryPath + "/printWeeklyMonitorNotes.pdf"
-        if (os.path.exists(filePath)):
-            os.remove(filePath)
-
-        filePath = pdfDirectoryPath + "/printWeeklyMonitorSubs.pdf"
-        if (os.path.exists(filePath)):
-            os.remove(filePath)
+    filePath = pdfDirectoryPath + "/rptSubList.pdf"
+    if (os.path.exists(filePath)):
+        os.remove(filePath)
 
 def TrainingNeeded(lastTrainingDate):
     #print('lastTrainingDate - ',lastTrainingDate,type(lastTrainingDate))
