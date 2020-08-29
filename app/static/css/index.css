@@ -54,7 +54,7 @@
     color:navy;
 }
 
-#prtReports {
+#printReportBtns {
     grid-area:prtRptArea;
     width:200px;
     padding-top:30px;
@@ -64,21 +64,21 @@
     color:navy;
     border:1px solid navy;
 }
-/* #prtReports .active {
+/* #printReportBtns .active {
     transform: translateY(3px);
     filter:saturate(50%);
   } */
-#prtReports ul {
+#printReportBtns ul {
     padding-left:0px;
     margin-left:25px;
     padding-right:0px;
     margin-right:0px;
 }
-#prtReports li {
+#printReportBtns li {
     padding-right:20px;
     margin-right:20px;
 }
-#prtReports button {
+#printReportBtns button {
     border-radius: 5px;
     margin-bottom:5px;
     width:150px;
@@ -86,7 +86,7 @@
     padding-right:0px;
 }
 
-#rptChoices {
+#attachmentCheckboxes {
     grid-area:rptNameArea;
     width:200px;
     padding-left: 20px;
@@ -94,7 +94,7 @@
     color:navy;
     border:1px solid navy
 } 
-#rptChoices form button {
+#attachmentCheckboxes form button {
     width:130px;
     margin-top:10px;
     margin-bottom:20px;
@@ -148,6 +148,7 @@
     padding-top:15px;
     padding-bottom: 40px;
     padding-left:20px;
+    margin-left: 20px;
     margin-right:10px;
     width:250px;
     height:200px;
@@ -203,9 +204,9 @@
     padding-top:0px;
     padding-bottom: 5px;
     padding-left:20px;
-    margin-right:10px;
-    width:250px;
-    height:200px;
+    margin-right:20px;
+    width:150px;
+    height:125px;
     color:navy;
     
     /* margin-top:0px;
@@ -214,7 +215,7 @@
     text-align:center; */
 }
 #emailButtons button {
-    width:200px;
+    width:125px;
     border-radius:5px;
     margin-top:5px;
 }

@@ -25,7 +25,6 @@ var curManagersEmail = ''
 var curMonitorsEmailAddresses = []
 var curMonitorsNames = []
 
-//console.log("... loading page ...")
 
 // SET INITIAL PAGE VALUES
 // SESSION STORAGE VARIABLES (Note - as global variable are erased on page load they need to be set to the last used values)
@@ -51,17 +50,15 @@ else {
     curCoordinatorID = sessionStorage.getItem('curCoordinatorID')
 }
 
-// SET BACKGROUND TO OPAQUE FOR:  REPORT CHOICES, PRINT/EMAIL CHOICE, SEND TO options, and EMAIL SEND/SAVE/CLEAR options
+// SET BACKGROUND TO OPAQUE FOR EMAIL SECTION
 if (!sessionStorage.getItem('processingEmail') ){
     sessionStorage.setItem('processingEmail','FALSE')
 }
 if (sessionStorage.getItem('processingEmail') == 'FALSE') {
     hideEmailForm()
-    hideReportChoices()
 }
 else {
     showEmailForm()
-    showReportChoices()
 }
 
 
@@ -71,17 +68,9 @@ document.getElementById("weekSelected").addEventListener("change", weekChanged);
 document.getElementById("weekSelected").addEventListener("click", weekChanged);
 document.getElementById("shopChoice").addEventListener("change", shopChanged);
 document.getElementById("coordChoice").addEventListener("change", coordinatorChanged);
-document.getElementById("selectpicker").addEventListener("click",memberSelectedRtn)
-document.getElementById("sendEmail").addEventListener("click",showEmailSections)
-// Note - both of these buttons link to the 'printReports' function
-//document.getElementById("printReportBtn").addEventListener("click",function(){printReports('PRINT');},false);
-document.getElementById("eMailReportBtn").addEventListener("click",function(){printReports('PDF');},false);
-
-// TOGGLE ACTIVE CLASS FOR 'PRINT' AND 'Email PDFs' BUTTONS
-// $('.prtOrEmailBtn').click(function() {
-//     $('button.prtOrEmailBtn.active').removeClass('active');
-//     $(this).addClass('active');
-// })
+document.getElementById("selectpicker").addEventListener("change",memberSelectedRtn)
+// document.getElementById("sendEmail").addEventListener("click",showEmailSections)
+document.getElementById("eMailReportBtn").addEventListener("click",function(){prepareAttachments();},false);
 
 // GET STAFFID THAT WAS STORED BY THE LOGIN ROUTINE
 if (!localStorage.getItem('staffID')) {
@@ -99,25 +88,20 @@ if (!localStorage.getItem('clientLocation')) {
 clientLocation = localStorage.getItem('clientLocation')
 
 // IF THERE IS NO SESSION VARIABLE THEN THIS MUST BE THE FIRST PAGE LOAD
-// AND THE EMAIL FORM SHOULD BE HIDDEN
-// if (sessionStorage.getItem('selectedIndex')) {
-//     document.getElementById('weekSelected').selectedIndex = sessionStorage.getItem('selectedIndex')
-// }
-// if (sessionStorage.getItem('weekSelected')) {
-//     curWeekDate = sessionStorage.getItem('weekSelected')
-//     console.log('sessionStorage var weekSelected exists')
-// }
-// else {
-//     hideEmailForm()
-//     console.log ('sessionStorage var weekSelected does NOT exist; execute hideEmailForm at page load')
-// }
+// AND THE PRINT BUTTONS AND ATTACHMENT CHOICES SHOULD BE HIDDEN
+if (sessionStorage.getItem('weekSelected')) {
+    curWeekDate = sessionStorage.getItem('weekSelected')
+}
+else {
+    hidePrintReports()
+    hideAttachmentChoices()
+    hideEmailForm()
+}
 
 // SET DROP DOWN MENU INITIAL VALUES
 setShopFilter(clientLocation)
 filterTheWeeksShown()
-// hideEmailForm()
-// hidePrintReports()
-// hideReportChoices()
+
 
 // END PAGE LOAD ROUTINES
 
@@ -125,13 +109,7 @@ filterTheWeeksShown()
 
 // BEGIN FUNCTIONS
 
-// TEST DATE COMPARISONS
-// $('#testDateCompareID').click(function() {
-//     window.location.href='/coordinatorReports/testDateCompare'
-// })
-
 // PRINT THE MONITOR DUTY WEEKLY SCHEDULE
-//<a id="printScheduleLink" class="btn btn-primary" style="display:block" href="/printWeeklyMonitorSchedule?date=2020-08-09&shop={curShopNumber}">Print Schedule</a> 
 $('#printMonitorScheduleID').click(function(){
     curWeekDate = document.getElementById('weekSelected').value
     if (curWeekDate == ''){
@@ -303,10 +281,7 @@ $('.eMailBtn').click(function() {
 
     // CALL APPROPRIATE FUNCTION
     if (this.id == 'sendBtn') {
-        sendOrSaveEmail('SEND')
-    }
-    if (this.id == 'saveBtn') {
-        sendOrSaveEmail('SAVE')
+        sendEmail()
     }
     if (this.id == 'clearBtn') {
         clearEmailData()
@@ -323,8 +298,7 @@ function clearEmailData() {
 }
 
 // THIS ROUTINE IS BEING REPLACED ....................................................
-function printReports(destination) {
-    alert('printReports routine')
+function prepareAttachments(destination) {
     // THE FOLLOWING LINE IS TEMPORARY;  THE VARIABLE curWeekDate IS BEING RESET BECAUSE AFTER THE THE WINDOW.PRINT COMMAND THE PAGE IS RELOADED
     curWeekDate = document.getElementById('weekSelected').value
     if (curWeekDate == '') {
@@ -336,83 +310,43 @@ function printReports(destination) {
         }
         return
     }
+    // SET FLAG TO INDICATE THAT THEIR IS AN EMAIL IN PROCESS; OTHERWISE PAGE LOAD WOULD HIDE THE EMAIL SECTIONS
+    sessionStorage.setItem('processingEmail','TRUE')
 
     // FILL EMAIL FIELDS
     shopInitials = document.getElementById('shopChoice').value
-    if (shopInitials == '') {
-        alert("Please select a location.")
-        return
-    }
-    if (shopInitials == 'RA') {
-        curShopNumber = '1'
-    }
-    else {
-        curShopNumber = '2'
-    }
-    sessionStorage.setItem('curShopNumber',curShopNumber)
-    // if (destination == 'PDF'){
-    //     showEmailForm()
+    // if (shopInitials == '') {
+    //     alert("Please select a location.")
     //     return
     // }
-    reportSelected = false
-    
-    // SET UP APPROPRIATE LINKS FOR scheduleBtn, notesBtn, contactsBtn, and subsBtn
-    // var scheduleBtn = document.getElementById('printScheduleLink');
-    // link='/coordinatorReports/printWeeklyMonitorSchedule?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=' + destination
-    // scheduleBtn.setAttribute('href', link)
-    
-    // var notesBtn = document.getElementById('printNotesLink');
-    // link='/coordinatorReports/printWeeklyMonitorNotes?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=' + destination
-    // notesBtn.setAttribute('href', link)
-
-    // var contactsBtn = document.getElementById('printContactsLink');
-    // link='/coordinatorReports/printWeeklyMonitorContacts?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=' + destination
-    // contactsBtn.setAttribute('href', link)
-
-    // var subsBtn = document.getElementById('printSubsLink');
-    // link='/coordinatorReports/printSubList?&destination=' + destination
-    // subsBtn.setAttribute('href', link)
-    
+    // if (shopInitials == 'RA') {
+    //     curShopNumber = '1'
+    // }
+    // else {
+    //     curShopNumber = '2'
+    // }
+    sessionStorage.setItem('curShopNumber',curShopNumber)
+     
     if (document.getElementById('scheduleID').checked) {
-        reportSelected = true
-        console.log(' ... before href to schedule PDF ...')
+        console.log('schedule checked')
         window.location.href = '/coordinatorReports/printWeeklyMonitorSchedule?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PDF' 
-        console.log(' ... after ... schedule PDF ...')
     }
-
     if (document.getElementById('notesID').checked) {
-        alert('printWeeklyMonitorNotes (printReports)')
-        reportSelected = true
-        console.log(' ... before href to notes PDF ...')
+        console.log('notes checked')
         window.location.href = '/coordinatorReports/printWeeklyMonitorNotes?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PDF' 
-        console.log(' ... after ... notes PDF ...')
     }
     if (document.getElementById('contactsID').checked) {
-        reportSelected = true
-        console.log(' ... before href to contacts PDF ...')
+        console.log('contacts checked')
         window.location.href = '/coordinatorReports/printWeeklyMonitorContacts?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PDF' 
-        console.log(' ... after ... contacts PDF ...')
     }
     if (document.getElementById('subListID').checked) {
-        reportSelected = true
-        console.log(' ... before href to sub list PDF ...')
+        console.log('sub list checked')
         window.location.href = '/coordinatorReports/printSubList?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PDF' 
-        console.log(' ... after ... sub list PDF ...')
     }
 
-    if (reportSelected != true) {
-        alert('No reports have been selected.')
-        return
-    }
+    showEmailForm()
 }
 
-function myFunction() {
-    document.getElementById("demo").innerHTML = "Hello World";
-  }
-
-// function emailReports() {
-//     alert('Not implemented')
-// }
 
 function shopChanged() {
     setShopFilter(this.value)
@@ -420,7 +354,6 @@ function shopChanged() {
 }
 
 function setShopFilter(shopLocation) {
-    //console.log('setShopFilter contains - '+ shopLocation)
     switch(shopLocation){
         case 'RA':
             localStorage.setItem('shopFilter','RA')
@@ -444,7 +377,6 @@ function setShopFilter(shopLocation) {
             curShopNumber = '1'
             curShopName = shopNames[0]
     } 
-    //alert('shopName is now - '+ curShopName)  
 }
 
 
@@ -479,20 +411,19 @@ function filterTheWeeksShown() {
 }
   
 function weekChanged () {
-
-    // SAVE SELECTED OPTION INDEX TO BE USED DURING PAGE LOAD
-    sessionStorage.setItem('selectedWeekIndex',this.selectedIndex)
     if (this.selectedIndex == 0) {
         return
     }
-    console.log('weekChanged routine; this.value - ' + this.value + ' selectedIndex - ' + this.selectedIndex)
+    // SAVE SELECTED OPTION INDEX TO BE USED DURING PAGE LOAD
+    sessionStorage.setItem('weekSelected',this.value)
     curWeekDate = this.value
     sessionStorage.setItem('curWeekDate',this.value)
 
     // HIDE EMAIL FORM
     sessionStorage.setItem('processingEmail','FALSE')
     hideEmailForm()
-    hideReportChoices()
+    showPrintReports()
+    showAttachmentChoices()
 
     // CLEAR REPORTS CHECKED
     document.getElementById('scheduleID').checked = false
@@ -536,7 +467,8 @@ function weekChanged () {
                 document.getElementById('coordHdgEmailLink').href = '#'
                 document.getElementById('coordHdgEmailLink').innerHTML = ''
             }
-            console.log('curShopNumber - ' + curShopNumber)
+            //console.log('curShopNumber - ' + curShopNumber)
+
             // SET UP LINKS FOR PRINT SCHEDULE BUTTON
             prtSchedule = document.getElementById("printMonitorScheduleID")
             address = "/coordinatorReports/printWeeklyMonitorSchedule?date="+ curWeekDate + "&shop=" + curShopNumber + "&destination=" + 'PRINT'
@@ -561,13 +493,12 @@ function weekChanged () {
             lnk = "window.location.href='" + address +"'"
             prtSubList.setAttribute("onclick",lnk)
 
-            console.log('call showPrintReports from weekChanged routine') 
             
             showPrintReports()
         },
         error: function (jqXHR, textStatus, errorThrown)
         {
-            alert('ERROR from getCoordinatorData' + textStatus)
+            alert('ERROR from getCoordinatorData\n textStatus -' + textStatus + '\n errorThrown - ' + errorThrown)
         }
         
     });
@@ -583,7 +514,6 @@ function weekChanged () {
             alert("Please select a date.")
             return 
         } 
-
         selectedMember = this.value
         lastEight = selectedMember.slice(-8)
         curMemberID= lastEight.slice(1,7)
@@ -614,34 +544,31 @@ function weekChanged () {
             
             error: function (jqXHR, textStatus, errorThrown)
             {
-                alert('ERROR from getMembersEmailAddress\n'+textStatus+'\n' + errorThrown)
+                alert('ERROR from getMembersEmailAddress\ntextStatus - ' + textStatus + '\nerrorThrown - ' + errorThrown)
             }
         })
     }
 
 
-    function sendOrSaveEmail(action) {
-        alert('action - '+ action)
-        attachments = []
-        // if scheduleID checked, append 'SCHEDULE'
-        if (document.getElementById('scheduleID').checked)
-            attachments.push('SCHEDULE')    
-        if (document.getElementById('notesID').checked)
-            attachments.push('NOTES')
-        if (document.getElementById('contactsID').checked)
-            attachments.push('CONTACTS')
-        if (document.getElementById('subListID').checked)
-            attachments.push('SUBLIST')
-        alert('attachments selected - ' + attachments)
+    function sendEmail() {
+        // attachments = []
+        
+        // if (document.getElementById('scheduleID').checked)
+        //     attachments.push('SCHEDULE')    
+        // if (document.getElementById('notesID').checked)
+        //     attachments.push('NOTES')
+        // if (document.getElementById('contactsID').checked)
+        //     attachments.push('CONTACTS')
+        // if (document.getElementById('subListID').checked)
+        //     attachments.push('SUBLIST')
+        // alert('attachments selected - ' + attachments)
         $.ajax({
-            url : "/coordinatorReports/sendOrSaveEmail",
+            url : "/coordinatorReports/sendEmail",
             type: "GET",
             data : {
-                action: action,
                 recipient:document.getElementById('eMailRecipientID').value,
                 subject:document.getElementById('eMailSubjectID').value,
-                message:document.getElementById('eMailMsgID').value,
-                attachments:attachments
+                message:document.getElementById('eMailMsgID').value
             },
             success: function(data, textStatus, jqXHR)
             {
@@ -652,33 +579,19 @@ function weekChanged () {
             },
             error: function (jqXHR, textStatus, errorThrown)
             {
-                alert('ERROR from eMailCoordinator')
+                alert('ERROR from eMailCoordinator\ntextStatus - '+textStatus+'\nerrorThrown - '+errorThrown)
             }
         });
     }
     
-function showEmailSections() {
-    sessionStorage.setItem('processingEmail','TRUE')
-    showReportChoices()
-    showEmailForm()
-    // HIDE PRINT BUTTONS
-    document.getElementById('printMonitorScheduleID').style.opacity=.2;
-    document.getElementById('printMonitorNotesID').style.opacity=.2;
-    document.getElementById('printMonitorContactsID').style.opacity=.2;
-    document.getElementById('printMonitorSubListID').style.opacity=.2;
-}
 
 function showEmailForm() {
-    //document.getElementById('rptChoices').style.opacity=1;
-    //document.getElementById('prtReports').style.opacity=1;
     document.getElementById('emailBody').style.opacity=1;
     document.getElementById('sendToOptions').style.opacity=1;
     document.getElementById('emailButtons').style.opacity=1;
 }
 
 function hideEmailForm() {
-    //document.getElementById('rptChoices').style.opacity=.2;
-    //document.getElementById('prtReports').style.opacity=.2;
     document.getElementById('emailBody').style.opacity=.2;
     document.getElementById('sendToOptions').style.opacity=.2;
     document.getElementById('emailButtons').style.opacity=.2;
@@ -686,24 +599,24 @@ function hideEmailForm() {
 
 function showPrintReports() {
     console.log('showing print reports section')
-    document.getElementById('prtReports').style.opacity=1;
+    document.getElementById('printReportBtns').style.opacity=1;
     document.getElementById('printMonitorScheduleID').style.opacity=1;
     document.getElementById('printMonitorNotesID').style.opacity=1;
     document.getElementById('printMonitorContactsID').style.opacity=1;
     document.getElementById('printMonitorSubListID').style.opacity=1;
 }
 function hidePrintReports() {
-    document.getElementById('prtReports').style.opacity=.2;
+    document.getElementById('printReportBtns').style.opacity=.2;
     document.getElementById('printMonitorScheduleID').style.opacity=.2;
     document.getElementById('printMonitorNotesID').style.opacity=.2;
     document.getElementById('printMonitorContactsID').style.opacity=.2;
     document.getElementById('printMonitorSubListID').style.opacity=.2;
 }
-function showReportChoices() {
-    document.getElementById('rptChoices').style.opacity=1;
+function showAttachmentChoices() {
+    document.getElementById('attachmentCheckboxes').style.opacity=1;
 }
-function hideReportChoices() {
-    document.getElementById('rptChoices').style.opacity=.2;
+function hideAttachmentChoices() {
+    document.getElementById('attachmentCheckboxes').style.opacity=.2;
 }
 
 

@@ -1,4 +1,4 @@
-{% extends 'bootstrap/base.html' %}
+{% extends 'base.html' %}
 
 {% block styles %}
     {{super()}}
@@ -49,24 +49,18 @@
             </select><br><br>
         </div>
 
-        <div id="prtReports">
-            <!-- <button type="button" id="printReportBtn" style="width:150px;margin-left:20px"class="prtOrEmailBtn btn-sm btn-primary">PRINT</button>   -->
+        <div id="printReportBtns">
             <!-- PRINT BUTTONS TO PROVIDE LINKS TO ROUTES -->
             <ul style="list-style-type:none;">
-                <li><button id='sendEmail' type="button" class='btn btn-sm btn-success'>SEND EMAIL</button></li>                
+                <!-- <li><button id='sendEmail' type="button" class='btn btn-sm btn-success'>SEND EMAIL</button></li>                 -->
                 <li><button id='printMonitorScheduleID' type="button" class='btn btn-sm btn-primary'>Print Schedule</button></li>
                 <li><button id='printMonitorNotesID' type="button" class='btn btn-sm btn-primary'>Print Notes</button></li>
                 <li><button id='printMonitorContactsID' type="button" class='btn btn-sm btn-primary'>Print Contacts</button></li>
                 <li><button id='printMonitorSubListID' type="button" class='btn btn-sm btn-primary'>Print Sub List</button></li>
-                <!-- <li><button id='testDateCompareID' type="button" class='btn btn-sm btn-primary'>Test Date Compare</button></li> -->
             </ul>
-            <!-- <a id="printScheduleLink" class="btn btn-primary" style="display:block" href="/printWeeklyMonitorSchedule?date=2020-08-09&shop={curShopNumber}">Print Schedule</a>
-            <a id="printNotesLink" style="display:block" href="/printWeeklyMonitorNotes?date=2020-08-09&shop=1">Print Notes</a>
-            <a id="printContactsLink" style="display:block" href="/printWeeklyMonitorContacts?date=2020-08-09&shop={curShopNumber}">Print Contacts</a>
-            <a id="printSubsLink" style="display:block" href="/printWeeklyMonitorSubs?date=2020-08-09&shop={curShopNumber}">Print Subs</a>    -->
         </div>
         
-        <div id="rptChoices">
+        <div id="attachmentCheckboxes">
             <form id='reportsFormID' class="reportsForm" action="">
                 <p>Report(s) to email ...</p>
                 <input type="checkbox" id="scheduleID" name="reports" value="rptSchedule">
@@ -77,7 +71,7 @@
                 <label for="contacts"> Contacts</label><br>
                 <input type="checkbox" id="subListID" name="reports" value="rptSubs">
                 <label for="subs"> Available subs</label><br> 
-                <button type="button" id="eMailReportBtn" class="prtOrEmailBtn btn btn-sm btn-primary">PREPARE EMAIL</button>   
+                <button type="button" id="eMailReportBtn" class="btn btn-sm btn-primary">START EMAIL</button>   
             </form>
         </div>   
 
@@ -150,7 +144,6 @@
             <div id="emailButtons" class="emailClass btn-group-vertical btn-group">
                 <span>Actions:</span>
                 <button id='sendBtn' type="button" name='emailOption' class='eMailBtn btn-sm btn-primary'>Send</button>
-                <button id='saveBtn' type="button" name='emailOption' class='eMailBtn btn-sm btn-primary'>Save Draft</button> 
                 <button id='clearBtn' type="button" name='emailOption' class='eMailBtn btn-sm btn-primary rounded'>Clear</button> 
             </div>
         </div> <!-- END OF EMAIL RECIPIENTS SECTION -->
