@@ -19,7 +19,7 @@ var curWeekDisplayDate = ''
 var curCoordinatorName = '' 
 var curCoordinatorEmail = ''
 var curCoordinatorPhone = ''
-var curManagersEmail = ''
+//var curManagersEmail = ''
 
 // UPDATED FROM SEND TO SELECTION OF 'COORDINATOR AND MONITORS'
 var curMonitorsEmailAddresses = []
@@ -87,12 +87,34 @@ if (!localStorage.getItem('clientLocation')) {
 }
 clientLocation = localStorage.getItem('clientLocation')
 
-// IF THERE IS NO SESSION VARIABLE THEN THIS MUST BE THE FIRST PAGE LOAD
-// AND THE PRINT BUTTONS AND ATTACHMENT CHOICES SHOULD BE HIDDEN
+// IS THIS THE INITIAL PAGE LOAD?
+// IF THERE IS NO SESSION VARIABLE FOR 'weekSelected' THEN THIS MUST BE THE FIRST PAGE LOAD.
+// AND THE PRINT BUTTONS AND ATTACHMENT CHOICES SHOULD BE HIDDEN.
+// 
 if (sessionStorage.getItem('weekSelected')) {
+    // REDIRECTS, NOT INITIAL PAGE LOAD SETTINGS
+    // Restore variables
     curWeekDate = sessionStorage.getItem('weekSelected')
+    curCoordinatorID = sessionStorage.getItem('coordID')
+    curCoordinatorName = sessionStorage.getItem('coordName')
+    curCoordinatorEmail = sessionStorage.getItem('coordEmail')
+    curCoordinatorPhone = sessionStorage.getItem('coordPhone')
+    //curManagersEmail = sessionStorage.getItem('coordManagersEmail')
+    curWeekDisplayDate = sessionStorage.getItem('curWeekDisplayDate')
+    
+    // Restore drop down list indexes
+    document.getElementById('coordChoice').selectedIndex=sessionStorage.getItem('coordIndex')
+    document.getElementById('weekSelected').selectedIndex = sessionStorage.getItem('weekIndex')
+    
+    //curCoordinatorID = document.getElementById('coordChoice').value
+   
+    buildCoordinatorLine()
+     
 }
 else {
+    // INITIAL PAGE LOAD SETTINGS
+    document.getElementById('coordChoice').selectedIndex=0
+    document.getElementById('weekSelected').selectedIndex=0
     hidePrintReports()
     hideAttachmentChoices()
     hideEmailForm()
@@ -100,8 +122,12 @@ else {
 
 // SET DROP DOWN MENU INITIAL VALUES
 setShopFilter(clientLocation)
-filterTheWeeksShown()
+//filterTheWeeksShown()
 
+
+// alert('curShopNumber - '+curShopNumber + '\ncurShopName - '+ curShopName + '\ncurCoordinatorID - '+curCoordinatorID + '\ncurWeekDate - '+curWeekDate
+// +'\ncurCoordinatorName - '+curCoordinatorName+'\ncurCoordinatorEmail - '+curCoordinatorEmail +'\ncurCoordinatorPhone - '+   curCoordinatorPhone
+// +'\ncurWeekDisplayDate - '+curWeekDisplayDate)
 
 // END PAGE LOAD ROUTINES
 
@@ -179,7 +205,17 @@ $('#coordinatorOnlyID').click(function(){
         alert("Please select a date.")
         return 
     }
-    clearEmailData() 
+    clearEmailData()
+
+    // INSERT RECIPIENT
+    document.getElementById('eMailRecipientID').value = curCoordinatorEmail
+            
+    // BUILD SUBJECT LINE
+    subject = "Monitor Duty for Week Of " + curWeekDisplayDate + " at " + curShopName
+    document.getElementById('eMailSubjectID').value=subject 
+
+
+    // GET TEXT TO BE USED IN MESSAGE
     $.ajax({
         url : "/coordinatorReports/eMailCoordinator",
         type: "GET",
@@ -188,14 +224,8 @@ $('#coordinatorOnlyID').click(function(){
             shopNumber: curShopNumber},
         success: function(data, textStatus, jqXHR)
         {
-            // INSERT RECIPIENT
-            document.getElementById('eMailRecipientID').value = curCoordinatorEmail
             
-            // BUILD SUBJECT LINE
-            subject = "Monitor Duty for Week Of " + curWeekDisplayDate + " at " + curShopName
-            document.getElementById('eMailSubjectID').value=subject 
-
-            // WRITE MESSAGE
+            // BUILD MESSAGE, INCLUDING TEXT RETRIEVED FROM EMAIL MESSAGE TABLE
             message = "DO NOT SEND EMAILS REGARDING MONITOR DUTY TO THE WORKSHOP.\n\n"
             message += "CALL OR EMAIL ACCORDING TO THE INSTRUCTIONS BELOW.\n"
             message += "THIS SCHEDULE IS FOR THE " + curShopName.toUpperCase() + " LOCATION\n\n"
@@ -207,7 +237,7 @@ $('#coordinatorOnlyID').click(function(){
         },
         error: function (jqXHR, textStatus, errorThrown)
         {
-            alert('ERROR from eMailCoordinator')
+            alert('ERROR from eMailCoordinator\ntextStatus - '+ textStatus + '\nerrorThrown - '+errorThrown)
         }
     });
 })
@@ -296,9 +326,11 @@ function clearEmailData() {
     document.getElementById('eMailSubjectID').value=''
     document.getElementById('eMailMsgID').value=''
 }
-
-// THIS ROUTINE IS BEING REPLACED ....................................................
+// PREPARE PDF FILES FOR ATTACHMENT TO EMAIL
 function prepareAttachments(destination) {
+    // TURN ON SPINNER IN BUTTON
+    document.getElementById("spinnerElement").style.display='block'
+
     // THE FOLLOWING LINE IS TEMPORARY;  THE VARIABLE curWeekDate IS BEING RESET BECAUSE AFTER THE THE WINDOW.PRINT COMMAND THE PAGE IS RELOADED
     curWeekDate = document.getElementById('weekSelected').value
     if (curWeekDate == '') {
@@ -314,7 +346,7 @@ function prepareAttachments(destination) {
     sessionStorage.setItem('processingEmail','TRUE')
 
     // FILL EMAIL FIELDS
-    shopInitials = document.getElementById('shopChoice').value
+    //shopInitials = document.getElementById('shopChoice').value
     // if (shopInitials == '') {
     //     alert("Please select a location.")
     //     return
@@ -326,25 +358,29 @@ function prepareAttachments(destination) {
     //     curShopNumber = '2'
     // }
     sessionStorage.setItem('curShopNumber',curShopNumber)
-     
+    
+    // CREATE MONITOR SCHEDULE REPORT PDF
     if (document.getElementById('scheduleID').checked) {
         console.log('schedule checked')
         window.location.href = '/coordinatorReports/printWeeklyMonitorSchedule?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PDF' 
     }
+    // CREATE MONITOR NOTES PDF
     if (document.getElementById('notesID').checked) {
-        console.log('notes checked')
         window.location.href = '/coordinatorReports/printWeeklyMonitorNotes?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PDF' 
     }
+    // CREATE MONITOR CONTACTS PDF
     if (document.getElementById('contactsID').checked) {
-        console.log('contacts checked')
         window.location.href = '/coordinatorReports/printWeeklyMonitorContacts?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PDF' 
     }
+    // CREATE SUB LIST PDF
     if (document.getElementById('subListID').checked) {
-        console.log('sub list checked')
         window.location.href = '/coordinatorReports/printSubList?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PDF' 
     }
 
     showEmailForm()
+
+    // TURN OFF SPINNER  (may need timer or other logic to detect when PDF's have been created)
+    document.getElementById("spinnerElement").style.display='none'
 }
 
 
@@ -408,13 +444,17 @@ function filterTheWeeksShown() {
             continue
         }
     }
+    document.getElementById('weekSelected').selectedIndex = 0
 }
   
 function weekChanged () {
+    console.log('... begin weekChanged routine ')
+    // DID THE USER CLICK ON 'Select a date ... '?
     if (this.selectedIndex == 0) {
         return
     }
     // SAVE SELECTED OPTION INDEX TO BE USED DURING PAGE LOAD
+    sessionStorage.setItem('weekIndex',this.selectedIndex)
     sessionStorage.setItem('weekSelected',this.value)
     curWeekDate = this.value
     sessionStorage.setItem('curWeekDate',this.value)
@@ -437,61 +477,70 @@ function weekChanged () {
             shopNumber: curShopNumber},
         success: function(data, textStatus, jqXHR)
         {
+            console.log('... return from getCoordinatorData ')
             curCoordinatorID = data.coordID 
             curCoordinatorName = data.coordName
             curCoordinatorEmail = data.coordEmail
             curCoordinatorPhone = data.coordPhone
-            curManagersEmail = data.curManagersEmail
-            curWeekDisplayDate = data.displayDate
+            //curManagersEmail = data.curManagersEmail
+            curWeekDisplayDate = data.curWeekDisplayDate
+            sessionStorage.setItem('coordID',data.coordID)
+            sessionStorage.setItem('coordName',data.coordName)
+            sessionStorage.setItem('coordEmail',data.coordEmail)
+            sessionStorage.setItem('coordPhone',data.coordPhone)
+            //sessionStorage.setItem('coordManagersEmail',data.coordManagersEmail)
+            sessionStorage.setItem('curWeekDisplayDate',data.curWeekDisplayDate)
+            
 
             // BUILD MESSAGE FOR coordinatorInfoID
-            if (curCoordinatorID != '') {
-                document.getElementById('coordHdgBeforeDate').innerHTML = "The coordinator for the week of " 
-                document.getElementById('coordHdgDate').innerHTML = curWeekDisplayDate 
-                document.getElementById('coordHdgBeforeName').innerHTML = ' is ' 
-                document.getElementById('coordHdgName').innerHTML = curCoordinatorName 
-                document.getElementById('coordHdgBeforePhone').innerHTML = ' and may be contacted at '
-                document.getElementById('coordHdgPhone').innerHTML = curCoordinatorPhone 
-                document.getElementById('coordHdgBeforeEmail').innerHTML = ' or by email at '
-                document.getElementById('coordHdgEmailLink').href = 'mailto:' + curCoordinatorEmail
-                document.getElementById('coordHdgEmailLink').innerHTML = curCoordinatorEmail
-            }
-            else {
-                document.getElementById('coordHdgBeforeDate').innerHTML = "A coordinator has not been assigned for this week."
-                document.getElementById('coordHdgDate').innerHTML = ''
-                document.getElementById('coordHdgBeforeName').innerHTML = '' 
-                document.getElementById('coordHdgName').innerHTML = ''
-                document.getElementById('coordHdgBeforePhone').innerHTML = ''
-                document.getElementById('coordHdgPhone').innerHTML = ''
-                document.getElementById('coordHdgBeforeEmail').innerHTML = ''
-                document.getElementById('coordHdgEmailLink').href = '#'
-                document.getElementById('coordHdgEmailLink').innerHTML = ''
-            }
+            buildCoordinatorLine()
+            // if (curCoordinatorID != '') {
+            //     document.getElementById('coordHdgBeforeDate').innerHTML = "The coordinator for the week of " 
+            //     document.getElementById('coordHdgDate').innerHTML = curWeekDisplayDate 
+            //     document.getElementById('coordHdgBeforeName').innerHTML = ' is ' 
+            //     document.getElementById('coordHdgName').innerHTML = curCoordinatorName 
+            //     document.getElementById('coordHdgBeforePhone').innerHTML = ' and may be contacted at '
+            //     document.getElementById('coordHdgPhone').innerHTML = curCoordinatorPhone 
+            //     document.getElementById('coordHdgBeforeEmail').innerHTML = ' or by email at '
+            //     document.getElementById('coordHdgEmailLink').href = 'mailto:' + curCoordinatorEmail
+            //     document.getElementById('coordHdgEmailLink').innerHTML = curCoordinatorEmail
+            // }
+            // else {
+            //     document.getElementById('coordHdgBeforeDate').innerHTML = "A coordinator has not been assigned for this week."
+            //     document.getElementById('coordHdgDate').innerHTML = ''
+            //     document.getElementById('coordHdgBeforeName').innerHTML = '' 
+            //     document.getElementById('coordHdgName').innerHTML = ''
+            //     document.getElementById('coordHdgBeforePhone').innerHTML = ''
+            //     document.getElementById('coordHdgPhone').innerHTML = ''
+            //     document.getElementById('coordHdgBeforeEmail').innerHTML = ''
+            //     document.getElementById('coordHdgEmailLink').href = '#'
+            //     document.getElementById('coordHdgEmailLink').innerHTML = ''
+            // }
             //console.log('curShopNumber - ' + curShopNumber)
 
             // SET UP LINKS FOR PRINT SCHEDULE BUTTON
-            prtSchedule = document.getElementById("printMonitorScheduleID")
-            address = "/coordinatorReports/printWeeklyMonitorSchedule?date="+ curWeekDate + "&shop=" + curShopNumber + "&destination=" + 'PRINT'
-            lnk = "window.location.href='" + address +"'"
-            prtSchedule.setAttribute("onclick",lnk)
+            // prtSchedule = document.getElementById("printMonitorScheduleID")
+            // address = "/coordinatorReports/printWeeklyMonitorSchedule?date="+ curWeekDate + "&shop=" + curShopNumber + "&destination=" + 'PRINT'
+            // lnk = "window.location.href='" + address +"'"
+            // prtSchedule.setAttribute("onclick",lnk)
 
             // SET UP LINKS FOR PRINT NOTES BUTTON
-            prtNotes = document.getElementById("printMonitorNotesID")
-            address = "/coordinatorReports/printWeeklyMonitorNotes?date="+ curWeekDate + "&shop=" + curShopNumber + "&destination=" + 'PRINT'
-            lnk = "window.location.href='" + address +"'"
-            prtNotes.setAttribute("onclick",lnk)
+            // prtNotes = document.getElementById("printMonitorNotesID")
+            // address = "/coordinatorReports/printWeeklyMonitorNotes?date="+ curWeekDate + "&shop=" + curShopNumber + "&destination=" + 'PRINT'
+            // lnk = "window.location.href='" + address +"'"
+            // prtNotes.setAttribute("onclick",lnk)
 
             // SET UP LINKS FOR PRINT CONTACTS BUTTON
-            prtContacts = document.getElementById("printMonitorContactsID")
-            address = "/coordinatorReports/printWeeklyMonitorContacts?date="+ curWeekDate + "&shop=" + curShopNumber + "&destination=" + 'PRINT'
-            lnk = "window.location.href='" + address +"'"
-            prtContacts.setAttribute("onclick",lnk)
+            // prtContacts = document.getElementById("printMonitorContactsID")
+            // address = "/coordinatorReports/printWeeklyMonitorContacts?date="+ curWeekDate + "&shop=" + curShopNumber + "&destination=" + 'PRINT'
+            // lnk = "window.location.href='" + address +"'"
+            // prtContacts.setAttribute("onclick",lnk)
 
             // SET UP LINKS FOR PRINT SUB LIST BUTTON
-            prtSubList = document.getElementById("printMonitorSubListID")
-            address = "/coordinatorReports/printSubList?date="+ curWeekDate + "&shop=" + curShopNumber + "&destination=" + 'PRINT'
-            lnk = "window.location.href='" + address +"'"
-            prtSubList.setAttribute("onclick",lnk)
+            // prtSubList = document.getElementById("printMonitorSubListID")
+            // address = "/coordinatorReports/printSubList?date="+ curWeekDate + "&shop=" + curShopNumber + "&destination=" + 'PRINT'
+            // lnk = "window.location.href='" + address +"'"
+            // prtSubList.setAttribute("onclick",lnk)
 
             
             showPrintReports()
@@ -506,6 +555,7 @@ function weekChanged () {
 
     function coordinatorChanged () {
         curCoordinatorID = this.value
+        sessionStorage.setItem('coordIndex',this.selectedIndex)
         filterTheWeeksShown()
     }
 
@@ -619,5 +669,32 @@ function hideAttachmentChoices() {
     document.getElementById('attachmentCheckboxes').style.opacity=.2;
 }
 
+function buildCoordinatorLine() {
+    // BUILD MESSAGE FOR coordinatorInfoID
+    console.log('curCoordinatorID at buildCoordinatorLine - '+ curCoordinatorID)
+    if (curCoordinatorID != '') {
 
+        document.getElementById('coordHdgBeforeDate').innerHTML = "The coordinator for the week of " 
+        document.getElementById('coordHdgDate').innerHTML = curWeekDisplayDate 
+        document.getElementById('coordHdgBeforeName').innerHTML = ' is ' 
+        document.getElementById('coordHdgName').innerHTML = curCoordinatorName 
+        document.getElementById('coordHdgBeforePhone').innerHTML = ' and may be contacted at '
+        document.getElementById('coordHdgPhone').innerHTML = curCoordinatorPhone 
+        document.getElementById('coordHdgBeforeEmail').innerHTML = ' or by email at '
+        document.getElementById('coordHdgEmailLink').href = 'mailto:' + curCoordinatorEmail
+        document.getElementById('coordHdgEmailLink').innerHTML = curCoordinatorEmail
+    }
+    else {
+        document.getElementById('coordHdgBeforeDate').innerHTML = "A coordinator has not been assigned for this week."
+        document.getElementById('coordHdgDate').innerHTML = ''
+        document.getElementById('coordHdgBeforeName').innerHTML = '' 
+        document.getElementById('coordHdgName').innerHTML = ''
+        document.getElementById('coordHdgBeforePhone').innerHTML = ''
+        document.getElementById('coordHdgPhone').innerHTML = ''
+        document.getElementById('coordHdgBeforeEmail').innerHTML = ''
+        document.getElementById('coordHdgEmailLink').href = '#'
+        document.getElementById('coordHdgEmailLink').innerHTML = ''
+    }
+    
+}
 // END OF FUNCTIONS

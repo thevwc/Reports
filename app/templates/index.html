@@ -4,8 +4,7 @@
     {{super()}}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 {% endblock %}
-
-{% block content %} 
+{% block app_content %}
     <div id="parent">
         <div id="hdg">
             <h2>MONITOR COORDINATOR REPORTS</h2>  
@@ -71,7 +70,10 @@
                 <label for="contacts"> Contacts</label><br>
                 <input type="checkbox" id="subListID" name="reports" value="rptSubs">
                 <label for="subs"> Available subs</label><br> 
-                <button type="button" id="eMailReportBtn" class="btn btn-sm btn-primary">START EMAIL</button>   
+                <button type="button" id="eMailReportBtn" class="spinner btn btn-sm btn-primary">
+                    <span id="spinnerElement" class="spinner-border spinner-border-sm" style=display:none></span>
+                    PREPARE PDF's
+                </button>   
             </form>
         </div>   
 

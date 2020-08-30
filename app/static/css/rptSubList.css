@@ -10,6 +10,7 @@
 	.pageButtons {
 		float:right;
 		margin-right:20px;
+		padding-right:20px;
 	} 
 
    	h1, h2, h3 {
@@ -68,7 +69,8 @@
 		display:grid;
 		grid-template-areas: "detailRow1Area"
 							"detailRow2Area"
-							"detailRow3Area";
+							"detailRow3Area"
+							;
 		
 	}
 	#detailRow1 {
@@ -76,6 +78,7 @@
 		grid-template-columns: 250px 150px 275px 325px auto;
 		padding-left:50px;
 		padding-right:100px;
+		margin-right:20px;
 		padding-top:0px;
 		padding-bottom:0px;
 		margin-top:0px;

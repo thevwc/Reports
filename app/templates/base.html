@@ -10,7 +10,6 @@
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
     {% for category, message in messages %}
-
         {% if category == "" %}            
         <div class="alert alert-success alert-dismissible col-lg-12" role="alert">
             <span> {{ message }}</span>

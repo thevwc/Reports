@@ -30,16 +30,6 @@ mail=Mail(app)
 @app.route('/coordinatorReports/index/')
 @app.route('/coordinatorReports/index', methods=['GET'])
 def index():
-    # testMail = False
-    # if testMail:
-    #     msg = Message('Hello', sender = 'hartl1r@gmail.com', recipients = ['hartl1r@gmail.com'])
-    #     msg.body = "This is the email body"
-    #     mail.send(msg)
-    #     return "Sent"
-
-    # GET REQUEST
-    
-    flash('this is a test','success')
 
     # BUILD ARRAY OF NAMES FOR DROPDOWN LIST OF COORDINATORS
     coordNames=[]
@@ -726,16 +716,11 @@ def printSubList():
 
 @app.route("/coordinatorReports/eMailCoordinator", methods=["GET","POST"])
 def eMailCoordinator():
-
+    print('... begin /coordinatorReports/eMailCoordinator')
     # THIS ROUTINE ONLY RETURNS THE EMAIL MESSAGE TO BE USED FOR COORDINATORS ONLY EMAILS
     # ___________________________________________________________________________________
 
-    # GET WEEKOF DATE
-    # RETURN COORDINATOR NAME, EMAIL, PHONE
-    # weekOf = request.args.get('weekOf')
-    # shopNumber = request.args.get('shopNumber')
-
-   # LOOK UP EMAIL MESSAGE FOR COORDINATOR
+   # LOOK UP MESSAGE TO BE USED FOR EMAILS TO COORDINATORS
     sqlEmailMsgs = "SELECT [Email Name] as eMailMsgName, [Email Message] as eMailMessage FROM tblEmail_Messages "
     sqlEmailMsgs += "WHERE [Email Name] = 'Email To Coordinators'"
     eMailMessages = db.engine.execute(sqlEmailMsgs)
@@ -781,7 +766,7 @@ def eMailCoordinatorAndMonitors():
 
     # LOOK UP EMAIL MESSAGE FOR COORDINATOR
     sqlEmailMsgs = "SELECT [Email Name] as eMailMsgName, [Email Message] as eMailMessage FROM tblEmail_Messages "
-    sqlEmailMsgs += "WHERE [Email Name] = 'Email To Coordinator'"
+    sqlEmailMsgs += "WHERE [Email Name] = 'Email To Coordinators'"
     eMailMessages = db.engine.execute(sqlEmailMsgs)
     for e in eMailMessages:
         eMailMsg=e.eMailMessage
@@ -802,7 +787,7 @@ def getMembersEmailAddress():
     # LOOK UP EMAIL MESSAGE FOR MEMBER
     eMailMsg=db.session.query(EmailMessages.eMailMessage).filter(EmailMessages.eMailMsgName == 'Email To Members').scalar()
     
-    return jsonify(eMail=eMail,eMailMsg=eMailMsg,displayDate=displayDate)
+    return jsonify(eMail=eMail,eMailMsg=eMailMsg,curWeekDisplayDate=displayDate)
 
 
 # THE FOLLOWING ROUTINE IS CALLED WHEN THE USER SELECTS A WEEK
@@ -844,7 +829,7 @@ def getCoordinatorData():
         coordName=coordName,
         coordEmail=coordEmail,
         coordPhone=coordPhone,
-        displayDate=displayDate
+        curWeekDisplayDate=displayDate
     )
 
 @app.route("/coordinatorReports/sendEmail", methods=["GET","POST"])
@@ -856,15 +841,16 @@ def sendEmail():
    
     # GET RECIPIENT
     recipient = request.args.get('recipient')
-
+    bcc=("Woodshop","villagesWoodShop@embarqmail.com")
+    #cc=("Richard l. Hartley","hartl1r@gmail.com")
     # FOR TESTING PURPOSES ..............................
-    #recipient = ("Richard Hartley", "hartl1r@gmail.com")
+    recipient = ("Richard Hartley", "hartl1r@gmail.com")
 
     recipientList = []
     recipientList.append(recipient)
     subject = request.args.get('subject')
     message = request.args.get('message')
-    msg = Message('Hello', sender = 'hartl1r@gmail.com', recipients = recipientList)
+    msg = Message('Hello', sender = 'hartl1r@gmail.com', recipients = recipientList) #, bcc=bcc)
     msg.subject = subject
     msg.body = message
 
@@ -902,7 +888,7 @@ def sendEmail():
     # SEND THE EMAIL
     mail.send(msg)
     RemovePDFfiles(pdfDirectoryPath)
-    flash ('Message sent.','SUCCESS')
+    #flash ('Message sent.','SUCCESS')
     return redirect(url_for('index'))
 
 
