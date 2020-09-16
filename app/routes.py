@@ -25,10 +25,9 @@ from os import path
 from flask_mail import Mail, Message
 mail=Mail(app)
 
-
-@app.route('/coordinatorReports/')
-@app.route('/coordinatorReports/index/')
-@app.route('/coordinatorReports/index', methods=['GET'])
+@app.route('/')
+@app.route('/index/')
+@app.route('/index', methods=['GET'])
 def index():
 
     # BUILD ARRAY OF NAMES FOR DROPDOWN LIST OF COORDINATORS
@@ -58,7 +57,7 @@ def index():
 
 
 #PRINT WEEKLY MONITOR DUTY SCHEDULE FOR COORDINATOR
-@app.route("/coordinatorReports/printWeeklyMonitorSchedule", methods = ['GET'])
+@app.route("/printWeeklyMonitorSchedule", methods = ['GET'])
 def printWeeklyMonitorSchedule():
     dateScheduled=request.args.get('date')
     shopNumber=request.args.get('shop')
@@ -323,7 +322,7 @@ def printWeeklyMonitorSchedule():
             
 
 #PRINT WEEKLY LIST OF CONTACTS FOR COORDINATOR
-@app.route("/coordinatorReports/printWeeklyMonitorContacts", methods=['GET'])
+@app.route("/printWeeklyMonitorContacts", methods=['GET'])
 def printWeeklyMonitorContacts():
     dateScheduled=request.args.get('date')
     shopNumber=request.args.get('shop')
@@ -452,7 +451,7 @@ def printWeeklyMonitorContacts():
     
     
 #PRINT WEEKLY NOTES FOR COORDINATOR 
-@app.route("/coordinatorReports/printWeeklyMonitorNotes", methods=["GET"])
+@app.route("/printWeeklyMonitorNotes", methods=["GET"])
 def printWeeklyMonitorNotes():
     dateScheduled=request.args.get('date')
     shopNumber=request.args.get('shop')
@@ -513,7 +512,7 @@ def printWeeklyMonitorNotes():
             )
         
 
-@app.route("/coordinatorReports/printSubList", methods=["GET"])
+@app.route("/printSubList", methods=["GET"])
 def printSubList():
     destination = request.args.get('destination')
     todays_date = date.today()
@@ -710,13 +709,13 @@ def printSubList():
             todaysDate=todays_dateSTR,subDict=subDict
             )
         
-    return redirect(url_for('/coordinatorReports/index'))
+    return redirect(url_for('/index'))
     
 
 
-@app.route("/coordinatorReports/eMailCoordinator", methods=["GET","POST"])
+@app.route("/eMailCoordinator", methods=["GET","POST"])
 def eMailCoordinator():
-    print('... begin /coordinatorReports/eMailCoordinator')
+    print('... begin /eMailCoordinator')
     # THIS ROUTINE ONLY RETURNS THE EMAIL MESSAGE TO BE USED FOR COORDINATORS ONLY EMAILS
     # ___________________________________________________________________________________
 
@@ -729,7 +728,7 @@ def eMailCoordinator():
 
     return jsonify(eMailMsg=eMailMsg)
 
-@app.route("/coordinatorReports/eMailCoordinatorAndMonitors", methods=["GET","POST"])
+@app.route("/eMailCoordinatorAndMonitors", methods=["GET","POST"])
 def eMailCoordinatorAndMonitors():
     # GET WEEKOF DATE
     weekOf = request.args.get('weekOf')
@@ -773,7 +772,7 @@ def eMailCoordinatorAndMonitors():
 
     return jsonify(monitorDict=monitorDict,eMailMsg=eMailMsg)
 
-@app.route("/coordinatorReports/getMembersEmailAddress", methods=["GET","POST"])
+@app.route("/getMembersEmailAddress", methods=["GET","POST"])
 def getMembersEmailAddress():
     memberID=request.args.get('memberID')
     weekOf = request.args.get('weekOf')
@@ -791,7 +790,7 @@ def getMembersEmailAddress():
 
 
 # THE FOLLOWING ROUTINE IS CALLED WHEN THE USER SELECTS A WEEK
-@app.route("/coordinatorReports/getCoordinatorData", methods=["GET","POST"])
+@app.route("/getCoordinatorData", methods=["GET","POST"])
 def getCoordinatorData():
     # GET WEEKOF DATE
     # RETURN COORDINATOR NAME, EMAIL, PHONE
@@ -832,7 +831,7 @@ def getCoordinatorData():
         curWeekDisplayDate=displayDate
     )
 
-@app.route("/coordinatorReports/sendEmail", methods=["GET","POST"])
+@app.route("/sendEmail", methods=["GET","POST"])
 def sendEmail():
     # DETERMINE PATH TO PDF FILES
     currentWorkingDirectory = os.getcwd()

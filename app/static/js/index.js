@@ -142,7 +142,7 @@ $('#printMonitorScheduleID').click(function(){
         alert("Please select a date.")
         return 
     }
-    window.location.href = '/coordinatorReports/printWeeklyMonitorSchedule?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PRINT' 
+    window.location.href = '/printWeeklyMonitorSchedule?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PRINT' 
 })
 
 $('#printMonitorNotesID').click(function(){
@@ -151,7 +151,7 @@ $('#printMonitorNotesID').click(function(){
         alert("Please select a date.")
         return 
     }
-    window.location.href = '/coordinatorReports/printWeeklyMonitorNotes?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PRINT' 
+    window.location.href = '/printWeeklyMonitorNotes?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PRINT' 
 })
 
 $('#printMonitorContactsID').click(function(){
@@ -160,7 +160,7 @@ $('#printMonitorContactsID').click(function(){
         alert("Please select a date.")
         return 
     }
-    window.location.href = '/coordinatorReports/printWeeklyMonitorContacts?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PRINT' 
+    window.location.href = '/printWeeklyMonitorContacts?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PRINT' 
 })
 
 $('#printMonitorSubListID').click(function(){
@@ -169,7 +169,7 @@ $('#printMonitorSubListID').click(function(){
         alert("Please select a date.")
         return 
     }
-    window.location.href = '/coordinatorReports/printSubList?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PRINT' 
+    window.location.href = '/printSubList?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PRINT' 
 })
 
 
@@ -177,7 +177,7 @@ $('#printMonitorSchedule2').click(function(){
     alert('begin printMonitorSchedule function ...')
     
     $.ajax({
-        url : "/coordinatorReports/printWeeklyMonitorSchedule",
+        url : "/printWeeklyMonitorSchedule",
         type: "GET",
         data : {
             date: curWeekDate,
@@ -217,7 +217,7 @@ $('#coordinatorOnlyID').click(function(){
 
     // GET TEXT TO BE USED IN MESSAGE
     $.ajax({
-        url : "/coordinatorReports/eMailCoordinator",
+        url : "/eMailCoordinator",
         type: "GET",
         data : {
             weekOf: curWeekDate,
@@ -252,7 +252,7 @@ $('#coordinatorAndMonitorsID').click(function(){
 
     clearEmailData()
     $.ajax({
-        url : "/coordinatorReports/eMailCoordinatorAndMonitors",
+        url : "/eMailCoordinatorAndMonitors",
         type: "GET",
         data : {
             weekOf: curWeekDate,
@@ -362,19 +362,19 @@ function prepareAttachments(destination) {
     // CREATE MONITOR SCHEDULE REPORT PDF
     if (document.getElementById('scheduleID').checked) {
         console.log('schedule checked')
-        window.location.href = '/coordinatorReports/printWeeklyMonitorSchedule?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PDF' 
+        window.location.href = '/printWeeklyMonitorSchedule?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PDF' 
     }
     // CREATE MONITOR NOTES PDF
     if (document.getElementById('notesID').checked) {
-        window.location.href = '/coordinatorReports/printWeeklyMonitorNotes?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PDF' 
+        window.location.href = '/printWeeklyMonitorNotes?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PDF' 
     }
     // CREATE MONITOR CONTACTS PDF
     if (document.getElementById('contactsID').checked) {
-        window.location.href = '/coordinatorReports/printWeeklyMonitorContacts?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PDF' 
+        window.location.href = '/printWeeklyMonitorContacts?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PDF' 
     }
     // CREATE SUB LIST PDF
     if (document.getElementById('subListID').checked) {
-        window.location.href = '/coordinatorReports/printSubList?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PDF' 
+        window.location.href = '/printSubList?date=' + curWeekDate + '&shop=' + curShopNumber + '&destination=PDF' 
     }
 
     showEmailForm()
@@ -470,7 +470,7 @@ function weekChanged () {
 
     // RETRIEVE COORDINATOR INFORMATION FROM SERVER
     $.ajax({
-        url : "/coordinatorReports/getCoordinatorData",
+        url : "/getCoordinatorData",
         type: "GET",
         data : {
             weekOf: curWeekDate,
@@ -520,25 +520,25 @@ function weekChanged () {
 
             // SET UP LINKS FOR PRINT SCHEDULE BUTTON
             // prtSchedule = document.getElementById("printMonitorScheduleID")
-            // address = "/coordinatorReports/printWeeklyMonitorSchedule?date="+ curWeekDate + "&shop=" + curShopNumber + "&destination=" + 'PRINT'
+            // address = "/printWeeklyMonitorSchedule?date="+ curWeekDate + "&shop=" + curShopNumber + "&destination=" + 'PRINT'
             // lnk = "window.location.href='" + address +"'"
             // prtSchedule.setAttribute("onclick",lnk)
 
             // SET UP LINKS FOR PRINT NOTES BUTTON
             // prtNotes = document.getElementById("printMonitorNotesID")
-            // address = "/coordinatorReports/printWeeklyMonitorNotes?date="+ curWeekDate + "&shop=" + curShopNumber + "&destination=" + 'PRINT'
+            // address = "/printWeeklyMonitorNotes?date="+ curWeekDate + "&shop=" + curShopNumber + "&destination=" + 'PRINT'
             // lnk = "window.location.href='" + address +"'"
             // prtNotes.setAttribute("onclick",lnk)
 
             // SET UP LINKS FOR PRINT CONTACTS BUTTON
             // prtContacts = document.getElementById("printMonitorContactsID")
-            // address = "/coordinatorReports/printWeeklyMonitorContacts?date="+ curWeekDate + "&shop=" + curShopNumber + "&destination=" + 'PRINT'
+            // address = "/printWeeklyMonitorContacts?date="+ curWeekDate + "&shop=" + curShopNumber + "&destination=" + 'PRINT'
             // lnk = "window.location.href='" + address +"'"
             // prtContacts.setAttribute("onclick",lnk)
 
             // SET UP LINKS FOR PRINT SUB LIST BUTTON
             // prtSubList = document.getElementById("printMonitorSubListID")
-            // address = "/coordinatorReports/printSubList?date="+ curWeekDate + "&shop=" + curShopNumber + "&destination=" + 'PRINT'
+            // address = "/printSubList?date="+ curWeekDate + "&shop=" + curShopNumber + "&destination=" + 'PRINT'
             // lnk = "window.location.href='" + address +"'"
             // prtSubList.setAttribute("onclick",lnk)
 
@@ -570,7 +570,7 @@ function weekChanged () {
 
         // REQUEST MEMBER's EMAIL ADDRESS FROM SERVER
         $.ajax({
-            url : "/coordinatorReports/getMembersEmailAddress",
+            url : "/getMembersEmailAddress",
             type: "GET",
             data : {memberID: curMemberID,
                     weekOf: curWeekDate,
@@ -613,7 +613,7 @@ function weekChanged () {
         //     attachments.push('SUBLIST')
         // alert('attachments selected - ' + attachments)
         $.ajax({
-            url : "/coordinatorReports/sendEmail",
+            url : "/sendEmail",
             type: "GET",
             data : {
                 recipient:document.getElementById('eMailRecipientID').value,
