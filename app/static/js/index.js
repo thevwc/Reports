@@ -74,10 +74,13 @@ document.getElementById("eMailReportBtn").addEventListener("click",function(){pr
 
 // GET STAFFID THAT WAS STORED BY THE LOGIN ROUTINE
 if (!localStorage.getItem('staffID')) {
-    alert("local storage for 'staffID' is missing; 604875 is being used.")
-    localStorage.setItem('staffID','604875')
+    staffID = prompt("Staff ID - ")
+    localStorage.setItem('staffID',staffID)
 }
-staffID = localStorage.getItem('staffID')
+else {
+    staffID = localStorage.getItem('staffID')
+}
+
 
 
 // GET clientLocation THAT WAS STORED BY THE LOGIN ROUTINE
@@ -122,12 +125,6 @@ else {
 
 // SET DROP DOWN MENU INITIAL VALUES
 setShopFilter(clientLocation)
-//filterTheWeeksShown()
-
-
-// alert('curShopNumber - '+curShopNumber + '\ncurShopName - '+ curShopName + '\ncurCoordinatorID - '+curCoordinatorID + '\ncurWeekDate - '+curWeekDate
-// +'\ncurCoordinatorName - '+curCoordinatorName+'\ncurCoordinatorEmail - '+curCoordinatorEmail +'\ncurCoordinatorPhone - '+   curCoordinatorPhone
-// +'\ncurWeekDisplayDate - '+curWeekDisplayDate)
 
 // END PAGE LOAD ROUTINES
 

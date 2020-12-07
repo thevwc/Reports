@@ -24,13 +24,22 @@
 }
 #hdg {
     grid-area: hdgArea;
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "titleArea     versionArea";
     padding-top: 10px;
     text-align: center;
     background-color:navy;
     color: var(--main-txt-color);
     border-bottom:white 3px;
 }
-
+.title {
+    grid-area:titleArea;
+}
+.version {
+    grid-area:versionArea;
+    align-items: right;
+}
 
 #location {
     grid-area:locationArea;

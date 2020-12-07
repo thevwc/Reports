@@ -7,23 +7,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import select, func, Column, extract, ForeignKey
 from sqlalchemy.orm import column_property, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
-#from flask_login import UserMixin
-#import jwt
 from app import app
 
-#@login.user_loader
-#def load_user(id):
-#    return User.query.get(int(id))
-
-    
-
-# @staticmethod
-# def verify_reset_password_token(token):
-#     try:
-#         id = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])['reset_password']
-#     except:
-#         return
-#     return User.query.get(id)
 
 class ControlVariables(db.Model):
     __tablename__ = 'tblControl_Variables'
