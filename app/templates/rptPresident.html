@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+    {{super()}}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/rptPresident.css') }}">
+{% endblock %}
+
+{% block content %} 
+<div class='wholePage'>
+
+    <div class="pageButtons">
+        <button id="printPageButton" style=margin-right:20px; onClick="window.print();">PRINT</button>
+        <button id="closePageButton" style=margin-right:20px; onclick="window.history.back()" >CLOSE PAGE</button>
+    </div> 
+    <br> 
+    
+    <br>
+    <div class="reportHdg">
+        <h1 class="text-center">THE VILLAGES WOODWORKERS CLUB</h1>
+        <br>
+        <h2 class="text-center">PRESIDENT'S REPORT</h2>
+        <h3 class="text-center">As of {{ todaysDate }}</h3>
+        <hr>
+    </div>
+    
+    <div class='mainBody'>
+        <div class="row item">
+            <div class="col">
+                <label id='curYrPd'>{{curYear}} Dues Paid</label>
+            </div>
+            <div class="col">
+                <input type="text" value={{curYrPd}}>
+            </div>
+        </div>
+
+        <div class="row item">
+            <div class="col">
+                <label id='curYrNewMbrs'>New members ({{curYear}})</label>
+            </div>
+            <div class="col">
+                <input type="text" value={{curYrNewMbrs}}>
+            </div>
+        </div>
+
+        <div class="row item">
+            <div class="col">
+                <label'>Members Needing Certification</label>
+            </div>
+            <div class="col">
+                <input type="text" value={{mbrsNotCertified}}>
+            </div>
+        </div>
+
+        <div class="row item">
+            <div class="col">
+                <label>{{curYear}} Inactive</label>
+            </div>
+            <div class="col">
+                <input type="text" value={{curYrInactive}}>
+            </div>
+        </div>
+        <hr>
+        <div class="row item">
+            <div class="col">
+                <label id='pastYrPaid'>{{pastYear}} Dues Paid</label>
+            </div>
+            <div class="col">
+                <input type="text" value={{pastYrPaid}}>
+            </div>
+        </div>
+
+        <div class="row item">
+            <div class="col">
+                <label id=pastYrInactive>{{pastYear}} Inactive</label>
+            </div>
+            <div class="col">
+                <input type="text" value={{pastYrInactive}}>
+            </div>
+        </div>
+
+        <div class="row item">
+            <div class="col">
+                <label id='pdPastNotCur'>{{pastYear}} Dues Paid, {{curYear}} Not Paid</label>
+            </div>
+            <div class="col">
+                <input type="text" value={{pdPastNotCur}}>
+            </div>
+        </div>
+
+        <div class="row item">
+            <div class="col">
+                <label id='pastYrNewMbrs'>New members ({{curYear}})</label>
+            </div>
+            <div class="col">
+                <input type="text" value={{pastYrNewMbrs}}>
+            </div>
+        </div>
+
+        <div class="row item">
+            <div class="col">
+                <label id='volunteers'>Non-Member Volunteers</label>
+            </div>
+            <div class="col">
+                <input type="text" value={{volunteers}}>
+            </div>
+        </div>
+
+        <div class="row item">
+            <div class="col">
+                <label id='recordsInDB'>Records in Database</label>
+            </div>
+            <div class="col">
+                <input type="text" value={{recordsInDB}}>
+            </div>
+        </div>
+
+
+    </div>
+{% endblock %}

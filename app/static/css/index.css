@@ -2,32 +2,26 @@
     --main-bg-color: navy;
     --main-txt-color: white;  
     --main-padding: 10px;  
-    --calendar-background: lightgray;
-    --calendar-text:blue;
+    --main-body-bg-color: lightgray;
   }
+                         
   
-                        
-  
-#parent {
+.parent {
     display: grid;
-    grid-template-columns: auto auto auto auto 1fr auto;
-    grid-template-rows: 50px auto auto auto auto 1fr;
-    grid-template-areas:"hdgArea        hdgArea         hdgArea         hdgArea         hdgArea         hdgArea" 
-                        "locationArea   coordArea       weeksArea       prtRptArea      rptNameArea     .  "
-                        ".              .               .               prtRptArea      rptNameArea     ."
-                        "coordHdgArea   coordHdgArea    coordHdgArea    coordHdgArea    coordHdgArea    coordHdgArea"
-                        "emailArea      emailArea       emailArea       emailArea       emailArea       emailArea "
-                        "emailBtnsArea  emailBtnsArea   emailBtnsArea   emailBtnsArea   emailBtnsArea   emailBtnsArea"; 
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-template-areas:"hdgArea" 
+                        "versionArea"
+                        "prtRptArea";
     grid-gap:1em;
-    background-color:lightgray; 
-    border:2px solid white;                  
+    background-color:lightgray;                
 }
-#hdg {
+.hdg {
     grid-area: hdgArea;
     display:grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-areas: "titleArea     versionArea";
-    padding-top: 10px;
+    grid-template-areas: "titleArea  versionArea";
+    padding-top: 0px;
     text-align: center;
     background-color:navy;
     color: var(--main-txt-color);
@@ -35,42 +29,49 @@
 }
 .title {
     grid-area:titleArea;
+    padding-top:2px;
+    font-size:1rem;
 }
 .version {
     grid-area:versionArea;
+    font-size:.75rem;
+    padding-top:5px;
     align-items: right;
 }
 
 #location {
     grid-area:locationArea;
-    padding-top:30px;
-    padding-left:20px;
+    padding-top:0px;
+    text-align: center;
     background-color: lightgray;
     color: navy;
 }
 
-#coordNames {
-    grid-area:coordArea;
-    padding-top:30px;
-    background-color: lightgray;
-    color:navy;
-}
-
-#weekChoices {
-    grid-area:weeksArea; 
-    padding:30px;
-    background-color: lightgray;
-    color:navy;
-}
-
 #printReportBtns {
     grid-area:prtRptArea;
-    width:200px;
-    padding-top:30px;
+    display:grid;
+    grid-template-rows: auto;
+    grid-template-columns:1fr 1fr 1fr;
+    grid-template-areas: "column1 column2  column3";
+    width:100%;
+    align-content: center;
+    text-align: center;
+    padding-top:0px;
     padding-left:0px;
-    margin-right:40px;
+    margin-right:0px;
     background-color: lightgray;
-    color:navy;
+}
+#column1 {
+    background-color: lightgray;
+    border:1px solid navy;
+}
+#column2 {
+    height:300px;
+    background-color: lightgray;
+    border:1px solid navy;
+}
+#column3 {
+    background-color: lightgray;
     border:1px solid navy;
 }
 /* #printReportBtns .active {
@@ -79,20 +80,31 @@
   } */
 #printReportBtns ul {
     padding-left:0px;
-    margin-left:25px;
+    margin-left:0px;
     padding-right:0px;
     margin-right:0px;
+    margin:auto;
 }
 #printReportBtns li {
-    padding-right:20px;
-    margin-right:20px;
+    padding-right:0px;
+    margin-right:0px;
 }
 #printReportBtns button {
     border-radius: 5px;
     margin-bottom:5px;
-    width:150px;
-    margin-right:20px;
+    width:250px;
+    margin-right:0px;
     padding-right:0px;
+}
+#memberOptions {
+	text-align: center;
+	height: 40px;
+	align-content: center;
+	justify-content: center;
+	padding-bottom:20px;
+	color:white;
+	margin-top:0px;
+	margin-bottom:10px;
 }
 
 #attachmentCheckboxes {
@@ -113,34 +125,6 @@
     padding:0px;
     border-radius: 5px; 
 } 
-/* 
-.reportsForm {
-    border:1px solid black;
-} */
-/* COORDINATOR INFORMATION LINE */
-#coordinatorInfo {
-    grid-area:coordHdgArea;
-    text-align: center;
-    border:1px solid navy;
-    background-color: navy;
-    color:white;
-}
-#coordHdgBeforeDate, #coordHdgBeforeName, #coordHdgBeforePhone, #coordHdgBeforeEmail {
-    color:white;
-}
-#coordHdgDate {
-    color:yellow;
-}
-#coordHdgName {
-    color:yellow;
-}
-#coordHdgPhone {
-    color:yellow;
-}
-#coordHdgEmailLink {
-    background-color: white;
-    color:blue;
-}
 
 /* EMAIL RECIPIENTS SECTION OF PAGE */
 #emailSection {
@@ -269,4 +253,65 @@ textarea {
 .modal-content {
     height:60%;
     background-color:#BBD6EC;
+}
+/* iPad portrait */
+@media (min-width: 768px) {
+    .parent {
+        width:80%;
+        display: grid;
+        grid-template-columns:1fr;
+        grid-template-rows:50px 1fr;
+        grid-template-areas: "hdgArea"  
+                            "locationArea"
+                            "prtRptArea";
+        gap:0px;
+        background-color:var(--main-body-bg-color);
+        
+        margin:auto; 
+        margin-top: 100px;
+        
+    }
+    /* .hdg {
+        grid-area: hdgArea; 
+        display:grid;
+        grid-template-rows: 1fr 1fr 1fr 1fr;
+        grid-template-columns:1fr 1fr;
+        grid-template-areas: " searchArea searchArea",
+                                "memberNameArea memberNameArea",
+                                "versionArea staffNameArea",
+                                ".  menuArea";
+        height:4rem;
+        background-color: var(--main-hdg-bg-color); 
+        color:var(--main-hdg-txt-color);
+        
+    } */
+
+    /* body {font-size:.75rem}
+    .localContactInfo {
+        font-size:.75rem;
+    } */
+}
+
+/* Laptop to monitor size */
+@media (min-width: 992px) {
+    .parent {
+        position: relative;
+        width:60%;
+        display: grid;
+        grid-template-columns:1fr;
+        grid-template-rows:50px 50px 1fr;
+        grid-template-areas:    "hdgArea"
+                                "locationArea"
+                                "prtRptArea";
+        gap:0px;
+        background-color:var(--main-body-bg-color);
+        top:0; bottom:0; left:0; right:0;
+
+    }
+   
+    #location {
+        margin-top:10px;
+    }
+    
+
 }

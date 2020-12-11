@@ -5,156 +5,64 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 {% endblock %}
 {% block app_content %}
-    <div id="parent">
-        <div id="hdg">
-            <div class="title">
-                <h2>MONITOR COORDINATOR REPORTS</h2>
-            </div>
-            <div class="version">
-                <h4 class="version">ver. Dec 7, 2020</h4>
-            </div>  
-            <!-- <button id="settingsIcon" style="display:none"><i class="fas fa-bars" data-toggle='modal' data-target='#settingsModal'></i></button>
-            <button id="settingsBtn" style="display:none" type='button' class = 'btn btn-primary' data-toggle = 'modal' data-target = '#settingsModal'>
-                    SETTINGS  
-            </button>     -->
+
+<div class="parent">
+    <div class="hdg">
+        <div class="title">
+            <div><h1>AVAILABLE REPORTS</h1></div>
         </div>
+        <div class="version">
+            <h3>ver. Dec 10, 2020</h3>
+        </div>  
+        <!-- <button id="settingsIcon" style="display:none"><i class="fas fa-bars" data-toggle='modal' data-target='#settingsModal'></i></button>
+        <button id="settingsBtn" style="display:none" type='button' class = 'btn btn-primary' data-toggle = 'modal' data-target = '#settingsModal'>
+                SETTINGS  
+        </button>     -->
+    </div>
+    <div id="printReportBtns">
 
-        <div id="location">
-            <form class = "filterItems "></form>
-                <label for="shopChoice">Location: </label>
-                <select id="shopChoice" name="shopList" style="height: 25px;font-size: 1em;">
-                    <option id='shop1' value="RA">Rolling Acres</option>
-                    <option id='shop2' value="BW">Brownwood</option>
-                </select>
-            </form>
-        </div>
-
-        <!--coordinators names -->
-        <div id="coordNames">
-            <label for="coordinatorPicker">Coordinator: </label>
-            <select id='coordChoice' style='margin-bottom:20px; width:200px' title='Select a coordinator ...' data-live-search=true data-live-search-style="contains" data-width='auto'>
-                <option class="optName" value="All">All</option>
-                {% for c in coordNames %}
-                    <option class="optName" value='{{c.coordID}}'</option>{{c.coordName}}</option>
-                {% endfor %}
-            </select><br><br>
-        </div>
-
-            <!--weeks to select -->
-        <div id="weekChoices">
-            <label for="weekPicker">Week of: </label>
-            <select id='weekSelected' class='weekPicker' style='margin-bottom:20px' title='Select a week ...' data-live-search=true data-live-search-style="contains" data-width='auto'>
-                <option class="optWeeks" value="">Select a week ...</option>
-                {% for w in weeks %}
-                    <option  class="optWeeks" data-shop={{w.shopNumber}} data-coordID={{w.coordID}}
-                     data-coordName = {{w.coordName}} data-coordEmail={{w.coordEmail}} value={{w.Start_Date}}>{{w.DisplayDate}}</option>
-                    <!-- <span>{{w.coordName}}</span> -->
-                {% endfor %}
-            </select><br><br>
-        </div>
-
-        <div id="printReportBtns">
-            <!-- PRINT BUTTONS TO PROVIDE LINKS TO ROUTES -->
-            <ul style="list-style-type:none;">
-                <!-- <li><button id='sendEmail' type="button" class='btn btn-sm btn-success'>SEND EMAIL</button></li>                 -->
-                <li><button id='printMonitorScheduleID' type="button" class='btn btn-sm btn-primary'>Print Schedule</button></li>
-                <li><button id='printMonitorNotesID' type="button" class='btn btn-sm btn-primary'>Print Notes</button></li>
-                <li><button id='printMonitorContactsID' type="button" class='btn btn-sm btn-primary'>Print Contacts</button></li>
-                <li><button id='printMonitorSubListID' type="button" class='btn btn-sm btn-primary'>Print Sub List</button></li>
-            </ul>
-        </div>
-        
-        <div id="attachmentCheckboxes">
-            <form id='reportsFormID' class="reportsForm" action="">
-                <p>Report(s) to email ...</p>
-                <input type="checkbox" id="scheduleID" name="reports" value="rptSchedule">
-                <label for="schedule"> Schedule</label><br>
-                <input type="checkbox" id="notesID" name="reports" value="rptNotes">
-                <label for="notes"> Notes</label><br>
-                <input type="checkbox" id="contactsID" name="reports" value="rptContacts">
-                <label for="contacts"> Contacts</label><br>
-                <input type="checkbox" id="subListID" name="reports" value="rptSubs">
-                <label for="subs"> Available subs</label><br> 
-                <button type="button" id="eMailReportBtn" class="spinner btn btn-sm btn-primary">
-                    <span id="spinnerElement" class="spinner-border spinner-border-sm" style=display:none></span>
-                    PREPARE PDF's
-                </button>   
-            </form>
-        </div>   
-
-        
-
-        <!-- COORDINATOR INFO SECTION -->
-        <div id= 'coordinatorInfo'>
-            <div id='coordinatorHeading'>
-                <span id='coordHdgBeforeDate'></span>
-                <span id='coordHdgDate'></span>
-                <span id='coordHdgBeforeName'></span>
-                <span id='coordHdgName'></span>
-                <span id='coordHdgBeforePhone'></span>
-                <span id='coordHdgPhone'></span>
-                <span id='coordHdgBeforeEmail'></span>
-                <a id='coordHdgEmailLink' href='#'></a>
-                <!-- <a href=mailto:hartl1r@gmail.com?subject="test">TEST</a> -->
-            </div>
-        </div>
-
-
-        <!--  EMAIL SECTION -->
-        <div id="emailSection">
-            <!-- LEFT COLUMN -->
-            <div id="sendToOptions" class="btn-group-vertical btn-group">
-                <span>Send to:</span>
-                <button id='coordinatorOnlyID' type="button" class='btn btn-sm btn-primary'>Coordinator Only</button>
-                <button id='coordinatorAndMonitorsID' type="button" class='btn btn-sm btn-primary'>Coordinator And Monitors</button>
-                <div class="memberOptions">
-                    <select id="selectpicker" class='selectpicker' title='Find a member ...'
-                    data-live-search=true data-live-search-style='contains' data-width='auto'>
-                        {% for n in nameList %}
-                            <option class="optName" data-email='{{n.eMail}}' value='{{n.name}}'>{{n.name}}</option>
-                        {% endfor %}
+        <div id="column1">
+            <div id="location" style=margin-top:20px>
+                <form class = "filterItems "></form>
+                    <label for="shopChoice">Location: </label>
+                    <select id="shopChoice" name="shopList" style="height: 25px;font-size: 1em;">
+                        <option id='shop1' value="RA">Rolling Acres</option>
+                        <option id='shop2' value="BW">Brownwood</option>
                     </select>
-                </div>
+                </form>
             </div>
-
-            <!-- MIDDLE COLUMN -->
-            <div id="emailBody" class="row">
-                <div id="emailRecipient" class="row">
-                    <div class="col-sm-2"  style=text-align:right>
-                        <span>To:</span>
-                    </div>
-                    <div class="col-sm-9">
-                        <input id="eMailRecipientID" type="textarea" style=color:blue;width:700px>
-                    </div>
-                </div>
-
-                <div id="emailSubject" class="row">
-                    <div class="col-sm-2"  style=text-align:right>
-                        <span>Subject:</span>
-                    </div>
-                    <div class="col-sm-9">
-                        <input id="eMailSubjectID" type="textarea" style=width:700px>
-                    </div>
-                </div>
-                
-                <div id="emailMessage" class="row">
-                    <div class="col-sm-2" style=text-align:right>
-                        <span>Message:</span>
-                    </div>
-                    <div class="col-sm-9">
-                        <textarea id='eMailMsgID' rows='20' cols='10' style=width:700px;height:400px></textarea>
-                    </div> 
-                </div>
-            </div> 
-
-            <!-- RIGHT COLUMN -->
-            <div id="emailButtons" class="emailClass btn-group-vertical btn-group">
-                <span>Actions:</span>
-                <button id='sendBtn' type="button" name='emailOption' class='eMailBtn btn-sm btn-primary'>Send</button>
-                <button id='clearBtn' type="button" name='emailOption' class='eMailBtn btn-sm btn-primary rounded'>Clear</button> 
+        </div>
+   
+        <div id="column2">
+            <div class="miscReports" style=margin-top:20px>
+                <!-- PRINT BUTTONS TO PROVIDE LINKS TO ROUTES -->
+                <ul style="list-style-type:none;">
+                    <!-- <li><button id='sendEmail' type="button" class='btn btn-sm btn-success'>SEND EMAIL</button></li>                 -->
+                    <li><button id='prtPresidentsReportID' type="button" onclick='PresidentsReport()' class='btn btn-sm btn-primary'>President's Report</button></li>
+                    <li><button id='prtMonitorTrainingID' type="button" class='btn btn-sm btn-primary'>Members by Monitor Training Date</button></li>
+                    <li><button id='prtMentorsID' type="button" onclick='Mentors()' class='btn btn-sm btn-primary'>Mentor List</button></li>
+                    <li><button id='prtContactsID' type="button" onclick='Contacts()' class='btn btn-sm btn-primary'>Contact List</button></li>
+                </ul>
             </div>
-        </div> <!-- END OF EMAIL RECIPIENTS SECTION -->
-    </div>  <!-- END OF PARENT WRAPPER -->
+        </div>
+
+        <div id="column3">
+            <div id="memberOptions" style=margin-top:20px>
+                <select id="selectpicker" class='selectpicker' style='margin-bottom:20px' title='Find a member ...' data-live-search=true data-live-search-style="contains" data-width='auto'>
+                {% for nme in nameList %}
+                    <option class="optName" value='{{nme}}'</option>{{nme}}</option>
+                {% endfor %}
+                </select>
+            </div>
+            <div class="memberReports">
+                <!-- PRINT BUTTONS TO PROVIDE LINKS TO ROUTES -->
+                <ul style="list-style-type:none;">
+                    <li><button id='prtMonitorTransactionsID' disabled onclick='Transactions()' type="button" class='btn btn-sm btn-primary'>Monitor Transactions</button></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>  <!-- END OF PARENT WRAPPER -->
 
 
 {% endblock %}

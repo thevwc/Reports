@@ -1,0 +1,90 @@
+<!-- rptWeeklyMonitorSchedule.html -->
+{% extends 'base.html' %}
+
+{% block styles %}
+    {{super()}}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/rptMonitorTransactions.css') }}">
+    <!-- <link rel="stylesheet" url="{{ url_for('static', filename='css/rptWeeklyMonitorSchedule.css') }}"> -->
+
+{% endblock %}
+
+{% block content %} 
+<!-- Include Print CSS -->
+<div class='wholePage'>
+
+    <div class="hdg">
+        <div class='title'>
+            <h1>THE VILLAGES WOODWORKERS CLUB</h1>
+        </div>
+        <div class="pageButtons">
+            <button id="printPageButton"  onClick="window.print();">PRINT</button>
+            <button id="closePageButton"  onclick="window.history.back()" >CLOSE PAGE</button>
+        </div>
+    </div>
+    
+    <div class='row'>
+        <div class="col">
+            <h3>Monitor Schedule Transactions for {{displayName}}</h3>
+        </div>    
+    </div>
+
+    <div class='row'>
+        <div class="col">
+            <h3>As of {{todaysDate}}</h3>
+        </div>
+    </div>
+
+    <div class='transactionsSection'>
+        <div class="row transactionsHdg">
+            <div class="col-3" style="text-align:right">Transaction Date/Time</div>
+            <div class="col-1">Type</div>
+            <div class="col-2" style="text-align:right">Scheduled</div>
+            <div class="col-1" style="text-align:center">Shift</div>
+            <div class="col-2" style="text-align:left">Duty</div>
+            <div class="col-1">Staff</div>
+        </div>
+         <hr>   
+        <div class="transactionsDetail ">
+            {% for transItem in transactionDict %}
+                <div class="row">
+                    <div class="col-3" style="text-align:right">{{transItem.transDateTime}}</div>
+                    <div class="col-1" style=margin:0;padding:0>{{transItem.transType}}</div>
+                    <div class="col-2" style="text-align:right">{{transItem.scheduledDate}}</div>
+                    <div class="col-1" style="text-align:center">{{transItem.shift}}</div>
+                    <div class="col-2">{{transItem.duty}}</div>
+                    <div class="col-1">{{transItem.staffInitials}}</div>
+                </div>
+            {% endfor %}
+        </div>  
+    </div>
+
+
+        <!-- MONITOR NOTES AFFECTING MEMBER -->
+    <div class="notesSection">
+        <br>
+        <hr>
+        <br>
+
+        <div>
+            <h2>MONITOR NOTES AFFECTING MEMBER</h2>
+        </div>
+
+        <div class="notesDetail">
+            {% for notesItem in notesDict %}
+            <div class="row">
+                <div class="col-3">
+                    {{notesItem.noteDateTime}}
+                </div>
+                <div class="col-7">
+                    {{notesItem.noteText}}
+                </div>
+                <div class="col-2">
+                    {{notesItem.staffInitials}}
+                </div>
+            </div>
+            
+            {% endfor %}
+        </div> 
+    </div>        
+</div>   
+{% endblock %} 

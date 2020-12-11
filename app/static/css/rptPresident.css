@@ -1,0 +1,139 @@
+/* iPhone layout */
+@media screen {
+	
+	#printPageButton #closePageButton {
+		float: right;
+		display: block;
+	} 
+	.pageButtons {
+		float:right;
+		margin-right:20px;
+	} 
+	.mainBody {
+		font-size:.75rem;
+	}
+	.mainBody input {
+		width:50px;
+		text-align: center;
+
+	}
+	.item {
+		margin-left:5em;
+		align-content:center;
+	}
+   	h1, h2, h3 {
+		color: black;
+		text-align: center;
+		font-family: "Times New Roman",Times, sans-serif,serif;
+   } 
+   	h1 {
+		font-size: 16pt;
+		break-before: avoid;
+	}
+	
+	h2 {
+		font-size: 14pt;
+	}
+	
+	h3 {
+		font-size: 12pt;
+	}
+	input {
+		border:1px solid black;
+	}
+}
+
+/* iPad portrait */
+@media (min-width: 768px) {
+	.item {
+		margin-left:15em;
+	}
+}
+/* Laptop to monitor size */
+@media (min-width: 992px) {
+	.item {
+		margin-left:20em;
+		margin-right:10em;
+	}
+	.mainBody {
+		font-size:1.5rem;
+	}
+	.mainBody input {
+		width:100px;
+	}
+}
+
+/* Laptop to monitor size */
+@media (min-width: 1920px) {
+	.item {
+		margin-left:28em;
+		margin-right:10em;
+	}
+	.mainBody {
+		font-size:1.5rem;
+	}
+	.mainBody input {
+		width:100px;
+	}
+}
+@media print {
+	.wholePage {
+		page-break-inside: avoid;
+	}
+ 	
+	.pageButtons {
+		display:none;
+		float: none;
+	}
+	.mainBody {
+		font-size:1.5rem;
+	}
+	.item {
+		margin-left:10em;
+		margin-right:0em;
+	}
+	
+	input {
+		width:100px;
+		text-align:center;
+	}
+	body {
+		border: 1px solid white;
+        height: 100%;
+        page-break-after: avoid;
+        page-break-before: avoid;
+	}
+
+	h1 {
+		font-size: 16pt;
+		break-before: avoid;
+	}
+			
+	h2 {
+		font-size: 14pt;
+	}
+			
+	h3 {
+		font-size: 12pt;
+	}
+			
+	h1, h2, h3, h4, h5 {
+		text-align:center;
+		font-weight: bold;
+		break-after: avoid;
+		color:black;
+	}
+
+}
+
+@page {
+	size: portrait;
+	orientation: portrait;
+	display:block;
+	position:relative;
+	margin: 1cm;
+	counter-increment: page;
+	page-break-before: avoid;
+	page-break-after: avoid;
+	page-break-inside: avoid;
+} 

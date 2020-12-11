@@ -8,12 +8,12 @@ import pdfkit
 from flask_bootstrap import Bootstrap
 from werkzeug.urls import url_parse
 from app.models import ShopName, Member, MemberActivity, MonitorSchedule, MonitorScheduleTransaction,\
-MonitorWeekNote, CoordinatorsSchedule, ControlVariables, EmailMessages
-
+MonitorWeekNote, CoordinatorsSchedule, ControlVariables, DuesPaidYears, Contact
 from app import app
 from app import db
 from sqlalchemy import func, case, desc, extract, select, update, text
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError, DBAPIError
+from sqlalchemy.orm import aliased
 
 import datetime as dt
 from datetime import date, datetime, timedelta
@@ -31,295 +31,177 @@ mail=Mail(app)
 def index():
 
     # BUILD ARRAY OF NAMES FOR DROPDOWN LIST OF COORDINATORS
-    coordNames=[]
-    sqlNames = "SELECT Last_Name + ', ' + First_Name as coordName, Member_ID as coordID FROM tblMember_Data "
-    sqlNames += "WHERE Monitor_Coordinator = 1 "
-    sqlNames += "ORDER BY Last_Name, First_Name "
-    coordNames = db.engine.execute(sqlNames)
+    # coordNames=[]
+    # sqlNames = "SELECT Last_Name + ', ' + First_Name as coordName, Member_ID as coordID FROM tblMember_Data "
+    # sqlNames += "WHERE Monitor_Coordinator = 1 "
+    # sqlNames += "ORDER BY Last_Name, First_Name "
+    # coordNames = db.engine.execute(sqlNames)
    
     # BUILD ARRAY OF MONITOR WEEKS FOR BOTH LOCATIONS
-    sqlWeeks = "SELECT Shop_Number as shopNumber, Start_Date,format(Start_Date,'MMM d, yyyy') as DisplayDate, "
-    sqlWeeks += "Coordinator_ID as coordID, Last_Name + ', ' + First_Name as coordName, eMail as coordEmail "
-    sqlWeeks += " FROM coordinatorsSchedule "
-    sqlWeeks += "LEFT JOIN tblMember_Data ON coordinatorsSchedule.Coordinator_ID = tblMember_Data.Member_ID "
-    sqlWeeks += "WHERE Start_Date >= getdate() "
-    sqlWeeks += "ORDER BY Shop_Number, Start_Date"
-    weeks = db.engine.execute(sqlWeeks)
+    # sqlWeeks = "SELECT Shop_Number as shopNumber, Start_Date,format(Start_Date,'MMM d, yyyy') as DisplayDate, "
+    # sqlWeeks += "Coordinator_ID as coordID, Last_Name + ', ' + First_Name as coordName, eMail as coordEmail "
+    # sqlWeeks += " FROM coordinatorsSchedule "
+    # sqlWeeks += "LEFT JOIN tblMember_Data ON coordinatorsSchedule.Coordinator_ID = tblMember_Data.Member_ID "
+    # sqlWeeks += "WHERE Start_Date >= getdate() "
+    # sqlWeeks += "ORDER BY Shop_Number, Start_Date"
+    # weeks = db.engine.execute(sqlWeeks)
 
     # MEMBER NAMES AND ID
-    sqlMembers = "SELECT Last_Name + ', ' + First_Name + ' (' + Member_ID + ')' as name, eMail FROM tblMember_Data "
-    sqlMembers += "ORDER BY Last_Name, First_Name "
-    nameList = db.engine.execute(sqlMembers)
-    
-    return render_template("index.html",coordNames=coordNames,weeks=weeks,nameList=nameList)  #,eMails=eMails)
+    #sqlMembers = "SELECT Last_Name + ', ' + First_Name + ' (' + Member_ID + ')' as name FROM tblMember_Data "
+    #sqlMembers += "ORDER BY Last_Name, First_Name "
+    #nameList = db.engine.execute(sqlMembers)
+    # BUILD ARRAY OF NAMES FOR DROPDOWN LIST OF MEMBERS
+    nameArray=[]
+    sqlSelect = "SELECT Last_Name, First_Name, Member_ID FROM tblMember_Data "
+    sqlSelect += "ORDER BY Last_Name, First_Name "
+    nameList = db.engine.execute(sqlSelect)
+    position = 0
+    for n in nameList:
+        position += 1
+        lastFirst = n.Last_Name + ', ' + n.First_Name + ' (' + n.Member_ID + ')'
+        nameArray.append(lastFirst)
+    return render_template("index.html",nameList=nameArray)
    
 
 
 
-#PRINT WEEKLY MONITOR DUTY SCHEDULE FOR COORDINATOR
-@app.route("/printWeeklyMonitorSchedule", methods = ['GET'])
-def printWeeklyMonitorSchedule():
-    dateScheduled=request.args.get('date')
-    shopNumber=request.args.get('shop')
+#PRINT PRESIDENTS REPORT
+@app.route("/prtPresidentsReport", methods = ['GET'])
+def prtPresidentsReport():
     destination = request.args.get('destination')  # destination is 'PRINT or 'PDF'
-   
-    # LOOK UP SHOP NAME
-    shopRecord = db.session.query(ShopName).filter(ShopName.Shop_Number==shopNumber).first()
-    shopName = shopRecord.Shop_Name
     
-    #  DATE SELECTED IS ALWAYS A MONDAY
-    #  CONVERT TO DATE TYPE
-    dateScheduledDat = datetime.strptime(dateScheduled,'%Y-%m-%d')
-    beginDateDAT = dateScheduledDat + timedelta(days=1)
-    beginDateSTR = beginDateDAT.strftime('%m-%d-%Y')
-
-    endDateDAT = beginDateDAT + timedelta(days=6)
-    endDateSTR = endDateDAT.strftime('%m-%d-%Y')
-
-    # DEFINE COLUMN HEADING DATES
-    sunDateDAT = dateScheduledDat 
-    sunDate = sunDateDAT.strftime('%m-%d-%Y')
-    monDateDAT = dateScheduledDat + timedelta(days=1)
-    monDate = monDateDAT.strftime('%m-%d-%Y')
-    tueDateDAT = dateScheduledDat + timedelta(days=2)
-    tueDate = tueDateDAT.strftime('%m-%d-%Y')
-    wedDateDAT = dateScheduledDat + timedelta(days=3)
-    wedDate = wedDateDAT.strftime('%m-%d-%Y')
-    thuDateDAT = dateScheduledDat + timedelta(days=4)
-    thuDate = thuDateDAT.strftime('%m-%d-%Y')
-    friDateDAT = dateScheduledDat + timedelta(days=5)
-    friDate = friDateDAT.strftime('%m-%d-%Y')
-    satDateDAT = dateScheduledDat + timedelta(days=6)
-    satDate = satDateDAT.strftime('%m-%d-%Y')
-
-    
-    # RETRIEVE SCHEDULE FOR SPECIFIC WEEK
+    # RETRIEVE TODAY'S DATE
     todays_date = date.today()
     todays_dateSTR = todays_date.strftime('%-m-%-d-%Y')
 
-    # GET COORDINATOR ID FROM COORDINATOR TABLE
-    coordinatorRecord = db.session.query(CoordinatorsSchedule)\
-        .filter(CoordinatorsSchedule.Start_Date==sunDateDAT)\
-        .filter(CoordinatorsSchedule.Shop_Number==shopNumber).first()
-    if coordinatorRecord == None:
-        coordinatorsName = 'Not Assigned'
-        coordinatorsEmail = ''
-    else:
-        # LOOK UP COORDINATORS NAME
-        coordinatorID = coordinatorRecord.Coordinator_ID
-        memberRecord = db.session.query(Member).filter(Member.Member_ID==coordinatorID).first()
-        if memberRecord == None:
-            coordinatorsEmail = ''
-            coordinatorsName = '(' + str(coordinatorID) + ')'
-        else:
-            coordinatorsEmail = memberRecord.eMail
-            if memberRecord.NickName != None and memberRecord.NickName != '':
-                coordinatorsName = memberRecord.First_Name + ' ' + memberRecord.Last_Name + ' (' + memberRecord.NickName + ')'
-            else:
-                coordinatorsName = memberRecord.First_Name + ' ' + memberRecord.Last_Name
-        
+    # COMPUTE VALUES
+    curYear = db.session.query(ControlVariables.Current_Dues_Year).filter(ControlVariables.Shop_Number == 1).scalar()
+    pastYear = int(curYear) -1
+   
+    curYrPd = db.session.query(func.count(Member.Member_ID)).filter(Member.Dues_Paid == True).scalar()
+
+    curYrNewMbrs = db.session.query(func.count(Member.Member_ID)).filter(extract('year',Member.Date_Joined)  == curYear).scalar()
+    
+    mbrsNotCertified = db.session.query(func.count(Member.Member_ID)).filter(Member.Certified != True).filter(Member.Dues_Paid == True).scalar()
+   
+    curYrInactive = db.session.query(func.count(Member.Member_ID)).filter(extract('year',Member.Inactive_Date)  == curYear).scalar()
+    
+    pastYrPaid = db.session.query(func.count(DuesPaidYears.Member_ID)).filter(DuesPaidYears.Dues_Year_Paid == pastYear).scalar()
+    
+    pastYrInactive = db.session.query(func.count(Member.Member_ID)).filter(extract('year',Member.Inactive_Date)  == 2019).scalar()
     
     
-    sqlSMAM = "SELECT Count(tblMonitor_Schedule.Member_ID) AS SMAMrows "
-    sqlSMAM += "FROM tblMonitor_Schedule "
-    sqlSMAM += "WHERE tblMonitor_Schedule.Duty = 'Shop Monitor' "
-    sqlSMAM += "AND tblMonitor_Schedule.AM_PM = 'AM' "
-    sqlSMAM += "AND tblMonitor_Schedule.Shop_Number='" + shopNumber + "' "
-    sqlSMAM += "AND tblMonitor_Schedule.Date_Scheduled >= '" + beginDateSTR + "' "
-    sqlSMAM += "AND tblMonitor_Schedule.Date_Scheduled <= '" + endDateSTR + "' "
-    sqlSMAM += "GROUP BY tblMonitor_Schedule.Date_Scheduled ORDER BY Count(tblMonitor_Schedule.Member_ID) DESC"
-    SMAMrows = db.engine.execute(sqlSMAM).scalar()
+    # SQL QUERY TO COMPUTE THOSE PAID LAST YEAR, NOT PAID THIS YEAR
+    sqlCompute = """SELECT tblDues_Paid_Years.Member_ID, tblDues_Paid_Years.Dues_Year_Paid
+        FROM tblDues_Paid_Years
+        WHERE (((tblDues_Paid_Years.Member_ID) Not In (Select Member_ID from tblDues_Paid_Years where Dues_Year_Paid = '2019')) 
+        AND ((tblDues_Paid_Years.Dues_Year_Paid)='2020'))"""
+    records = db.engine.execute(sqlCompute)
+    pdPastNotCur = 0
+    for r in records:
+        pdPastNotCur += 1
+
+    pastYrNewMbrs = db.session.query(func.count(Member.Member_ID)).filter(extract('year',Member.Date_Joined)  == pastYear).scalar()
     
-    sqlSMPM = "SELECT Count(tblMonitor_Schedule.Member_ID) AS SMPMrows "
-    sqlSMPM += "FROM tblMonitor_Schedule "
-    sqlSMPM += "WHERE tblMonitor_Schedule.Duty = 'Shop Monitor' "
-    sqlSMPM += "AND tblMonitor_Schedule.AM_PM = 'PM' "
-    sqlSMPM += "AND tblMonitor_Schedule.Shop_Number='" + shopNumber + "' "
-    sqlSMPM += "AND tblMonitor_Schedule.Date_Scheduled >= '" + beginDateSTR + "' "
-    sqlSMPM += "AND tblMonitor_Schedule.Date_Scheduled <= '" + endDateSTR + "' "
-    sqlSMPM += "GROUP BY tblMonitor_Schedule.Date_Scheduled ORDER BY Count(tblMonitor_Schedule.Member_ID) DESC"
-    SMPMrows = db.engine.execute(sqlSMPM).scalar()
+    volunteers = db.session.query(func.count(Member.Member_ID)).filter(Member.NonMember_Volunteer == True).scalar()
+
+    recordsInDB = db.session.query(func.count(Member.Member_ID)).scalar()
     
-    sqlTCAM = "SELECT Count(tblMonitor_Schedule.Member_ID) AS TCAMrows "
-    sqlTCAM += "FROM tblMonitor_Schedule "
-    sqlTCAM += "WHERE tblMonitor_Schedule.Duty = 'Tool Crib' "
-    sqlTCAM += "AND tblMonitor_Schedule.AM_PM = 'AM' "
-    sqlTCAM += "AND tblMonitor_Schedule.Shop_Number='" + shopNumber + "' "
-    sqlTCAM += "AND tblMonitor_Schedule.Date_Scheduled >= '" + beginDateSTR + "' "
-    sqlTCAM += "AND tblMonitor_Schedule.Date_Scheduled <= '" + endDateSTR + "' "
-    sqlTCAM += "GROUP BY tblMonitor_Schedule.Date_Scheduled ORDER BY Count(tblMonitor_Schedule.Member_ID) DESC"
-    TCAMrows = db.engine.execute(sqlTCAM).scalar()
-    
-    sqlTCPM = "SELECT Count(tblMonitor_Schedule.Member_ID) AS TCPMrows "
-    sqlTCPM += "FROM tblMonitor_Schedule "
-    sqlTCPM += "WHERE tblMonitor_Schedule.Duty = 'Tool Crib' "
-    sqlTCPM += "AND tblMonitor_Schedule.AM_PM = 'AM' "
-    sqlTCPM += "AND tblMonitor_Schedule.Shop_Number='" + shopNumber + "' "
-    sqlTCPM += "AND tblMonitor_Schedule.Date_Scheduled >= '" + beginDateSTR + "' "
-    sqlTCPM += "AND tblMonitor_Schedule.Date_Scheduled <= '" + endDateSTR + "' "
-    sqlTCPM += "GROUP BY tblMonitor_Schedule.Date_Scheduled ORDER BY Count(tblMonitor_Schedule.Member_ID) DESC"
-    TCPMrows = db.engine.execute(sqlTCPM).scalar()
-    
-
-    # DEFINE ARRAYS FOR EACH GROUPING
-    rows = SMAMrows 
-    cols = 6    # member name and training needed Y or N
-    SMAMnames = [[0 for x in range(cols)] for y in range(rows)]
-    SMAMtraining = [[0 for x in range(cols)] for y in range(rows)]
-
-    rows = SMPMrows  
-    cols = 6    # member name and training needed Y or N
-    SMPMnames = [[0 for x in range(cols)] for y in range(rows)]
-    SMPMtraining = [[0 for x in range(cols)] for y in range(rows)]
-
-    rows = TCAMrows 
-    cols = 6    # member name and training needed Y or N
-    TCAMnames = [[0 for x in range(cols)] for y in range(rows)]
-    TCAMtraining = [[0 for x in range(cols)] for y in range(rows)]
-
-    rows = TCPMrows  
-    cols = 6    # member name and training needed Y or N
-    TCPMnames = [[0 for x in range(cols)] for y in range(rows)]
-    TCPMtraining = [[0 for x in range(cols)] for y in range(rows)]
-
-
-    # BUILD SELECT STATEMENT TO RETRIEVE SM MEMBERS SCHEDULE FOR CURRENT YEAR FORWARD
-    sqlSelectSM = "SELECT tblMember_Data.Member_ID as memberID, "
-    sqlSelectSM += "First_Name + ' ' + Last_Name as displayName, tblShop_Names.Shop_Name, "
-    sqlSelectSM += "Last_Monitor_Training as trainingDate, DATEPART(year,Last_Monitor_Training) as trainingYear, "
-    sqlSelectSM += "tblMonitor_Schedule.Member_ID, DATEPART(dw,Date_Scheduled)-2 as dayOfWeek, "
-    sqlSelectSM += " format(Date_Scheduled,'M/d/yyyy') as DateScheduled, DATEPART(year,Date_Scheduled) as scheduleYear, "
-    sqlSelectSM += "AM_PM, Duty, No_Show, tblMonitor_Schedule.Shop_Number, tblMember_Data.Monitor_Duty_Waiver_Expiration_Date as waiver "
-    sqlSelectSM += "FROM tblMember_Data "
-    sqlSelectSM += "LEFT JOIN tblMonitor_Schedule ON tblMonitor_Schedule.Member_ID = tblMember_Data.Member_ID "
-    sqlSelectSM += "LEFT JOIN tblShop_Names ON tblMonitor_Schedule.Shop_Number = tblShop_Names.Shop_Number "
-    sqlSelectSM += "WHERE Date_Scheduled between '" + beginDateSTR + "' and '" + endDateSTR + "' "
-    sqlSelectSM += "ORDER BY dayOfWeek, AM_PM,Last_Name"
-    SMschedule = db.engine.execute(sqlSelectSM)
-    
-    # BUILD SELECT STATEMENT TO RETRIEVE TC MEMBERS SCHEDULE FOR CURRENT YEAR FORWARD
-    sqlSelectTC = "SELECT tblMember_Data.Member_ID as memberID, "
-    sqlSelectTC += "First_Name + ' ' + Last_Name as displayName, tblShop_Names.Shop_Name, "
-    sqlSelectTC += "Last_Monitor_Training as trainingDate, DATEPART(year,Last_Monitor_Training) as trainingYear, "
-    sqlSelectTC += "tblMonitor_Schedule.Member_ID, DATEPART(dw,Date_Scheduled)-0 as dayOfWeek, "
-    sqlSelectTC += " format(Date_Scheduled,'M/d/yyyy') as DateScheduled, DATEPART(year,Date_Scheduled) as scheduleYear, "
-    sqlSelectTC += "AM_PM, Duty, No_Show, tblMonitor_Schedule.Shop_Number, tblMember_Data.Monitor_Duty_Waiver_Expiration_Date as waiver "
-    sqlSelectTC += "FROM tblMember_Data "
-    sqlSelectTC += "LEFT JOIN tblMonitor_Schedule ON tblMonitor_Schedule.Member_ID = tblMember_Data.Member_ID "
-    sqlSelectTC += "LEFT JOIN tblShop_Names ON tblMonitor_Schedule.Shop_Number = tblShop_Names.Shop_Number "
-    sqlSelectTC += "WHERE Date_Scheduled between '" + beginDateSTR + "' and '" + endDateSTR + "' "
-    sqlSelectTC += " and tblMonitor_Schedule.Duty = 'Tool Crib' "
-    sqlSelectTC += "ORDER BY dayOfWeek, AM_PM, Last_Name"
-    TCschedule = db.engine.execute(sqlSelectTC)
-
-    #   BUILD SHOP MONITOR ARRAYS
-    for s in SMschedule:
-        
-        # IS TRAINING NEEDED?
-        if (s.waiver == None):
-            if (s.trainingYear == None):
-                trainingNeeded = 'Y'
-            else:
-                intTrainingYear = int(s.trainingYear) +2
-                intScheduleYear = int(s.scheduleYear)
-                if (intTrainingYear <= intScheduleYear):
-                    trainingNeeded = 'Y'
-                else:
-                    trainingNeeded = 'N'
-        else:
-            trainingNeeded = 'N'
-
-    
-
-        # Group - Shop Monitor;  shift - AM
-        if (s.Duty == 'Shop Monitor' and s.AM_PM == 'AM'):
-            for r in range(SMAMrows):
-                if (SMAMnames[r][s.dayOfWeek] == 0):
-                    SMAMnames[r][s.dayOfWeek] = s.displayName
-                    SMAMtraining[r][s.dayOfWeek] = trainingNeeded
-                    break
-        
-        # Group - Shop Monitor;  shift - PM
-        if (s.Duty == 'Shop Monitor' and s.AM_PM == 'PM'): 
-            for r in range(SMPMrows):
-                if (SMPMnames[r][s.dayOfWeek] == 0):
-                    SMPMnames[r][s.dayOfWeek] = s.displayName
-                    SMPMtraining[r][s.dayOfWeek] = trainingNeeded
-                    break
-
-        # Group - Tool Crib;  shift - AM
-        if (s.Duty == 'Tool Crib' and s.AM_PM == 'AM'):
-            for r in range(TCAMrows):
-                if (TCAMnames[r][s.dayOfWeek] == 0):
-                    TCAMnames[r][s.dayOfWeek] = s.displayName
-                    TCAMtraining[r][s.dayOfWeek] = trainingNeeded
-                    break
-
-        # Group - Tool Crib;  shift - PM
-        if (s.Duty == 'Tool Crib' and s.AM_PM == 'PM'):
-            for r in range(TCPMrows):
-                if (TCPMnames[r][s.dayOfWeek] == 0):
-                    TCPMnames[r][s.dayOfWeek] = s.displayName
-                    TCPMtraining[r][s.dayOfWeek] = trainingNeeded
-                    break
-
-
-    # REPLACE 0 WITH BLANK IN NAMES ARRAY
-    for r in range(SMAMrows):
-        c=0
-        while c <= 5:
-            if (SMAMnames[r][c] == 0):
-                SMAMnames[r][c] = ''
-            c += 1
-    for r in range(SMPMrows):
-            c=0
-            while c <= 5:
-                if (SMPMnames[r][c] == 0):
-                    SMPMnames[r][c] = ''
-                c += 1
-    for r in range(TCAMrows):
-        c=0
-        while c <= 5:
-            if (TCAMnames[r][c] == 0):
-                TCAMnames[r][c] = ''
-            c += 1
-    for r in range(TCPMrows):
-            c=0
-            while c <= 5:
-                if (TCPMnames[r][c] == 0):
-                    TCPMnames[r][c] = ''
-                c += 1
-    
-    if (destination == 'PDF'):
-        html =  render_template("rptWeeklyMonitorSchedule.html",\
-        SMAMnames=SMAMnames,SMPMnames=SMPMnames,TCAMnames=TCAMnames,TCPMnames=TCPMnames,\
-        SMAMtraining=SMAMtraining,SMPMtraining=SMPMtraining,TCAMtraining=TCAMtraining,TCPMtraining=TCPMtraining,\
-        SMAMrows=SMAMrows,SMPMrows=SMPMrows,TCAMrows=TCAMrows,TCPMrows=TCPMrows,\
-        shopName=shopName,weekOf=beginDateSTR,coordinatorsName=coordinatorsName, coordinatorsEmail=coordinatorsEmail,\
-        todays_date=todays_dateSTR,\
-        monDate=monDate,tueDate=tueDate,wedDate=wedDate,thuDate=thuDate,friDate=friDate,satDate=satDate)
-        
-        # DEFINE PATH TO USE TO STORE PDF
-        currentWorkingDirectory = os.getcwd()
-        pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
-        filePath = pdfDirectoryPath + "/rptWeeklyMonitorSchedule.pdf"
-        options = { 
-            "enable-local-file-access": None
-        }
-        pdfkit.from_string(html,filePath, options=options)
-        return redirect(url_for('index'))
-        
-        # USE THE FOLLOWING TO RENDER PDF TO SCREEN
-        #return render_pdf(html(string=html))
-    else:
-        return render_template("rptWeeklyMonitorSchedule.html",\
-            SMAMnames=SMAMnames,SMPMnames=SMPMnames,TCAMnames=TCAMnames,TCPMnames=TCPMnames,\
-            SMAMtraining=SMAMtraining,SMPMtraining=SMPMtraining,TCAMtraining=TCAMtraining,TCPMtraining=TCPMtraining,\
-            SMAMrows=SMAMrows,SMPMrows=SMPMrows,TCAMrows=TCAMrows,TCPMrows=TCPMrows,\
-            shopName=shopName,weekOf=beginDateSTR,coordinatorsName=coordinatorsName, coordinatorsEmail=coordinatorsEmail,\
-            todays_date=todays_dateSTR,\
-            monDate=monDate,tueDate=tueDate,wedDate=wedDate,thuDate=thuDate,friDate=friDate,satDate=satDate)
+    return render_template("rptPresident.html",todaysDate=todays_dateSTR,curYear=curYear,pastYear=pastYear,\
+    curYrPd=curYrPd,curYrNewMbrs=curYrNewMbrs,mbrsNotCertified=mbrsNotCertified,curYrInactive=curYrInactive,\
+    pastYrPaid=pastYrPaid,pastYrInactive=pastYrInactive,pdPastNotCur=pdPastNotCur,pastYrNewMbrs=pastYrNewMbrs,\
+    volunteers=volunteers,recordsInDB=recordsInDB)
             
+ 
+@app.route("/prtMentors", methods=["GET"])
+def prtMentors():
+    destination = request.args.get('destination')
+    todays_date = date.today()
+    todays_dateSTR = todays_date.strftime('%-m-%-d-%Y')
+         
+    mentors = db.session.query(Member)\
+        .filter(Member.Mentor == True)\
+        .order_by(Member.Last_Name,Member.First_Name)\
+        .all()
+    mentorDict = []
+    mentorItem = []
+    for m in mentors:
+        displayName = m.Last_Name + ', ' + m.First_Name 
+        if m.Nickname != None:
+            displayName += ' (' + m.Nickname + ')'
+        
+        if m.Cell_Phone == None:
+            cellPhone = ''
+        else:
+            cellPhone = m.Cell_Phone
+        
+        if m.Home_Phone == None:
+            homePhone = ''
+        else:
+            homePhone = m.Home_Phone
+
+        mentorItem = {
+            'name':displayName,
+            'cellPhone':cellPhone,
+            'homePhone':homePhone,
+            'eMail':m.eMail
+        }
+        mentorDict.append(mentorItem)
+    return render_template("rptMentors.html",todaysDate=todays_dateSTR,mentorDict=mentorDict)
+    
+
+@app.route("/prtContacts", methods=["GET"])
+def prtContacts():
+    destination = request.args.get('destination')
+    todays_date = date.today()
+    todays_dateSTR = todays_date.strftime('%-m-%-d-%Y')
+          
+    # GET LIST OF CONTACT GROUPS
+    groups = db.session.query(func.count(Contact.Contact_Group).label('count'),Contact.Contact_Group).group_by(Contact.Contact_Group).all()
+    # for g in groups:
+    #     print (g.Contact_Group,g.count)
+
+
+    sqlContacts = "SELECT Contact_Group, Position, "
+    sqlContacts += "tblContact_List.Member_ID as MemberID, [Last_Name], [First_Name],[Middle_Name],Nickname, "
+    sqlContacts += "eMail, Home_Phone, Cell_Phone, Expires "
+    sqlContacts += "FROM tblContact_List "
+    sqlContacts += "LEFT JOIN tblMember_Data ON tblContact_List.Member_ID = tblMember_Data.Member_ID "
+    sqlContacts += "ORDER BY Contact_Group, Position, Last_Name, First_Name"
+
+    contacts = db.engine.execute(sqlContacts)
+   
+    contactDict = []
+    contactItem = []
+    for c in contacts:
+        contactGroup = c.Contact_Group
+        position = c.Position
+        displayName = c.Last_Name + ', ' + c.First_Name 
+        if c.Nickname != None:
+            displayName += ' (' + c.Nickname + ')'
+        
+        if c.Cell_Phone == None:
+            cellPhone = ''
+        else:
+            cellPhone = c.Cell_Phone
+        
+        if c.Home_Phone == None:
+            homePhone = ''
+        else:
+            homePhone = c.Home_Phone
+
+        contactItem = {
+            'contactGroup':contactGroup,
+            'position':position,
+            'name':displayName,
+            'cellPhone':cellPhone,
+            'homePhone':homePhone,
+            'eMail':c.eMail
+        }
+        contactDict.append(contactItem)
+    return render_template("rptContactList.html",todaysDate=todays_dateSTR,contactDict=contactDict,groups=groups)
+ 
+           
 
 #PRINT WEEKLY LIST OF CONTACTS FOR COORDINATOR
 @app.route("/printWeeklyMonitorContacts", methods=['GET'])
@@ -450,53 +332,95 @@ def printWeeklyMonitorContacts():
             )
     
     
-#PRINT WEEKLY NOTES FOR COORDINATOR 
-@app.route("/printWeeklyMonitorNotes", methods=["GET"])
-def printWeeklyMonitorNotes():
-    dateScheduled=request.args.get('date')
-    shopNumber=request.args.get('shop')
+#PRINT MEMBER MONITOR SCHEDULE TRANSACTIONS AND NOTES
+@app.route("/prtMonitorTransactions", methods=["GET"])
+def prtMonitorTransactions():
+    memberID=request.args.get('memberID')
     destination = request.args.get('destination')
-    
-    # GET LOCATION NAME FOR REPORT HEADING
-    shopRecord = db.session.query(ShopName).filter(ShopName.Shop_Number==shopNumber).first()
-    shopName = shopRecord.Shop_Name
-    
-    #  DETERMINE START OF WEEK DATE
-    #  CONVERT TO DATE TYPE
-    dateScheduledDat = datetime.strptime(dateScheduled,'%Y-%m-%d')
-    dayOfWeek = dateScheduledDat.weekday()
+    curYear = request.args.get('year')
+    lastYear = int(curYear)-1
 
-    # GET BEGIN, END DATES FOR REPORT HEADING (Monday, Saturday)
-    beginDateDAT = dateScheduledDat + timedelta(days=1)
-    beginDateSTR = beginDateDAT.strftime('%m-%d-%Y')
-    yyyymmdd = dateScheduledDat.strftime('%Y-%m-%d')
-
-    endDateDAT = beginDateDAT + timedelta(days=5)
-    endDateSTR = endDateDAT.strftime('%m-%d-%Y')
-
-    weekOfHdg = dateScheduledDat.strftime('%B %d, %Y')
-    
-    # RETRIEVE SCHEDULE FOR SPECIFIC WEEK
+    # GET TODAYS DATE
     todays_date = date.today()
-    todays_dateSTR = todays_date.strftime('%-m-%-d-%Y')
+    todaysDate = todays_date.strftime('%-m-%-d-%Y')
     
-    # BUILD SELECT STATEMENT TO RETRIEVE NOTES FOR SPECIFIED WEEK AND LOCATION
-    sqlNotes = "SELECT Date_Of_Change, convert(nvarchar,Date_Of_Change,100) as changeDateTime, "
-    sqlNotes += "convert(nvarchar,Date_Of_Change,110) as changeDate, "
-    sqlNotes += "convert(nvarchar,Date_Of_Change,108) as changeTime, "
-    sqlNotes += "Schedule_Note, Author_ID, Initials FROM monitorWeekNotes "
-    sqlNotes += "LEFT JOIN tblMember_Data on Author_ID = Member_ID "
-    sqlNotes += "WHERE WeekOf = '" + yyyymmdd + "' "
-    sqlNotes += "ORDER BY Date_Of_Change"
-    
-    notes = db.engine.execute(sqlNotes)
+    # GET MEMBER NAME
+    member = db.session.query(Member).filter(Member.Member_ID == memberID).first()
+    displayName = member.First_Name
+    if (member.Nickname != None and member.Nickname != ''):
+        displayName += ' (' + member.Nickname + ')'
+    displayName += ' ' + member.Last_Name
+    #print(displayName)
 
+    # GET MONITOR SCHEDULE TRANSACTIONS
+    transactions = db.session.query(MonitorScheduleTransaction)\
+    .filter(MonitorScheduleTransaction.Member_ID == memberID)\
+    .all()
+    # .filter(MonitorScheduleTransaction.Date_Scheduled.year == curYear)\
     
+    #for t in transactions:
+    #   print (t.Member_ID, t.Date_Scheduled)
+    transactionDict = []
+    transactionItem = []
+    for t in transactions:
+        #strDateScheduled = str(t.Date_Scheduled.year)
+        #print(type(strDateScheduled),strDateScheduled,type(curYear),curYear)
+        if (str(t.Date_Scheduled.year) == curYear):
+            #print('match')
+            transDateTime = t.Transaction_Date.strftime('%m-%d-%Y %I:%M %p')
+            transType = t.Transaction_Type
+            scheduled = t.Date_Scheduled.strftime('%m-%d-%Y')
+            shift = t.AM_PM
+            duty = t.Duty
+            staffID = t.Staff_ID
+            staffInitials = db.session.query(Member.Initials).filter(Member.Member_ID == staffID).scalar()
+            if staffInitials == None:
+                staffInitials=''
+            
+            transactionItem = {
+                'transDateTime':transDateTime,
+                'transType':transType,
+                'scheduledDate':scheduled,
+                'shift':shift,
+                'duty':duty,
+                'staffInitials':staffInitials
+            }
+            transactionDict.append(transactionItem) 
+
+
+    # BUILD SELECT STATEMENT TO RETRIEVE NOTES FOR SPECIFIED MEMBER
+    notes = db.session.query(MonitorWeekNote)\
+    .all()
+    #.filter(MonitorWeekNote.Date_Of_Change.year == curYear or MonitorWeekNote.Date_Of_Change == pastYear)\
+    if notes == None:
+        flash("There are no notes for this member.")
+    notesDict = []
+    notesItem = []
+    for n in notes:
+        note = str(n.Schedule_Note)
+        # print('......................')
+        # print(note)
+        # print('......................')
+        
+        if note.find(memberID) != -1\
+        and (n.Date_Of_Change.year == curYear or n.Date_Of_Change.year == lastYear):
+            #print('++++++++++++++++++++++++++++++++')
+            #print(n.Author_ID,n.Date_Of_Change,n.Schedule_Note)
+            initials = db.session.query(Member.Initials).filter(Member.Member_ID == n.Author_ID).scalar()
+            
+            notesItem = {
+                'noteDateTime':n.Date_Of_Change.strftime('%m-%d-%Y %I:%M %p'),
+                'noteText':n.Schedule_Note,
+                'staffInitials':initials
+            }
+            notesDict.append(notesItem) 
+
+
     if (destination == 'PDF') : 
         html =  render_template("rptWeeklyNotes.html",\
             beginDate=beginDateSTR,endDate=endDateSTR,\
             locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
-            todaysDate=todays_dateSTR
+            todaysDate=todaysDate
             )
         currentWorkingDirectory = os.getcwd()
         pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
@@ -505,213 +429,11 @@ def printWeeklyMonitorNotes():
         pdfkit.from_string(html,filePath, options=options)
         return redirect(url_for('index'))
     else:
-        return render_template("rptWeeklyNotes.html",\
-            beginDate=beginDateSTR,endDate=endDateSTR,\
-            locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
-            todaysDate=todays_dateSTR
-            )
+        return render_template("rptMonitorTransactions.html",\
+            transactionDict=transactionDict,\
+            notesDict=notesDict,displayName=displayName,\
+            todaysDate=todaysDate,memberID=memberID)
         
-
-@app.route("/printSubList", methods=["GET"])
-def printSubList():
-    destination = request.args.get('destination')
-    todays_date = date.today()
-    todays_dateSTR = todays_date.strftime('%-m-%-d-%Y')
-    thisYear = todays_date.strftime('%Y')
-    janFirstSTR = thisYear + '0101'
-    janFirst = datetime.strptime(janFirstSTR,'%Y%m%d')
-
-    # BUILD ARRAY OF NAMES OF MONITOR SUBS
-    sqlSubs = "SELECT Last_Name, First_Name, Nickname, Member_ID,"
-    sqlSubs += " Cell_Phone, Home_Phone, eMail, Last_Monitor_Training, Monitor_Duty_Waiver_Expiration_Date,"
-    sqlSubs += " format(Monitor_Duty_Waiver_Expiration_Date,'yyyy-MM-dd') as Waiver_Expiration_Date, Restricted_From_Shop,"
-    sqlSubs += " Reason_For_Restricted_From_Shop, Requires_Tool_Crib_Duty,"
-    sqlSubs += " Certified, Certification_Training_Date, Certified_2, Certification_Training_Date_2,"
-    sqlSubs += " Monitor_Duty_Notes,"
-    sqlSubs += " Jan_Resident as Jan, Feb_Resident as Feb, Mar_Resident as Mar,"
-    sqlSubs += " Apr_Resident as Apr, May_Resident as May, Jun_Resident as Jun,"
-    sqlSubs += " Jul_Resident as Jul, Aug_Resident as Aug, Sep_Resident as Sep,"
-    sqlSubs += " Oct_Resident as Oct, Nov_Resident as Nov, Dec_Resident as Dec"
-    sqlSubs += " FROM tblMember_Data"
-    sqlSubs += " WHERE Monitor_Sub = 1 and Dues_Paid = 1"
-    sqlSubs += " ORDER BY Last_Name, First_Name " 
-    subs = db.engine.execute(sqlSubs)
-    
-    subDict = []
-    subItem = []
-    
-    for s in subs:
-        memberID = s.Member_ID
-       
-        # CONCATENATE NICKNAME WITH LAST AND FIRST NAME
-        displayName = s.Last_Name + ', ' + s.First_Name
-        if s.Nickname != None:
-            displayName += ' ('+s.Nickname+')'
-
-        # DETERMINE IF TRAINING IS NEEDED
-        hasWaiver = False
-        if (s.Waiver_Expiration_Date != None):
-            waiverDate = s.Monitor_Duty_Waiver_Expiration_Date.date()
-            if (waiverDate > todays_date):
-                hasWaiver = True
-                trainingNeededTxt=''
-            
-        if hasWaiver == False:
-            if TrainingNeeded(s.Last_Monitor_Training):
-                trainingNeededTxt='TRAINING NEEDED'
-            else:
-                trainingNeededTxt=''
-                
-        # CHECK IF TOOL CRIB DUTY REQUIRED
-        if s.Requires_Tool_Crib_Duty:
-            toolCribRequested='TOOL CRIB REQUESTED'
-        else:
-            toolCribRequested=''
-
-        # CHECK IF RESTRICTED FROM SHOP
-        if s.Restricted_From_Shop:
-            restricted = 'RESTRICTED'
-        else:
-            restricted = ''
-        if s.Reason_For_Restricted_From_Shop == None:
-            reasonRestricted = ''
-        else:
-            reasonRestricted = s.Reason_For_Restricted_From_Shop
-
-        # FORMAT DATE CERTIFIED
-        if s.Certification_Training_Date == None:
-            certifiedDateRA = ' '
-        else:
-            certifiedDateRA = s.Certification_Training_Date.strftime('%m/%d/%Y')
-        if s.Certification_Training_Date_2 == None:
-            certifiedDateBW = ' '
-        else:
-            certifiedDateBW = s.Certification_Training_Date_2.strftime('%m/%d/%Y')
-
-        # CHECK FOR MONITOR DUTY NOTES
-        if s.Monitor_Duty_Notes:
-            monitorDutyNotes = s.Monitor_Duty_Notes
-        else:
-            monitorDutyNotes = ''
-
-        # COMBINE MONTHS IN VILLAGES
-        monthsStr = ''
-        if s.Jan == True:
-            monthsStr =' Jan '
-        else:
-            monthsStr = ' -  '
-        if s.Feb == True:
-            monthsStr +='Feb '
-        else:
-            monthsStr += ' -  '
-        if s.Mar == True:
-            monthsStr +='Mar '
-        else:
-            monthsStr += ' -  '
-        if s.Apr == True:
-            monthsStr +='Apr '
-        else:
-            monthsStr += ' -  '
-        if s.May == True:
-            monthsStr +='May '
-        else:
-            monthsStr += ' -  '
-        if s.Jun == True:
-            monthsStr +='Jun '
-        else:
-            monthsStr += ' -  '
-        if s.Jul == True:
-            monthsStr +='Jul '
-        else:
-            monthsStr += ' -  '
-        if s.Aug == True:
-            monthsStr +='Aug '
-        else:
-            monthsStr += ' -  '
-        if s.Sep == True:
-            monthsStr +='Sep '
-        else:
-            monthsStr += ' -  '
-        if s.Oct == True:
-            monthsStr +='Oct '
-        else:
-            monthsStr += ' -  '
-        if s.Nov == True:
-            monthsStr +='Nov '
-        else:
-            monthsStr += ' -  '
-        if s.Dec == True:
-            monthsStr +='Dec '
-        else:
-            monthsStr += ' -  '
-        
-
-
-        # GET NUMBER OF PAST MONITOR DUTY ASSIGNMENTS
-        completedShifts = db.session.query(func.count(MonitorSchedule.Member_ID))\
-            .filter(MonitorSchedule.Member_ID == memberID)\
-            .filter(MonitorSchedule.No_Show == False)\
-            .filter(MonitorSchedule.Date_Scheduled < todays_date)\
-            .filter(MonitorSchedule.Date_Scheduled > janFirst).scalar()
-            
-
-        # GET NUMBER OF FUTURE MONITOR DUTY ASSIGNMENTS (SINCE JANUARY 1)
-        futureShifts = db.session.query(func.count(MonitorSchedule.Member_ID))\
-            .filter(MonitorSchedule.Member_ID == memberID)\
-            .filter(MonitorSchedule.Date_Scheduled > todays_date).scalar()
-
-        # BUILD DICTIONARY OF MEMBERS AND RELATED DATA
-        subItem = {
-            'name':displayName,
-            'memberID':memberID,
-            'eMail': s.eMail,
-            'cellPhone':s.Cell_Phone,
-            'homePhone':s.Home_Phone,
-            'trainingNeeded':trainingNeededTxt,
-            'restricted':restricted,
-            'reasonRestricted':reasonRestricted,
-            'toolCribRequested':toolCribRequested,
-            'certifiedRA':s.Certified,
-            'dateCertifiedRA':certifiedDateRA,
-            'certifiedBW':s.Certified_2,
-            'dateCertifiedBW':certifiedDateBW,
-            'completedShifts':completedShifts,
-            'futureShifts':futureShifts,
-            'monitorDutyNotes':monitorDutyNotes,
-            'monthsStr':monthsStr,
-            'Jan':s.Jan,
-            'Feb':s.Feb,
-            'Mar':s.Mar,
-            'Apr':s.Apr,
-            'May':s.May,
-            'Jun':s.Jun,
-            'Jul':s.Jul,
-            'Aug':s.Aug,
-            'Sep':s.Sep,
-            'Oct':s.Oct,
-            'Nov':s.Nov,
-            'Dec':s.Dec,}
-        subDict.append(subItem)
-        
-    if (destination == 'PDF') :  
-        html =  render_template("rptSubList.html",\
-            todaysDate=todays_dateSTR,subDict=subDict
-            )
-        currentWorkingDirectory = os.getcwd()
-        pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
-        filePath = pdfDirectoryPath + "/rptSubList.pdf"
-        options = {"enable-local-file-access": None}
-        pdfkit.from_string(html,filePath, options=options)
-        return redirect(url_for('index'))  
-        
-    else:
-        return render_template("rptSubList.html",\
-            todaysDate=todays_dateSTR,subDict=subDict
-            )
-        
-    return redirect(url_for('/index'))
-    
-
 
 @app.route("/eMailCoordinator", methods=["GET","POST"])
 def eMailCoordinator():
