@@ -5,10 +5,10 @@
 		float: right;
 		display: block;
 	} 
-	.pageButtons {
+	/* .pageButtons {
 		float:right;
 		margin-right:20px;
-	} 
+	}  */
 	.mainBody {
 		font-size:.75rem;
 	}

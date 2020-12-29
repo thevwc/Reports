@@ -46,19 +46,17 @@
 	hr {
 		border:2px solid black;
 	}
-	table {
-		margin:0 auto;
+	.row {
+		margin:0;
 	}
 	.detail {
 		line-height: 2;
 	}
-	.detail tr:nth-child(even) {
+	.detail .row:nth-child(even) {
 		background-color:lightgray;
 	}
-	
-	tfoot tr{
-		margin:0 auto;
-		break-after:always;
+	.groupFooter {
+		break-after: always;
 	}
 }
 
@@ -88,10 +86,7 @@
 		font-weight: bold;
 		color:black;
 	}
-	table {
-		margin:0 auto;
-	}
-	
+
 	.wholePage {
 		margin-left:1em;
 		margin-right:1em;
@@ -103,17 +98,29 @@
 		background-color:lightgray;
 	}
 	
+	.groupFooter p {
+		position:fixed;
+		background-color: lightgreen;
+		bottom:0px;
+		width:100vw;
+		padding-top:4px;
+		padding-bottom:4px;
+		break-after: always;
+	}
+	p .groupFooter {
+		break-after: always;
+	}
+	
 	.pageButtons {
 		display:none;
 		float:none;
 	}
-	.contactGroupFooter {
-		break-after:page;
-	}
+	
 }
 
 @page {
-	size:landscape;
+	size: portrait;
+	orientation: portrait;
 	display:block;
 	position:relative;
 	counter-increment: page;

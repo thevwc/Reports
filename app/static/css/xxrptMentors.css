@@ -1,13 +1,12 @@
 @media screen { 
 	.wholePage {
 		line-height: 1;
-		row-gap:0em;
 		margin-left:10rem;
 		margin-right:10rem;
 	}
-	#printPageButton #closePageButton {
-		float: right;
+	.pageButtons{
 		display: block;
+		float: right;
 	}
 	.hdg {
 		display:grid;
@@ -19,79 +18,59 @@
 		grid-area: titleArea;
 		text-align:center;
 	} 
-	.pageButtons {
-		grid-area: buttonArea;
-		text-align:right;
-		margin-right:20px;
-		padding-right:20px;
-	} 
 	
    	h1, h2, h3 {
 		color: black;
-		text-align: center;
 		font-family: "Times New Roman",Times, sans-serif,serif;
+		text-align: center;
    } 
    	h1 {
-		font-size: 18pt;
 		break-before: avoid;
+		font-size: 18pt;
 	}
-	
 	h2 {
 		font-size: 16pt;
 	}
-	
 	h3 {
 		font-size: 14pt;
 	}
 	hr {
 		border:2px solid black;
 	}
-	table {
-		margin:0 auto;
+	.row {
+		margin:0;
 	}
 	.detail {
 		line-height: 2;
 	}
-	.detail tr:nth-child(even) {
+	.detail .row:nth-child(even) {
 		background-color:lightgray;
 	}
 	
-	tfoot tr{
-		margin:0 auto;
-		break-after:always;
-	}
 }
 
 @media print {
 	html, body {
 		border: 1px solid white;
-        height: auto;
 		break-before:avoid;
 		break-after:avoid;
+		height: auto;
 	}
-	
 	h1 {
-		font-size: 16pt;
 		break-before: page;
-	}
-			
+		font-size: 16pt;
+	}		
 	h2 {
 		font-size: 14pt;
-	}
-			
+	}		
 	h3 {
 		font-size: 12pt;
-	}
-			
+	}		
 	h1, h2, h3, h4, h5 {
-		text-align:center;
-		font-weight: bold;
 		color:black;
+		font-weight: bold;
+		text-align:center;
 	}
-	table {
-		margin:0 auto;
-	}
-	
 	.wholePage {
 		margin-left:1em;
 		margin-right:1em;
@@ -103,19 +82,25 @@
 		background-color:lightgray;
 	}
 	
+	.groupFooter p {
+		position:fixed;
+		background-color: lightgreen;
+		bottom:0px;
+		width:100vw;
+		padding-top:4px;
+		padding-bottom:4px;
+	}
+	
 	.pageButtons {
 		display:none;
 		float:none;
 	}
-	.contactGroupFooter {
-		break-after:page;
-	}
+	
 }
 
 @page {
-	size:landscape;
+	size: portrait;
+	orientation: portrait;
 	display:block;
-	position:relative;
 	counter-increment: page;
-	break-after:always;
 } 

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+    {{super()}}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/rptMentors.css') }}">
+{% endblock %}
+
+{% block content %} 
+<div class='wholePage'>
+    <div class="hdg">
+        <div class='title'>
+            <h1>THE VILLAGES WOODWORKERS CLUB</h1>
+        </div>
+        <div class="pageButtons">
+            <button id="printPageButton"  onClick="window.print();">PRINT</button>
+            <button id="closePageButton"  onclick="window.history.back()" >CLOSE PAGE</button>
+        </div>
+    </div>
+
+    <div class='row'>
+        <div class="col">
+            <h3>MENTORS</h3>
+        </div>    
+    </div>
+       
+    <div class='row'>
+        <div class="col">
+            <h3>As of {{todaysDate}}</h3>
+        </div>
+    </div>    
+    <br>
+    <div class="row">
+        <div class='col'>Name</div>
+        <div class='col'>Home Phone</div>
+        <div class='col'>Cell Phone</div>
+        <div class='col'>E-Mail</div>
+    </div>
+    <hr>
+
+    <div class="detail">
+    {% for mentorItem in mentorDict %}    
+        <div class="row">
+            <div class='col'>
+                {{mentorItem.name}}
+            </div>
+            <div class='col'>
+                {{mentorItem.homePhone}}
+            </div>
+            <div class='col'>
+                {{mentorItem.cellPhone}}
+            </div>
+            <div class='col'>
+                {{mentorItem.eMail}}
+            </div>     
+        </div>            
+    {% endfor %} 
+    </div>    
+</div>
+{% endblock %}

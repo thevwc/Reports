@@ -114,7 +114,7 @@ def prtPresidentsReport():
             
  
 @app.route("/prtMentors", methods=["GET"])
-def prtMentors():
+def prtMentorsTable():
     destination = request.args.get('destination')
     todays_date = date.today()
     todays_dateSTR = todays_date.strftime('%-m-%-d-%Y')
@@ -125,6 +125,7 @@ def prtMentors():
         .all()
     mentorDict = []
     mentorItem = []
+    recordCnt = 0
     for m in mentors:
         displayName = m.Last_Name + ', ' + m.First_Name 
         if m.Nickname != None:
@@ -147,8 +148,8 @@ def prtMentors():
             'eMail':m.eMail
         }
         mentorDict.append(mentorItem)
-    return render_template("rptMentors.html",todaysDate=todays_dateSTR,mentorDict=mentorDict)
-    
+        recordCnt += 1
+    return render_template("rptMentors.html",todaysDate=todays_dateSTR,mentorDict=mentorDict,recordCnt=recordCnt)
 
 @app.route("/prtContacts", methods=["GET"])
 def prtContacts():

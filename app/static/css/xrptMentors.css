@@ -2,12 +2,13 @@
 	.wholePage {
 		line-height: 1;
 		row-gap:0em;
-		margin-left:10rem;
-		margin-right:10rem;
+		margin-left:20rem;
+		margin-right:20rem;
 	}
 	#printPageButton #closePageButton {
 		float: right;
 		display: block;
+		border:1px solid red;
 	}
 	.hdg {
 		display:grid;
@@ -46,33 +47,36 @@
 	hr {
 		border:2px solid black;
 	}
-	table {
-		margin:0 auto;
+	.row {
+		margin:0;
 	}
 	.detail {
 		line-height: 2;
 	}
-	.detail tr:nth-child(even) {
+	.detail .row:nth-child(even) {
 		background-color:lightgray;
-	}
-	
-	tfoot tr{
-		margin:0 auto;
-		break-after:always;
 	}
 }
 
 @media print {
-	html, body {
-		border: 1px solid white;
-        height: auto;
-		break-before:avoid;
-		break-after:avoid;
+	.wholePage {
+		page-break-inside: avoid;
+	}
+	.detail .row:nth-child(even) {
+		background-color:lightgray;
 	}
 	
+	
+	body {
+		border: 1px solid white;
+        height: 100%;
+        page-break-after: avoid;
+        page-break-before: avoid;
+	}
+
 	h1 {
 		font-size: 16pt;
-		break-before: page;
+		break-before: avoid;
 	}
 			
 	h2 {
@@ -86,36 +90,22 @@
 	h1, h2, h3, h4, h5 {
 		text-align:center;
 		font-weight: bold;
+		break-after: avoid;
 		color:black;
 	}
-	table {
-		margin:0 auto;
-	}
-	
-	.wholePage {
-		margin-left:1em;
-		margin-right:1em;
-	}
-	.detail {
-		line-height: 2;
-	}
-	.detail .row:nth-child(even) {
-		background-color:lightgray;
-	}
-	
 	.pageButtons {
 		display:none;
-		float:none;
-	}
-	.contactGroupFooter {
-		break-after:page;
 	}
 }
 
 @page {
-	size:landscape;
+	size: portrait;
+	orientation: portrait;
 	display:block;
 	position:relative;
 	counter-increment: page;
-	break-after:always;
+	page-break-before: avoid;
+	page-break-after: avoid;
+	page-break-inside: avoid;
+	
 } 
