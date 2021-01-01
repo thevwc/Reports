@@ -1,30 +1,12 @@
 @media screen { 
 	.wholePage {
 		line-height: 1;
-		row-gap:0em;
-		margin-left:20rem;
-		margin-right:20rem;
 	}
-	#printPageButton #closePageButton {
-		float: right;
-		display: block;
-		border:1px solid red;
-	}
-	.hdg {
-		display:grid;
-		grid-template-rows: 50px;
-		grid-template-columns: 1fr 2fr 1fr;
-		grid-template-areas: ". titleArea buttonArea";
-	}
-	.title {
-		grid-area: titleArea;
-		text-align:center;
-	} 
+	
 	.pageButtons {
-		grid-area: buttonArea;
+		display:block;
 		text-align:right;
 		margin-right:20px;
-		padding-right:20px;
 	} 
 	
    	h1, h2, h3 {
@@ -47,10 +29,26 @@
 	hr {
 		border:2px solid black;
 	}
-	.row {
-		margin:0;
+
+	table {
+		width:95%;
+		margin:0 auto;
 	}
-	.transactionsSection {
+	th {
+		font-size: 1rem;
+		background-color: navy;
+		color:white;
+	}
+
+	td {
+		font-size:1rem;
+		border:1px solid blue;
+	}
+
+
+
+	
+	/* .transactionsSection {
 		margin-left:11rem;
 		margin-right:5rem;
 	}
@@ -64,30 +62,40 @@
 	}
 	.transactionsDetail .row:nth-child(even) {
 		background-color:lightgray;
-	}
+	} */
 	.notesDetail {
 		line-height: 1.5;
 	}
-	.notesDetail .row:nth-child(even) {
+	.notesDetail tr:nth-child(even) {
 		background-color:lightgray;
 	}
 }
 
 @media print {
-	.wholePage {
-		page-break-inside: avoid;
+	html, body {
+		font-size:1rem;
+		break-before:avoid;
+		break-after: avoid;
 	}
+	.wholePage {
+		width:100%;
+		margin:0 auto;
+		break-before:avoid;
+		break-after: avoid;
+	}
+	.pageButtons {
+		display:none;
+	}
+	body {
+		height:99%;
+		break-after: avoid;
+		break-before: avoid;
+	}
+
 	.detail .row:nth-child(even) {
 		background-color:lightgray;
 	}
 	
-	
-	body {
-		border: 1px solid white;
-        height: 100%;
-        page-break-after: avoid;
-        page-break-before: avoid;
-	}
 
 	h1 {
 		font-size: 16pt;
@@ -108,19 +116,31 @@
 		break-after: avoid;
 		color:black;
 	}
-	.pageButtons {
-		display:none;
+	table {
+		width:95%;
+		margin:0 auto;
 	}
+	th {
+		font-size: 1rem;
+		background-color: white;
+		color:black;
+	}
+
+	td {
+		font-size:1rem;
+		border:1px solid black;
+	}
+
 }
 
 @page {
-	size: portrait;
-	orientation: portrait;
+	size: landscape;
+	orientation: landscape;
 	display:block;
 	position:relative;
-	counter-increment: page;
-	page-break-before: avoid;
-	page-break-after: avoid;
-	page-break-inside: avoid;
+	margin:1cm;
+	/* break-before: avoid;
+	break-after: avoid;
+	break-inside: avoid; */
 	
 } 

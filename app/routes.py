@@ -343,8 +343,9 @@ def prtMonitorTransactions():
 
     # GET TODAYS DATE
     todays_date = date.today()
-    todaysDate = todays_date.strftime('%-m-%-d-%Y')
-    
+    #todaysDate = todays_date.strftime('%-m-%-d-%Y')
+    displayDate = todays_date.strftime('%B %-d, %Y') 
+
     # GET MEMBER NAME
     member = db.session.query(Member).filter(Member.Member_ID == memberID).first()
     displayName = member.First_Name
@@ -433,7 +434,7 @@ def prtMonitorTransactions():
         return render_template("rptMonitorTransactions.html",\
             transactionDict=transactionDict,\
             notesDict=notesDict,displayName=displayName,\
-            todaysDate=todaysDate,memberID=memberID)
+            displayDate=displayDate,memberID=memberID)
         
 
 @app.route("/eMailCoordinator", methods=["GET","POST"])
@@ -501,7 +502,7 @@ def getMembersEmailAddress():
     weekOf = request.args.get('weekOf')
     shopNumber = request.args.get('shopNumber')
     weekOfDat = datetime.strptime(weekOf,'%Y-%m-%d')
-    displayDate = weekOfDat.strftime('%B %d, %Y')  #'%m/%d/%Y')
+    displayDate = weekOfDat.strftime('%B %d, %Y') 
 
     # GET MEMBER'S EMAIL ADDRESS;
     eMail=db.session.query(Member.eMail).filter(Member.Member_ID == memberID).scalar()
