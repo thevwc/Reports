@@ -22,7 +22,6 @@
     grid-template-columns: 1fr 1fr;
     grid-template-areas: "titleArea  versionArea";
     padding-top: 0px;
-    text-align: center;
     background-color:navy;
     color: var(--main-txt-color);
     border-bottom:white 3px;
@@ -31,12 +30,14 @@
     grid-area:titleArea;
     padding-top:2px;
     font-size:1rem;
+    padding-left:1em;
 }
 .version {
     grid-area:versionArea;
     font-size:.75rem;
     padding-top:5px;
-    align-items: right;
+    text-align: right;
+    padding-right:1em;
 }
 
 #location {

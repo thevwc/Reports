@@ -67,7 +67,7 @@
 
 	h1 {
 			font-size: 18pt;
-			break-before: page;
+			break-before: avoid;
 			/*counter-increment: page;*/
 	}
 			

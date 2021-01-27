@@ -60,10 +60,12 @@ def index():
         position += 1
         lastFirst = n.Last_Name + ', ' + n.First_Name + ' (' + n.Member_ID + ')'
         nameArray.append(lastFirst)
-    return render_template("index.html",nameList=nameArray)
+    
+    # GET OPEN SECTIONS
+    # NOT FULL, NOT CLOSED
+    openSections = []
+    return render_template("index.html",nameList=nameArray,openSections=openSections)
    
-
-
 
 #PRINT PRESIDENTS REPORT
 @app.route("/prtPresidentsReport", methods = ['GET'])
