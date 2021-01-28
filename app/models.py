@@ -16,6 +16,7 @@ class ControlVariables(db.Model):
     Shop_Number = db.Column(db.Integer, primary_key=True)
     Current_Dues_Year = db.Column(db.String(4))
     Current_Dues_Amount = db.Column(db.Numeric)
+    Current_Course_Term = db.Column(db.String(15))
     Current_Initiation_Fee = db.Column(db.Numeric)
     Date_To_Begin_New_Dues_Collection = db.Column(db.Date)
     Date_To_Accept_New_Members = db.Column(db.Date)
@@ -60,7 +61,7 @@ class Member(db.Model):
 
     Home_Phone = db.Column(db.String(14))
     Cell_Phone = db.Column(db.String(14))
-    eMail = db.Column(db.String(50))
+    eMail = db.Column('E-Mail',db.String(50))
     Dues_Paid=db.Column(db.Boolean)
     NonMember_Volunteer=db.Column(db.Boolean)
     Restricted_From_Shop = db.Column(db.Boolean)
@@ -291,3 +292,10 @@ class KeysTable(db.Model):
     DateAssigned = db.Column(db.Date)
     MemberID = db.Column(db.String(6))
     Reason = db.Column(db.String(45))
+
+class EmailMessages(db.Model):
+    __tablename__ = 'tblEmail_Messages'
+    __table_args__={"schema":"dbo"}
+    emailName = db.Column('Email Name',db.String(255), primary_key=True)
+    emailMessage = db.Column('Email Message',db.String(max))
+db.Column('E-Mail',db.String(50))

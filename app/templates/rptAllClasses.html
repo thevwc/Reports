@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+    {{super()}}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/rptContactList.css') }}"> 
+{% endblock %}
+
+{% block content %} 
+
+<div class='wholePage'>
+    
+    <div class="hdg">
+        <div class="pageButtons">
+            <button id="printPageButton" class='btn btn-primary' onClick="window.print();">PRINT</button>
+            <button id="closePageButton" class='btn btn-secondary' onclick="window.history.back()" >CLOSE PAGE</button>
+        </div>
+        <div class='title' text-align:center>
+            <h1>THE VILLAGES WOODWORKERS CLUB</h1>
+        </div>
+    </div>
+
+    <div class= "subTitles" text-align:center>
+        <h3>Contact List</h3>
+        <h3>As of {{todaysDate}}</h3>
+    </div>
+    
+    <br>
+    <table class='courseOfferingsColHdg'>
+       
+        <thead class = 'colHdgs'>
+        <th>
+            <tr>
+                <th>Section</th>
+                <th>Title</th>
+                <th>Instructor</th>
+                <th>Dates</th>
+                <th>Cap</th>
+                <th>Taken</th>
+                <th>Avail</th>
+                <th>Fee</th>
+                <th style=text-align:center>Supplies</th>
+                <th>Supply Fee</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            
+
+        </th>
+        </thead>
+        
+        <tbody class='courseOfferingsDetail'>
+            {% for offering in offeringDict %}
+                <tr class="offeringRow {{offering.fullMsg}} {{offering.closedMsg}}" style="border-top:3px solid maroon">
+                    <td class='offeringSectionName'>{{offering.sectionName}}</td>
+                    <td class='offeringTitle'>{{offering.title}}</td>
+                    <td class='offeringInstructor'>{{offering.instructorName}}</td>
+                    <td>{{offering.dates}}</td>
+                    <td>{{offering.capacity}}</td>
+                    <td>{{offering.seatsTaken}}</td>
+                    <td style=font-weight:500>{{offering.seatsAvailable}}</td>
+                    <td>
+                        {{"$%.2f"|format(offering.fee)}}
+                    </td>
+                    <td style=text-align:center>{{offering.supplies}}</td>
+                    <td>{{"$%.2f"|format(offering.suppliesFee)}}</td>
+                </tr>
+                {% if offering.prereq != '' or offering.notes != '' %}
+                    <tr class=" {{offering.fullMsg}} {{offering.closedMsg}}">
+                        {% if offering.notes != '' %}
+                            <td></td>
+                            <td style=color:black>{{offering.notes}}</td>
+                        {% endif %}
+                        {% if offering.prereq != '' %}
+                            <td id='p{{offering.sectionName}}' style=color:red>Prerequisite -  {{offering.prereq}}</td>
+                        {% endif %}
+                    </tr>                    
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

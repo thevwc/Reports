@@ -56,4 +56,7 @@ function Transactions() {
     window.location.href = link
 }
 
+function AllClasses() {
+    window.location.href = '/prtAllClasses?destination=PRINT' 
+}
 // END OF FUNCTIONS

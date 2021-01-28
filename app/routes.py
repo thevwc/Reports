@@ -2,18 +2,19 @@
 
 from flask import session, render_template, flash, redirect, url_for, request, jsonify, json, make_response, after_this_request
 #from flask_weasyprint import HTML, render_pdf
-import pdfkit
+#import pdfkit
 
 
 from flask_bootstrap import Bootstrap
 from werkzeug.urls import url_parse
 from app.models import ShopName, Member, MemberActivity, MonitorSchedule, MonitorScheduleTransaction,\
-MonitorWeekNote, CoordinatorsSchedule, ControlVariables, DuesPaidYears, Contact
+MonitorWeekNote, CoordinatorsSchedule, ControlVariables, DuesPaidYears, Contact, EmailMessages
 from app import app
 from app import db
 from sqlalchemy import func, case, desc, extract, select, update, text
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError, DBAPIError
 from sqlalchemy.orm import aliased
+from sqlalchemy.sql import text as SQLQuery
 
 import datetime as dt
 from datetime import date, datetime, timedelta
@@ -325,7 +326,7 @@ def printWeeklyMonitorContacts():
         options = { 
             "enable-local-file-access": None
         }
-        pdfkit.from_string(html,filePath, options=options)
+        #pdfkit.from_string(html,filePath, options=options)
         return redirect(url_for('index'))
     else:
         return render_template("rptWeeklyContacts.html",\
@@ -422,15 +423,15 @@ def prtMonitorTransactions():
 
     if (destination == 'PDF') : 
         html =  render_template("rptWeeklyNotes.html",\
-            beginDate=beginDateSTR,endDate=endDateSTR,\
-            locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
-            todaysDate=todaysDate
+            #beginDate=beginDateSTR,endDate=endDateSTR,\
+            #locationName=shopName,notes=notes,weekOfHdg=weekOfHdg,\
+            todaysDate=displayDate
             )
         currentWorkingDirectory = os.getcwd()
         pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
         filePath = pdfDirectoryPath + "/rptWeeklyNotes.pdf"    
         options = {"enable-local-file-access": None}
-        pdfkit.from_string(html,filePath, options=options)
+        #pdfkit.from_string(html,filePath, options=options)
         return redirect(url_for('index'))
     else:
         return render_template("rptMonitorTransactions.html",\
@@ -449,6 +450,7 @@ def eMailCoordinator():
     sqlEmailMsgs = "SELECT [Email Name] as eMailMsgName, [Email Message] as eMailMessage FROM tblEmail_Messages "
     sqlEmailMsgs += "WHERE [Email Name] = 'Email To Coordinators'"
     eMailMessages = db.engine.execute(sqlEmailMsgs)
+    eMailMsg = ''
     for e in eMailMessages:
         eMailMsg=e.eMailMessage
 
@@ -493,6 +495,7 @@ def eMailCoordinatorAndMonitors():
     sqlEmailMsgs = "SELECT [Email Name] as eMailMsgName, [Email Message] as eMailMessage FROM tblEmail_Messages "
     sqlEmailMsgs += "WHERE [Email Name] = 'Email To Coordinators'"
     eMailMessages = db.engine.execute(sqlEmailMsgs)
+    eMailMsg=''
     for e in eMailMessages:
         eMailMsg=e.eMailMessage
 
@@ -655,3 +658,78 @@ def TrainingNeeded(lastTrainingDate):
         print ('Error in TrainingNeeded routine using - ', lastTrainingDate)
         return True
 
+@app.route("/prtAllClasses", methods=["GET"])
+def prtAllClasses():
+    destination = request.args.get('destination')
+    todays_date = date.today()
+    todays_dateSTR = todays_date.strftime('%-m-%-d-%Y')
+    term = db.session.query(ControlVariables.Current_Course_Term).filter(ControlVariables.Shop_Number == 1).scalar()
+    print('term - ',term)
+
+    # BUILD COURSE OFFERING ARRAY FOR THE CURRENT TERM
+    offeringDict = []
+    offeringItems = []
+
+    try:
+        sp = "EXEC offerings '" + term + "'"
+        sql = SQLQuery(sp)
+        offerings = db.engine.execute(sql)
+        
+    except (SQLAlchemyError, DBAPIError) as e:
+        errorMsg = "ERROR retrieving offerings "
+        flash(errorMsg,'danger')
+        return 'ERROR in offering list build.'
+    
+    if offerings == None:
+        flash('There are no courses offerings for this term.','info')
+    else:    
+        for offering in offerings:
+            # GET CLASS SIZE LIMIT
+            capacity = offering.Section_Size
+            
+            seatsAvailable = capacity - offering.seatsTaken
+            if (offering.Section_Closed_Date):
+                statusClosed = 'CLOSED'
+            else:
+                statusClosed = ''
+
+            seatsAvailable = capacity - offering.seatsTaken
+            if (seatsAvailable > 0):
+                statusFull = ''
+            else:
+                statusFull = 'FULL'
+
+            fee = offering.courseFee
+
+            if (offering.datesNote == None):
+                datesNote = ''
+            else:
+                datesNote = 'Meets - ' + offering.datesNote
+
+            if (offering.prereq == None):
+                prereq = ''
+            else:
+                prereq = offering.prereq
+
+
+            offeringItems = {
+                'sectionName':offering.courseNumber + '-' + offering.sectionID,
+                'term':term,
+                'courseNumber':offering.courseNumber,
+                'title':offering.title,
+                'instructorName':offering.instructorName,
+                'dates':offering.Section_Dates,
+                'notes':datesNote,
+                'capacity':capacity,
+                'seatsTaken':offering.seatsTaken,
+                'seatsAvailable':seatsAvailable,
+                'fee':fee,
+                'prereq':prereq,
+                'supplies':offering.Section_Supplies,
+                'suppliesFee':offering.Section_Supplies_Fee,
+                'fullMsg':statusFull,
+                'closedMsg':statusClosed
+            }
+            offeringDict.append(offeringItems)
+            
+    return render_template("rptAllClasses.html",offeringDict=offeringDict)
