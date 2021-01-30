@@ -3,6 +3,7 @@
 {% block styles %}
     {{super()}}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modal.css') }}">
 {% endblock %}
 {% block app_content %}
 
@@ -12,13 +13,10 @@
             <div><h1>AVAILABLE REPORTS</h1></div>
         </div>
         <div class="version">
-            <h3>ver. Jan 28, 2021</h3>
+            <h3>ver. Jan 30, 2021</h3>
         </div>  
-        <!-- <button id="settingsIcon" style="display:none"><i class="fas fa-bars" data-toggle='modal' data-target='#settingsModal'></i></button>
-        <button id="settingsBtn" style="display:none" type='button' class = 'btn btn-primary' data-toggle = 'modal' data-target = '#settingsModal'>
-                SETTINGS  
-        </button>     -->
     </div>
+
     <div id="printReportBtns">
         <div id="column1">
             <div id="location" style=margin-top:20px>
@@ -41,18 +39,9 @@
                     <li><button id='prtMonitorTrainingID' type="button" class='btn btn-sm btn-primary'>Members by Monitor Training Date</button></li>
                     <li><button id='prtMentorsID' type="button" onclick='Mentors()' class='btn btn-sm btn-primary'>Mentor List</button></li>
                     <li><button id='prtContactsID' type="button" onclick='Contacts()' class='btn btn-sm btn-primary'>Contact List</button></li>
-                    <li><button id='prtOpenClassesID' type="button" onclick='OpenClasses()' disabled class='btn btn-sm btn-primary'>Open Classes</button></li>
                     <li><button id='prtAllClassesID' type="button" onclick='AllClasses()'  class='btn btn-sm btn-primary'>All Classes</button></li>
-                   
-                    <li>
-                        <select name="openSections" id="">
-                            {% for o in openSections %}
-                                <option value="{{sectionNumber}}">{{sectionName}}</option>
-                            {% endfor %}
-                        </select>
-                        <button id='prtClassSectionID' type="button" onclick='ClassSection()' disabled class='btn btn-sm btn-primary'>Class Section Listing</button>
-                    </li>
-                   
+                    <li><button id='prtOpenClassesID' type="button" onclick='OpenClasses()' class='btn btn-sm btn-primary'>Open Classes</button></li>
+                    <li><button id='prtClassListID' type="button" onclick='ClassList()' class='btn btn-sm btn-primary'>Class List</button>
                 </ul>
             </div>
         </div>
@@ -74,7 +63,6 @@
         </div>
     </div>
 </div>  <!-- END OF PARENT WRAPPER -->
-
 
 {% endblock %}
 

@@ -30,27 +30,9 @@ mail=Mail(app)
 @app.route('/index/')
 @app.route('/index', methods=['GET'])
 def index():
-
-    # BUILD ARRAY OF NAMES FOR DROPDOWN LIST OF COORDINATORS
-    # coordNames=[]
-    # sqlNames = "SELECT Last_Name + ', ' + First_Name as coordName, Member_ID as coordID FROM tblMember_Data "
-    # sqlNames += "WHERE Monitor_Coordinator = 1 "
-    # sqlNames += "ORDER BY Last_Name, First_Name "
-    # coordNames = db.engine.execute(sqlNames)
-   
-    # BUILD ARRAY OF MONITOR WEEKS FOR BOTH LOCATIONS
-    # sqlWeeks = "SELECT Shop_Number as shopNumber, Start_Date,format(Start_Date,'MMM d, yyyy') as DisplayDate, "
-    # sqlWeeks += "Coordinator_ID as coordID, Last_Name + ', ' + First_Name as coordName, eMail as coordEmail "
-    # sqlWeeks += " FROM coordinatorsSchedule "
-    # sqlWeeks += "LEFT JOIN tblMember_Data ON coordinatorsSchedule.Coordinator_ID = tblMember_Data.Member_ID "
-    # sqlWeeks += "WHERE Start_Date >= getdate() "
-    # sqlWeeks += "ORDER BY Shop_Number, Start_Date"
-    # weeks = db.engine.execute(sqlWeeks)
-
-    # MEMBER NAMES AND ID
-    #sqlMembers = "SELECT Last_Name + ', ' + First_Name + ' (' + Member_ID + ')' as name FROM tblMember_Data "
-    #sqlMembers += "ORDER BY Last_Name, First_Name "
-    #nameList = db.engine.execute(sqlMembers)
+    # GET CURRENT TERM
+    term = db.session.query(ControlVariables.Current_Course_Term).filter(ControlVariables.Shop_Number == 1).scalar()
+    
     # BUILD ARRAY OF NAMES FOR DROPDOWN LIST OF MEMBERS
     nameArray=[]
     sqlSelect = "SELECT Last_Name, First_Name, Member_ID FROM tblMember_Data "
@@ -62,10 +44,73 @@ def index():
         lastFirst = n.Last_Name + ', ' + n.First_Name + ' (' + n.Member_ID + ')'
         nameArray.append(lastFirst)
     
-    # GET OPEN SECTIONS
-    # NOT FULL, NOT CLOSED
-    openSections = []
-    return render_template("index.html",nameList=nameArray,openSections=openSections)
+
+    # BUILD COURSE OFFERING ARRAY FOR THE CURRENT TERM
+    offeringDict = []
+    offeringItems = []
+
+    try:
+        sp = "EXEC offerings '" + term + "'"
+        sql = SQLQuery(sp)
+        offerings = db.engine.execute(sql)
+        
+    except (SQLAlchemyError, DBAPIError) as e:
+        errorMsg = "ERROR retrieving offerings "
+        flash(errorMsg,'danger')
+        return 'ERROR in offering list build.'
+    
+    if offerings == None:
+        flash('There are no courses offerings for this term.','info')
+    else:    
+        for offering in offerings:
+            # GET CLASS SIZE LIMIT
+            capacity = offering.Section_Size
+            
+            seatsAvailable = capacity - offering.seatsTaken
+            if (offering.Section_Closed_Date):
+                statusClosed = 'C'
+            else:
+                statusClosed = ''
+
+            seatsAvailable = capacity - offering.seatsTaken
+            if (seatsAvailable > 0):
+                statusFull = ''
+            else:
+                statusFull = 'F'
+
+            fee = offering.courseFee
+
+            if (offering.datesNote == None):
+                datesNote = ''
+            else:
+                datesNote = 'Meets - ' + offering.datesNote
+
+            if (offering.prereq == None):
+                prereq = ''
+            else:
+                prereq = offering.prereq
+
+
+            offeringItems = {
+                'sectionName':offering.courseNumber + '-' + offering.sectionID,
+                'term':term,
+                'courseNumber':offering.courseNumber,
+                'title':offering.title,
+                'instructorName':offering.instructorName,
+                'dates':offering.Section_Dates,
+                'notes':datesNote,
+                'capacity':capacity,
+                'seatsTaken':offering.seatsTaken,
+                'seatsAvailable':seatsAvailable,
+                'fee':fee,
+                'prereq':prereq,
+                'supplies':offering.Section_Supplies,
+                'suppliesFee':offering.Section_Supplies_Fee,
+            }
+            if statusFull != 'F' and statusClosed != 'C':
+                offeringDict.append(offeringItems)
+   
+    return render_template("index.html",nameList=nameArray,offeringDict=offeringDict)
    
 
 #PRINT PRESIDENTS REPORT
@@ -662,10 +707,9 @@ def TrainingNeeded(lastTrainingDate):
 def prtAllClasses():
     destination = request.args.get('destination')
     todays_date = date.today()
-    todays_dateSTR = todays_date.strftime('%-m-%-d-%Y')
+    displayDate = todays_date.strftime('%-B %d, %Y')
     term = db.session.query(ControlVariables.Current_Course_Term).filter(ControlVariables.Shop_Number == 1).scalar()
-    print('term - ',term)
-
+    
     # BUILD COURSE OFFERING ARRAY FOR THE CURRENT TERM
     offeringDict = []
     offeringItems = []
@@ -689,7 +733,7 @@ def prtAllClasses():
             
             seatsAvailable = capacity - offering.seatsTaken
             if (offering.Section_Closed_Date):
-                statusClosed = 'CLOSED'
+                statusClosed = 'C'
             else:
                 statusClosed = ''
 
@@ -697,7 +741,7 @@ def prtAllClasses():
             if (seatsAvailable > 0):
                 statusFull = ''
             else:
-                statusFull = 'FULL'
+                statusFull = 'F'
 
             fee = offering.courseFee
 
@@ -732,4 +776,319 @@ def prtAllClasses():
             }
             offeringDict.append(offeringItems)
             
-    return render_template("rptAllClasses.html",offeringDict=offeringDict)
+    return render_template("rptAllClasses.html",offeringDict=offeringDict,term=term,displayDate=displayDate)
+
+@app.route("/prtOpenClasses", methods=["GET"])
+def prtOpenClasses():
+    destination = request.args.get('destination')
+    todays_date = date.today()
+    displayDate = todays_date.strftime('%-B %d, %Y')
+    term = db.session.query(ControlVariables.Current_Course_Term).filter(ControlVariables.Shop_Number == 1).scalar()
+
+    # BUILD COURSE OFFERING ARRAY FOR THE CURRENT TERM
+    offeringDict = []
+    offeringItems = []
+
+    try:
+        sp = "EXEC offerings '" + term + "'"
+        sql = SQLQuery(sp)
+        offerings = db.engine.execute(sql)
+        
+    except (SQLAlchemyError, DBAPIError) as e:
+        errorMsg = "ERROR retrieving offerings "
+        flash(errorMsg,'danger')
+        return 'ERROR in offering list build.'
+    
+    if offerings == None:
+        flash('There are no courses offerings for this term.','info')
+    else:    
+        for offering in offerings:
+            # GET CLASS SIZE LIMIT
+            capacity = offering.Section_Size
+            
+            seatsAvailable = capacity - offering.seatsTaken
+            if (offering.Section_Closed_Date):
+                statusClosed = 'C'
+            else:
+                statusClosed = ''
+
+            seatsAvailable = capacity - offering.seatsTaken
+            if (seatsAvailable > 0):
+                statusFull = ''
+            else:
+                statusFull = 'F'
+
+            fee = offering.courseFee
+
+            if (offering.datesNote == None):
+                datesNote = ''
+            else:
+                datesNote = 'Meets - ' + offering.datesNote
+
+            if (offering.prereq == None):
+                prereq = ''
+            else:
+                prereq = offering.prereq
+
+
+            offeringItems = {
+                'sectionName':offering.courseNumber + '-' + offering.sectionID,
+                'term':term,
+                'courseNumber':offering.courseNumber,
+                'title':offering.title,
+                'instructorName':offering.instructorName,
+                'dates':offering.Section_Dates,
+                'notes':datesNote,
+                'capacity':capacity,
+                'seatsTaken':offering.seatsTaken,
+                'seatsAvailable':seatsAvailable,
+                'fee':fee,
+                'prereq':prereq,
+                'supplies':offering.Section_Supplies,
+                'suppliesFee':offering.Section_Supplies_Fee,
+            }
+            if statusFull != 'F' and statusClosed != 'C':
+                offeringDict.append(offeringItems)
+            
+    return render_template("rptOpenClasses.html",offeringDict=offeringDict,term=term,displayDate=displayDate)
+
+
+@app.route("/ClassLists", methods=["GET"])
+def ClassLists():
+    #destination = request.args.get('destination')
+    todays_date = date.today()
+    displayDate = todays_date.strftime('%-B %d, %Y')
+    term = db.session.query(ControlVariables.Current_Course_Term).filter(ControlVariables.Shop_Number == 1).scalar()
+
+    # BUILD COURSE OFFERING ARRAY FOR THE CURRENT TERM
+    offeringDict = []
+    offeringItems = []
+
+    try:
+        sp = "EXEC offerings '" + term + "'"
+        sql = SQLQuery(sp)
+        offerings = db.engine.execute(sql)
+        
+    except (SQLAlchemyError, DBAPIError) as e:
+        errorMsg = "ERROR retrieving offerings "
+        flash(errorMsg,'danger')
+        return 'ERROR in offering list build.'
+    
+    if offerings == None:
+        flash('There are no courses offerings for this term.','info')
+    else:    
+        for offering in offerings:
+            # GET CLASS SIZE LIMIT
+            capacity = offering.Section_Size
+            
+            seatsAvailable = capacity - offering.seatsTaken
+            if (offering.Section_Closed_Date):
+                statusClosed = 'C'
+            else:
+                statusClosed = ''
+
+            seatsAvailable = capacity - offering.seatsTaken
+            if (seatsAvailable > 0):
+                statusFull = ''
+            else:
+                statusFull = 'F'
+
+            fee = offering.courseFee
+
+            if (offering.datesNote == None):
+                datesNote = ''
+            else:
+                datesNote = 'Meets - ' + offering.datesNote
+
+            if (offering.prereq == None):
+                prereq = ''
+            else:
+                prereq = offering.prereq
+
+
+            offeringItems = {
+                'sectionName':offering.courseNumber + '-' + offering.sectionID,
+                'term':term,
+                'courseNumber':offering.courseNumber,
+                'title':offering.title,
+                'instructorName':offering.instructorName,
+                'dates':offering.Section_Dates,
+                'notes':datesNote,
+                'capacity':capacity,
+                'seatsTaken':offering.seatsTaken,
+                'seatsAvailable':seatsAvailable,
+                'fee':fee,
+                'prereq':prereq,
+                'supplies':offering.Section_Supplies,
+                'suppliesFee':offering.Section_Supplies_Fee,
+            }
+            if statusFull != 'F' and statusClosed != 'C':
+                offeringDict.append(offeringItems)
+    # BUILD COURSE OFFERING ARRAY FOR THE CURRENT TERM
+    offeringDict = []
+    offeringItems = []
+
+    try:
+        sp = "EXEC offerings '" + term + "'"
+        sql = SQLQuery(sp)
+        offerings = db.engine.execute(sql)
+        
+    except (SQLAlchemyError, DBAPIError) as e:
+        errorMsg = "ERROR retrieving offerings "
+        flash(errorMsg,'danger')
+        return 'ERROR in offering list build.'
+    
+    if offerings == None:
+        flash('There are no courses offerings for this term.','info')
+    else:    
+        for offering in offerings:
+            # GET CLASS SIZE LIMIT
+            capacity = offering.Section_Size
+            
+            seatsAvailable = capacity - offering.seatsTaken
+            if (offering.Section_Closed_Date):
+                statusClosed = 'C'
+            else:
+                statusClosed = ''
+
+            seatsAvailable = capacity - offering.seatsTaken
+            if (seatsAvailable > 0):
+                statusFull = ''
+            else:
+                statusFull = 'F'
+
+            fee = offering.courseFee
+
+            if (offering.datesNote == None):
+                datesNote = ''
+            else:
+                datesNote = 'Meets - ' + offering.datesNote
+
+            if (offering.prereq == None):
+                prereq = ''
+            else:
+                prereq = offering.prereq
+
+
+            offeringItems = {
+                'sectionName':offering.courseNumber + '-' + offering.sectionID,
+                'term':term,
+                'courseNumber':offering.courseNumber,
+                'title':offering.title,
+                'instructorName':offering.instructorName,
+                'dates':offering.Section_Dates,
+                'notes':datesNote,
+                'capacity':capacity,
+                'seatsTaken':offering.seatsTaken,
+                'seatsAvailable':seatsAvailable,
+                'fee':fee,
+                'prereq':prereq,
+                'supplies':offering.Section_Supplies,
+                'suppliesFee':offering.Section_Supplies_Fee,
+            }
+            if statusFull != 'F' and statusClosed != 'C':
+                offeringDict.append(offeringItems)
+            
+        
+    return render_template("ClassLists.html",offeringDict=offeringDict,term=term,displayDate=displayDate)
+
+@app.route("/getCourseMembers", methods=["GET"])
+def getCourseMembers():
+    print('/getCourseMembers')
+    specifiedSection = request.args.get('sectionNumber')
+    #destination = request.args.get('destination')
+    # todays_date = date.today()
+    # displayDate = todays_date.strftime('%-B %d, %Y')
+    term = db.session.query(ControlVariables.Current_Course_Term).filter(ControlVariables.Shop_Number == 1).scalar()
+    
+    # BUILD CLASS LISTS ARRAY FOR THE CURRENT TERM
+    classListDict = []
+    classListItems = []
+
+    try:
+        sp = "EXEC classLists '" + term + "'"
+        sql = SQLQuery(sp)
+        classLists = db.engine.execute(sql)
+        
+    except (SQLAlchemyError, DBAPIError) as e:
+        errorMsg = "ERROR retrieving classLists "
+        flash(errorMsg,'danger')
+        return 'ERROR in classList list build.'
+    
+    if classLists == None:
+        flash('There are no classLists available for this term.','info')
+    else:    
+        for classList in classLists:
+            memberName = classList.lastName + ', ' + classList.firstName
+            if classList.nickName != None and classList.nickName != '':
+                memberName += ' (' + classList.nickName + ')'
+            sectionName = classList.courseNumber + '-' + classList.sectionID 
+            classListItems = {
+                'memberName':memberName,
+                'sectionName':sectionName,
+                'dateEnrolled':classList.dateEnrolled.strftime('%m-%d-%Y'),
+                'homePhone':classList.homePhone,
+                'cellPhone':classList.cellPhone,
+                'eMail':classList.eMail
+            }
+            if sectionName == specifiedSection:
+                classListDict.append(classListItems)
+    return jsonify(classListDict=classListDict)        
+       
+
+@app.route("/prtClassList/<specifiedSection>", methods=["GET"])
+def prtClassList(specifiedSection):
+    print('/prtClassList')
+    #specifiedSection = request.args.get('sectionNumber')
+    #destination = request.args.get('destination')
+    todays_date = date.today()
+    displayDate = todays_date.strftime('%-B %d, %Y')
+    term = db.session.query(ControlVariables.Current_Course_Term).filter(ControlVariables.Shop_Number == 1).scalar()
+    
+    # BUILD CLASS LISTS ARRAY FOR THE CURRENT TERM
+    classListDict = []
+    classListItems = []
+
+    try:
+        sp = "EXEC classLists '" + term + "'"
+        sql = SQLQuery(sp)
+        classLists = db.engine.execute(sql)
+        
+    except (SQLAlchemyError, DBAPIError) as e:
+        errorMsg = "ERROR retrieving classLists "
+        flash(errorMsg,'danger')
+        return 'ERROR in classList list build.'
+    
+    if classLists == None:
+        flash('There are no classLists available for this term.','info')
+    else:    
+        for classList in classLists:
+            memberName = classList.lastName + ', ' + classList.firstName
+            if classList.nickName != None and classList.nickName != '':
+                memberName += ' (' + classList.nickName + ')'
+            sectionName = classList.courseNumber + '-' + classList.sectionID 
+            classListItems = {
+                'memberName':memberName,
+                'sectionName':sectionName,
+                'dateEnrolled':classList.dateEnrolled.strftime('%m-%d-%Y'),
+                'homePhone':classList.homePhone,
+                'cellPhone':classList.cellPhone,
+                'eMail':classList.eMail
+            }
+            if sectionName == specifiedSection:
+                print(memberName)
+                classListDict.append(classListItems)
+
+    sectionNumber = 'C051-A'
+    courseTitle = 'title'
+    instructor = 'instructor name'
+    classDates = 'dates'
+    classTimes = 'times'
+    maxSize=maxSize = '5'
+    enrolled = '4'
+    available = '1'
+    return render_template("rptClassList.html",enrolleeDict=classListDict,\
+    sectionNumber=sectionNumber,courseTitle=courseTitle,\
+    instructor=instructor,classDates=classDates,classTimes=classTimes,\
+    maxSize=maxSize,enrolled=enrolled,available=available,displayDate=displayDate)        
+       

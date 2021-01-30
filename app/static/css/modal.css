@@ -1,0 +1,44 @@
+.classListModal {
+    width:1500px;
+    height:800px;
+}
+.modal-content {
+    width:100%;
+    border:2px solid blue;
+    background-color: lightgreen;
+}
+.modal-header {
+    text-align:center;
+    background-color: navy;
+    color:white;
+}
+/* .modal-header span {
+    color:white;
+} */
+.modal-body {
+    margin:auto;
+}
+
+/* .modal-dialog {
+    vertical-align:middle;
+} */
+.modal-footer {
+    display:grid;
+    grid-template-rows: 50px;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "footer-left  footer-right";
+    background-color:lightgrey;
+    height:50px;
+    margin-top:20px;
+    padding-top:0px;
+}
+.footer-left-col {
+    grid-area: footer-left;
+    text-align:left;
+    padding-top:2em;
+}
+.footer-right-col {
+      grid-area: footer-right;
+      text-align: right;
+  }
+

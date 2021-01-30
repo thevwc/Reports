@@ -20,7 +20,7 @@
     </div>
 
     <div class= "subTitles" text-align:center>
-        <h3>All Classes - {{term}}</h3>
+        <h3>Open Classes - {{term}}</h3>
         <h3>As of {{displayDate}}</h3>
     </div>
     
@@ -39,7 +39,6 @@
                 <th style=text-align:center>Fee</th>
                 <th colspan='2' style=padding-left:10px>Supplies & Fee</th>
                 <th></th>
-                <th></th>
             </tr>
             
 
@@ -50,12 +49,8 @@
             {% for offering in offeringDict %}
                 <tr
                     class="offeringRow {{offering.fullMsg}} {{offering.closedMsg}}"
-                    {% if offering.fullMsg == 'FULL' or offering.closedMsg == 'CLOSED' %}
-                        style='text-decoration: line-through;border-top:1px solid black;'
-                    {% else %}
-                        style="border-top:1px solid black"
-                   {% endif %}
-                    >
+                    style="border-top:1px solid black">
+                    
                     <td class='offeringSectionName'>{{offering.sectionName}}</td>
                     <td class='offeringTitle'>{{offering.title}}</td>
                     <td class='offeringInstructor'>{{offering.instructorName}}</td>
@@ -68,7 +63,6 @@
                     </td>
                     <td style=padding-left:10px>{{offering.supplies}}</td>
                     <td>{{"$%.2f"|format(offering.suppliesFee)}}</td>
-                    <td style=color:red>{{offering.fullMsg}}&nbsp{{offering.closedMsg}}</td>   
                 </tr>
                 {% if offering.prereq != '' or offering.notes != '' %}
                     <tr

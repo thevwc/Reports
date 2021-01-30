@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+    {{super()}}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/classLists.css') }}">
+{% endblock %}
+{% block app_content %}
+
+<div class="parent">
+    <div class="hdg">
+        <div class="title">
+            <div><h1>CLASS LISTS</h1></div>
+        </div>
+        <div class="version">
+            <h3>ver. Jan 29, 2021</h3>
+        </div>  
+    </div>
+
+
+    <div class='offerings'>
+        <div>Click on a section # to display a list of students ...</div>
+        <table id='offeringsID'>
+            <thead class = 'offeringsColHdgs'>
+                <th>
+                    <tr>
+                        <th style=text-align:center>Section</th>
+                        <th style=text-align:left>Title</th>
+                        <th style=text-align:left>Instructor</th>
+                        <th style=text-align:left>Dates</th>
+                        <th style=text-align:center>Size</th>
+                        <th style=text-align:center>Enrolled</th>
+                        <th style=text-align:center>Avail</th>
+                    </tr>
+                </th>
+            </thead> 
+            <tbody id='offeringsDetail' class='offeringsDetail'>
+                {% for offering in offeringDict %}
+                    <tr class="offeringsRow">
+                        <td>
+                            <button type='button'
+                                id="{{offering.sectionName}}" 
+                                class='sectionBtn btn btn-primary btn-sm'
+                                style="height:20px;padding-top:0">
+                                {{offering.sectionName}}
+                            </button>
+                        </td>
+                        <td>{{offering.title}}</td>
+                        <td>{{offering.instructorName}}</td>
+                        <td>{{offering.dates}}</td>
+                        <td style=text-align:center>{{offering.capacity}}</td>
+                        <td style=text-align:center>{{offering.seatsTaken}}</td>
+                        <td style=text-align:center>{{offering.seatsAvailable}}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="enrollees">
+        <div class="row enrolleesColHdg">
+            <div class="col-1"></div>
+            <div class="col-3">Member</div>
+            <div class="col-1">Enrolled</div>
+            <div class="col-3">Email</div>
+            <div class="col-2">Home Phone</div>
+            <div class="col-2">Cell Phone</div>
+        </div>
+       
+        <div id="enrolleesDetail" class='enrolleesDetail'>
+            <!--   THIS SECTION IS BUILD VIA JAVASCRIPT   -->
+        </div>
+    </div>
+    
+    <div class="taskButtons">
+        <button id='prtClassListBtn' type='button' class ='btn btn-primary'>Print Class List</button>
+        <button id='eMailClassListBtn' type='button' class ='btn btn-primary'>Email Class List</button>
+        <button id='closeClassListBtn' type='button' class ='btn btn-secondary'>Close</button>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+    {{super()}}
+    <script src="{{ url_for('static', filename='js/classLists.js') }}"> </script>
+{% endblock %}

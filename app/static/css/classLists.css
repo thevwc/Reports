@@ -1,0 +1,90 @@
+:root {
+    --main-bg-color: navy;
+    --main-txt-color: white;  
+    --main-padding: 10px;  
+    --main-body-bg-color: lightgray;
+  }
+                         
+  
+.parent {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 50px 220px 200px  100px;
+    grid-template-areas:"hdgArea" 
+                        "offeringsArea"
+                        "enrolleesArea"
+                        "tasksArea";
+    grid-gap:0em;
+    margin:7em;
+    border:1px solid navy;
+    background-color:white;                
+}
+.hdg {
+    grid-area: hdgArea;
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "titleArea  versionArea";
+    padding-top: 0px;
+    background-color:navy;
+    color: var(--main-txt-color);
+    border-bottom:white 3px;
+}
+.title {
+    grid-area:titleArea;
+    padding-top:2px;
+    font-size:1rem;
+    padding-left:1em;
+}
+.version {
+    grid-area:versionArea;
+    font-size:.75rem;
+    padding-top:5px;
+    text-align: right;
+    padding-right:1em;
+}
+
+.offerings {
+    grid-area:offeringsArea;
+    height:220px;
+    background-color: lightgrey;
+    overflow-y:auto;
+    border-bottom: 1em solid navy;
+}
+.offerings table {
+    height:200px;
+    margin:0 auto;
+}
+
+.offeringsDetail {
+    background-color: lightgrey;
+}
+
+.offeringsColHdgs th {
+    padding-left:20px;
+}
+.offeringsRow td {
+    padding-left:20px;
+}
+
+.enrollees {
+    grid-area:enrolleesArea;
+    background-color: beige;
+    overflow-y:auto;
+}
+
+.enrolleesColHdg {
+    font-weight:700;
+    border-bottom: 2px solid black;
+    color:maroon;
+}
+.enrolleesDetail {
+    color:maroon;
+}
+.taskButtons {
+    grid-area:tasksArea;
+    background-color: lightgrey;
+    color:navy;
+    padding-top:3em;
+    text-align: center;
+
+}
