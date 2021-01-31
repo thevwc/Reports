@@ -7,8 +7,9 @@ from flask import session, render_template, flash, redirect, url_for, request, j
 
 from flask_bootstrap import Bootstrap
 from werkzeug.urls import url_parse
-from app.models import ShopName, Member, MemberActivity, MonitorSchedule, MonitorScheduleTransaction,\
-MonitorWeekNote, CoordinatorsSchedule, ControlVariables, DuesPaidYears, Contact, EmailMessages
+from app.models import CourseEnrollee, CourseOffering, ShopName, Member, MemberActivity,\
+MonitorSchedule, MonitorScheduleTransaction, MonitorWeekNote, CoordinatorsSchedule,\
+ControlVariables, DuesPaidYears, Contact, EmailMessages, Course, CourseOffering, CourseEnrollee
 from app import app
 from app import db
 from sqlalchemy import func, case, desc, extract, select, update, text
@@ -400,7 +401,6 @@ def prtMonitorTransactions():
     if (member.Nickname != None and member.Nickname != ''):
         displayName += ' (' + member.Nickname + ')'
     displayName += ' ' + member.Last_Name
-    #print(displayName)
 
     # GET MONITOR SCHEDULE TRANSACTIONS
     transactions = db.session.query(MonitorScheduleTransaction)\
@@ -408,15 +408,10 @@ def prtMonitorTransactions():
     .all()
     # .filter(MonitorScheduleTransaction.Date_Scheduled.year == curYear)\
     
-    #for t in transactions:
-    #   print (t.Member_ID, t.Date_Scheduled)
     transactionDict = []
     transactionItem = []
     for t in transactions:
-        #strDateScheduled = str(t.Date_Scheduled.year)
-        #print(type(strDateScheduled),strDateScheduled,type(curYear),curYear)
         if (str(t.Date_Scheduled.year) == curYear):
-            #print('match')
             transDateTime = t.Transaction_Date.strftime('%m-%d-%Y %I:%M %p')
             transType = t.Transaction_Type
             scheduled = t.Date_Scheduled.strftime('%m-%d-%Y')
@@ -447,15 +442,9 @@ def prtMonitorTransactions():
     notesDict = []
     notesItem = []
     for n in notes:
-        note = str(n.Schedule_Note)
-        # print('......................')
-        # print(note)
-        # print('......................')
-        
+        note = str(n.Schedule_Note)    
         if note.find(memberID) != -1\
         and (n.Date_Of_Change.year == curYear or n.Date_Of_Change.year == lastYear):
-            #print('++++++++++++++++++++++++++++++++')
-            #print(n.Author_ID,n.Date_Of_Change,n.Schedule_Note)
             initials = db.session.query(Member.Initials).filter(Member.Member_ID == n.Author_ID).scalar()
             
             notesItem = {
@@ -487,7 +476,6 @@ def prtMonitorTransactions():
 
 @app.route("/eMailCoordinator", methods=["GET","POST"])
 def eMailCoordinator():
-    print('... begin /eMailCoordinator')
     # THIS ROUTINE ONLY RETURNS THE EMAIL MESSAGE TO BE USED FOR COORDINATORS ONLY EMAILS
     # ___________________________________________________________________________________
 
@@ -994,7 +982,6 @@ def ClassLists():
 
 @app.route("/getCourseMembers", methods=["GET"])
 def getCourseMembers():
-    print('/getCourseMembers')
     specifiedSection = request.args.get('sectionNumber')
     #destination = request.args.get('destination')
     # todays_date = date.today()
@@ -1038,9 +1025,6 @@ def getCourseMembers():
 
 @app.route("/prtClassList/<specifiedSection>", methods=["GET"])
 def prtClassList(specifiedSection):
-    print('/prtClassList')
-    #specifiedSection = request.args.get('sectionNumber')
-    #destination = request.args.get('destination')
     todays_date = date.today()
     displayDate = todays_date.strftime('%-B %d, %Y')
     term = db.session.query(ControlVariables.Current_Course_Term).filter(ControlVariables.Shop_Number == 1).scalar()
@@ -1076,19 +1060,44 @@ def prtClassList(specifiedSection):
                 'eMail':classList.eMail
             }
             if sectionName == specifiedSection:
-                print(memberName)
                 classListDict.append(classListItems)
 
-    sectionNumber = 'C051-A'
-    courseTitle = 'title'
-    instructor = 'instructor name'
-    classDates = 'dates'
-    classTimes = 'times'
-    maxSize=maxSize = '5'
-    enrolled = '4'
-    available = '1'
+    courseNumber = specifiedSection[0:4]
+    sectionID = specifiedSection[5:6]
+
+    courseTitle = db.session.query(Course.Course_Title).filter(Course.Course_Number == courseNumber).scalar()
+
+    instructorName = 'Not&nbspassigned.'
+    classDates = 'N/A'
+    classTimes = ''
+    maxSize = ''
+    enrolled = ''
+    available = ''
+
+    section = db.session.query(CourseOffering)\
+        .filter(CourseOffering.Course_Number == courseNumber)\
+        .filter(CourseOffering.Section_ID == sectionID).first()
+    if section:
+        instructorID =section.Instructor_ID
+        member = db.session.query(Member).filter(Member.Member_ID == instructorID).first()
+        if member:
+            instructorName = member.First_Name
+            if member.Nickname != None and member.Nickname != '':
+                instructorName += ' (' + member.Nickname + ')'
+            instructorName += " " + member.Last_Name
+
+        classDates = section.Section_Dates
+        classTimes = section.Section_Dates_Note
+        maxSize= section.Section_Size
+   
+        enrolled = db.session.query(func.count(CourseEnrollee.Member_ID))\
+            .filter(CourseEnrollee.Course_Term == term)\
+            .filter(CourseEnrollee.Course_Number == courseNumber)\
+            .filter(CourseEnrollee.Section_ID == sectionID).scalar()
+
+        available = maxSize - enrolled
     return render_template("rptClassList.html",enrolleeDict=classListDict,\
-    sectionNumber=sectionNumber,courseTitle=courseTitle,\
-    instructor=instructor,classDates=classDates,classTimes=classTimes,\
+    sectionNumber=specifiedSection,courseTitle=courseTitle,\
+    instructor=instructorName,classDates=classDates,classTimes=classTimes,\
     maxSize=maxSize,enrolled=enrolled,available=available,displayDate=displayDate)        
        

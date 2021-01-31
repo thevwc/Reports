@@ -29,6 +29,7 @@
 		width:70%;		
 		border:2px solid black;
 		margin:0 auto;
+		margin-top:1em;
 		padding-left:8em;
 	}
 	label {
@@ -125,7 +126,22 @@
 		display:none;
 		float:none;
 	}
-	
+	.sectionSummary {
+		width:70%;		
+		border:2px solid black;
+		margin:0 auto;
+		margin-top:1em;
+		padding-left:8em;
+	}
+	label {
+		padding-top:0em;
+	}
+	input {
+		border-width:0px;
+		border:none;
+		font-weight:700;
+		width:100px;	
+	}
 }
 
 @page {

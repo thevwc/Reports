@@ -299,3 +299,50 @@ class EmailMessages(db.Model):
     emailName = db.Column('Email Name',db.String(255), primary_key=True)
     emailMessage = db.Column('Email Message',db.String(max))
 db.Column('E-Mail',db.String(50))
+
+class Course(db.Model):
+    __tablename__ = 'tblCourses'
+    __table_args__ = {"schema": "dbo"}
+    ID = db.Column(db.Integer,primary_key=True)
+    Course_Number = db.Column(db.String(4))
+    Course_Title = db.Column(db.String(50))
+    Course_Fee = db.Column(db.Numeric)
+    Course_Duration = db.Column(db.String(15))
+    Course_Note = db.Column(db.String(255))
+    Course_Suggested_Supplies = db.Column(db.String(50))
+    Course_Suggested_Supply_Fee = db.Column(db.Numeric)
+    Course_Description = db.Column(db.String(255))
+    Course_Suggested_Size = db.Column(db.Integer)
+    Course_Prerequisite = db.Column(db.String(50))
+    Course_Supplies_Are_Taxable = db.Column(db.Boolean)
+
+class CourseOffering(db.Model):
+    __tablename__ = 'tblCourse_Offerings'
+    __table_args__ = {"schema": "dbo"}
+    ID = db.Column(db.Integer,primary_key=True)
+    Course_Term = db.Column(db.String(15))
+    Course_Number = db.Column(db.String(4))
+    Section_ID = db.Column(db.String(1))
+    Instructor_ID = db.Column(db.String(6))
+    Section_Dates = db.Column(db.String(50))
+    Section_Dates_Note = db.Column(db.String(30))
+    Section_Size = db.Column(db.Integer)
+    Prerequisite_Course = db.Column(db.String(4))
+    Section_Supplies = db.Column(db.String(50))
+    Section_Supplies_Fee = db.Column(db.Numeric)
+    Section_Closed_Date = db.Column(db.Date)
+    Section_Start_Date = db.Column(db.Date)
+
+class CourseEnrollee(db.Model):
+    __tablename__ = 'tblCourse_Enrollees'
+    __table_args__ = {"schema": "dbo"}
+    ID = db.Column(db.Integer,primary_key=True)
+    Course_Term = db.Column(db.String(15))
+    Course_Number = db.Column(db.String(4))
+    Section_ID = db.Column(db.String(1))
+    Member_ID = db.Column(db.String(6))
+    Receipt_Number = db.Column(db.String(6))
+    Date_Enrolled = db.Column(db.Date)
+    Supply_Sets = db.Column(db.Integer)
+    Prerequisite_Met_By = db.Column(db.String(50))
+    Registered_By = db.Column(db.String(6))

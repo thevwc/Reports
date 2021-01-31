@@ -6,11 +6,11 @@
 // EVENT LISTENTERS
 document.getElementById('prtClassListBtn').addEventListener('click',prtClassList)
 document.getElementById('eMailClassListBtn').addEventListener('click',eMailClassList)
-document.getElementById('closeClassListBtn').addEventListener('click',closeClassList)
+//document.getElementById('closeClassListBtn').addEventListener('click',closeClassList)
 
 $(".sectionBtn").click(function(e) {
     sectionNumber = e.target.id
-    
+    document.getElementById('selectedSectionNumber').value = sectionNumber
     //parentTD = e.target.parentElement
     //titleTD = parentTD.nextElementSibling
     
@@ -81,13 +81,13 @@ $(".sectionBtn").click(function(e) {
 });
 
 function prtClassList() {
-    sectionNumber='C051-A'
+    sectionNumber= document.getElementById('selectedSectionNumber').value
     window.location.href = '/prtClassList/' + sectionNumber
 }
 function eMailClassList() {
     alert('Routine not implemented.')
 }
 function closeClassList() {
-    location.back()
+    window.history.back()
 }
 // END OF FUNCTIONS

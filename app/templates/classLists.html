@@ -12,7 +12,7 @@
             <div><h1>CLASS LISTS</h1></div>
         </div>
         <div class="version">
-            <h3>ver. Jan 29, 2021</h3>
+            <h3>ver. Jan 31, 2021</h3>
         </div>  
     </div>
 
@@ -72,9 +72,10 @@
     </div>
     
     <div class="taskButtons">
+        <input id='selectedSectionNumber' type="hidden">
         <button id='prtClassListBtn' type='button' class ='btn btn-primary'>Print Class List</button>
         <button id='eMailClassListBtn' type='button' class ='btn btn-primary'>Email Class List</button>
-        <button id='closeClassListBtn' type='button' class ='btn btn-secondary'>Close</button>
+        <button id='closeClassListBtn' type='button' class ='btn btn-secondary' onclick="window.history.back()">Close</button>
     </div>
 
 </div>
