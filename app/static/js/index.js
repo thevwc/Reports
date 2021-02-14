@@ -10,23 +10,6 @@ var shopNames = ['Rolling Acres', 'Brownwood']
 var curShopNumber = ''
 var curShopName = ''
 
-// LISTENERS
-//document.getElementById('offeringsDetail').addEventListener('click',offeringClickRtn)
-// SET INITIAL PAGE VALUES
-
-// GET STAFFID THAT WAS STORED BY THE LOGIN ROUTINE
-if (!localStorage.getItem('staffID')) {
-    staffID = prompt("Staff ID - ")
-    localStorage.setItem('staffID',staffID)
-}
-else {
-    staffID = localStorage.getItem('staffID')
-}
-
-// PRINT THE REPORTS
-//$('#prtPresidentsReportID').click(function(){
-    
-//})
 
 document.getElementById("selectpicker").addEventListener("change",memberSelectedRtn)
 
@@ -53,7 +36,7 @@ function Transactions() {
     d = new Date();
     curYear = d.getFullYear();
     yr = prompt('Monitor schedule year?',curYear)
-    link = '/prtMonitorTransactions?destination=PRINT&memberID=' + currentMemberID + '&year=' + curYear
+    link = '/prtMonitorTransactions?destination=PRINT&memberID=' + currentMemberID + '&year=' + yr
     window.location.href = link
 }
 
@@ -79,22 +62,4 @@ function offeringClickRtn(e) {
     }
 }
 
-// $("#offeringsDetail").on("change", function() {
-//     alert('something changed')
-// })
-
-// $(".sectionBtn").click(function() {
-//     alert('sectionBtn clicked')
-//     sectionNumber = this.id
-//     alert('this.value - ',this.value)
-//     courseData = this.value
-//     selectedCourse = courseData.slice(0,4)
-//     $("#courseOfferingsTable tr").filter(function() {
-//         $(this).toggle($(this).text().indexOf(selectedCourse) > -1)
-//     })
-//  });
-
-//  function offeringBtn() {
-//      alert('offeringBtn clicked, this.id - '+this.id)
-//  }
 // END OF FUNCTIONS

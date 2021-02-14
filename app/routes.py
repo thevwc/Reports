@@ -137,14 +137,15 @@ def prtPresidentsReport():
     
     pastYrPaid = db.session.query(func.count(DuesPaidYears.Member_ID)).filter(DuesPaidYears.Dues_Year_Paid == pastYear).scalar()
     
-    pastYrInactive = db.session.query(func.count(Member.Member_ID)).filter(extract('year',Member.Inactive_Date)  == 2019).scalar()
+    pastYrInactive = db.session.query(func.count(Member.Member_ID)).filter(extract('year',Member.Inactive_Date)  == pastYear).scalar()
     
     
     # SQL QUERY TO COMPUTE THOSE PAID LAST YEAR, NOT PAID THIS YEAR
-    sqlCompute = """SELECT tblDues_Paid_Years.Member_ID, tblDues_Paid_Years.Dues_Year_Paid
-        FROM tblDues_Paid_Years
-        WHERE (((tblDues_Paid_Years.Member_ID) Not In (Select Member_ID from tblDues_Paid_Years where Dues_Year_Paid = '2019')) 
-        AND ((tblDues_Paid_Years.Dues_Year_Paid)='2020'))"""
+    sqlCompute = "SELECT tblDues_Paid_Years.Member_ID, tblDues_Paid_Years.Dues_Year_Paid "
+    sqlCompute += "FROM tblDues_Paid_Years "
+    sqlCompute += "WHERE (((tblDues_Paid_Years.Member_ID) Not In "
+    sqlCompute += "(Select Member_ID from tblDues_Paid_Years where Dues_Year_Paid = '" + str(pastYear) + "')) "
+    sqlCompute += "AND ((tblDues_Paid_Years.Dues_Year_Paid)='" + curYear + "'))"
     records = db.engine.execute(sqlCompute)
     pdPastNotCur = 0
     for r in records:
@@ -388,6 +389,7 @@ def prtMonitorTransactions():
     memberID=request.args.get('memberID')
     destination = request.args.get('destination')
     curYear = request.args.get('year')
+    print('year from form - ',curYear)
     lastYear = int(curYear)-1
 
     # GET TODAYS DATE
@@ -411,7 +413,9 @@ def prtMonitorTransactions():
     transactionDict = []
     transactionItem = []
     for t in transactions:
+        print('year - ',t.Date_Scheduled.year)
         if (str(t.Date_Scheduled.year) == curYear):
+            print('t.Date_Scheduled.year - ',t.Date_Scheduled.year, curYear)
             transDateTime = t.Transaction_Date.strftime('%m-%d-%Y %I:%M %p')
             transType = t.Transaction_Type
             scheduled = t.Date_Scheduled.strftime('%m-%d-%Y')
@@ -720,10 +724,15 @@ def prtAllClasses():
             capacity = offering.Section_Size
             
             seatsAvailable = capacity - offering.seatsTaken
-            if (offering.Section_Closed_Date):
-                statusClosed = 'C'
-            else:
+            print('offering.Section_Closed_Date -', offering.courseNumber, offering.Section_Closed_Date )
+
+            if offering.Section_Closed_Date == None:
                 statusClosed = ''
+            else:
+                if (offering.Section_Closed_Date.date() <= todays_date):
+                    statusClosed = 'C'
+                else:
+                    statusClosed = ' '
 
             seatsAvailable = capacity - offering.seatsTaken
             if (seatsAvailable > 0):

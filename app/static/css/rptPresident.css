@@ -21,6 +21,22 @@
 		margin-left:5em;
 		align-content:center;
 	}
+	.hdg {
+		display:grid;
+		grid-template-rows: 50px;
+		grid-template-columns: 1fr 2fr 1fr;
+		grid-template-areas: ". titleArea buttonArea";
+	}
+	.title {
+		grid-area: titleArea;
+		text-align:center;
+	} 
+	.pageButtons {
+		grid-area: buttonArea;
+		text-align:right;
+		margin-right:20px;
+		padding-right:20px;
+	} 
    	h1, h2, h3 {
 		color: black;
 		text-align: center;
