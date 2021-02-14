@@ -111,7 +111,18 @@ def index():
             if statusFull != 'F' and statusClosed != 'C':
                 offeringDict.append(offeringItems)
    
-    return render_template("index.html",nameList=nameArray,offeringDict=offeringDict)
+    # RECENT TRAINING DATES, 30 DAYS OR LESS
+    firstWeek = date.today() - timedelta(30)
+    firstTrainingDate = firstWeek.strftime('%m-%d-%Y')
+    sqlTrainingDates = "SELECT Last_Monitor_Training, format(Last_Monitor_Training,'MMM d, yyyy') AS displayDate "
+    sqlTrainingDates += "FROM tblMember_Data "
+    sqlTrainingDates += "WHERE Last_Monitor_Training >= '" + firstTrainingDate  + "' "
+    sqlTrainingDates += "GROUP BY Last_Monitor_Training "
+    sqlTrainingDates += "ORDER BY Last_Monitor_Training"
+    
+    trainingDates = db.engine.execute(sqlTrainingDates)
+
+    return render_template("index.html",nameList=nameArray,offeringDict=offeringDict,trainingDates=trainingDates)
    
 
 #PRINT PRESIDENTS REPORT
@@ -1110,3 +1121,64 @@ def prtClassList(specifiedSection):
     instructor=instructorName,classDates=classDates,classTimes=classTimes,\
     maxSize=maxSize,enrolled=enrolled,available=available,displayDate=displayDate)        
        
+
+@app.route('/printTrainingClass', methods=['GET'])
+def printTrainingClass():
+    # LIST TRAINING CLASS ATTENDEES
+    trainingDate=request.args.get('classDate')
+   
+    if trainingDate == None:
+        flash('The training date is missing','danger')
+        return
+
+    shopNumber=request.args.get('shop')
+    destination = request.args.get('destination')
+    trainingDateDAT = datetime.strptime(trainingDate,'%Y-%m-%d')
+    displayTrainingDate = trainingDateDAT.strftime('%B %-d, %Y') 
+    
+    # GET TODAYS DATE
+    todays_date = date.today()
+    todaysDate = todays_date.strftime('%B %-d, %Y')
+
+    # GET MEMBERS IN TRAINING CLASS
+    members = db.session.query(Member).filter(Member.Last_Monitor_Training == trainingDate)\
+    .order_by(Member.Last_Name,Member.First_Name).all()
+    
+    if members == None:
+        flash ('No members assigned to this date.','info')
+        return redirect(url_for('index'))
+
+    classDict = []
+    classItem = []
+    
+    for m in members:
+        displayName = m.Last_Name
+        if m.Last_Monitor_Training != None:
+            lastMonitorTraining = m.Last_Monitor_Training.strftime('%m-%d-%Y')
+        else:
+            lastMonitorTraining = ''
+        if m.Nickname != None:
+            displayName += ' (' + m.Nickname + ')'
+        displayName += ' ' + m.First_Name
+    
+        classItem = {
+            'name': displayName,
+            'memberID':m.Member_ID
+        }
+        classDict.append(classItem)
+
+    # DISPLAY OR MAKE PDF
+    if (destination == 'PDF'):
+        html = render_template("rptTrainingClass.html",classDict=classDict,displayTrainingDate=displayTrainingDate,todaysDate=todaysDate)
+        # DEFINE PATH TO USE TO STORE PDF
+        currentWorkingDirectory = os.getcwd()
+        pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
+        filePath = pdfDirectoryPath + "/rptTrainingClass.pdf"
+        options = { 
+            "enable-local-file-access": None
+        }
+        pdfkit.from_string(html,filePath, options=options)
+        return redirect(url_for('index'))
+    else:
+        return render_template("rptTrainingClass.html",members=members,classDict=classDict,displayTrainingDate=displayTrainingDate,todaysDate=todaysDate)
+

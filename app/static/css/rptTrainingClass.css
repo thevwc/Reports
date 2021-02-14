@@ -1,0 +1,136 @@
+@media screen { 
+	#printPageButton #closePageButton {
+		float: right;
+		display: block;
+	} 
+	.pageButtons {
+		float:right;
+		margin-right:20px;
+	} 
+
+   	h1, h2, h3 {
+		color: black;
+		text-align: center;
+		font-family: "Times New Roman",Times, sans-serif,serif;
+   } 
+   	h1 {
+		font-size: 16pt;
+		break-before: avoid;
+	}
+	
+	h2 {
+		font-size: 14pt;
+	}
+	
+	h3 {
+		font-size: 12pt;
+	}
+
+   	table {
+		width:30%;
+		margin:0 auto;
+	}
+	table caption {
+		text-align:center;
+		caption-side:top;
+		border:1px solid black;
+		font-weight: bold;
+		color:black;
+	}
+	th {
+		font:size 10pt;
+	}
+	
+	th, td {
+		border: 1px solid black;
+		text-align:center;  
+	}
+	td {
+		font: size 10pt;
+	}
+    
+} 
+
+@media print {
+	.wholePage {
+		page-break-inside: avoid;
+	}
+ 	
+	.pageButtons {
+		display:none;
+		float: none;
+	}
+	
+	table {
+		width:40%;
+		margin: 0 auto;
+	} 
+
+	table caption {
+		text-align:center;
+		caption-side:top;
+		border:1px solid black;
+		font-weight: bold;
+		color:black;
+	}
+
+	th {
+		font-size: 10pt;
+	}
+
+
+	th, td {
+		border:1px solid black;
+		color: black;
+		font-size: 12pt;
+	}
+
+	tfoot::after {
+		counter-increment:page;
+		content: "Page " counter(page) " of " counter(pages);
+	}
+
+	#reportFooter {
+		color:black;
+	}
+
+	body {
+		border: 1px solid white;
+        height: 100%;
+        page-break-after: avoid;
+        page-break-before: avoid;
+	}
+
+	h1 {
+		font-size: 16pt;
+		break-before: avoid;
+	}
+			
+	h2 {
+		font-size: 14pt;
+	}
+			
+	h3 {
+		font-size: 12pt;
+	}
+			
+	h1, h2, h3, h4, h5 {
+		text-align:center;
+		font-weight: bold;
+		break-after: avoid;
+		color:black;
+	}
+
+}
+
+@page {
+	size: portrait;
+	orientation: portrait;
+	display:block;
+	position:relative;
+	margin: 1cm;
+	counter-increment: page;
+	page-break-before: avoid;
+	page-break-after: avoid;
+	page-break-inside: avoid;
+} 
