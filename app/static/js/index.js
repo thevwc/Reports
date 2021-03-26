@@ -19,6 +19,8 @@ function memberSelectedRtn() {
 	currentMemberID= lastEight.slice(1,7)
 	//document.getElementById('selectpicker').value=''
     document.getElementById('prtMonitorTransactionsID').removeAttribute('disabled')
+    document.getElementById('prtMemberScheduleID').removeAttribute('disabled')
+
 }
 function PresidentsReport() {
     window.location.href = '/prtPresidentsReport?destination=PRINT' 
@@ -37,6 +39,12 @@ function Transactions() {
     curYear = d.getFullYear();
     yr = prompt('Monitor schedule year?',curYear)
     link = '/prtMonitorTransactions?destination=PRINT&memberID=' + currentMemberID + '&year=' + yr
+    window.location.href = link
+}
+
+
+function MemberSchedule() {
+    link = '/prtMemberSchedule?destination=PRINT&memberID=' + currentMemberID 
     window.location.href = link
 }
 

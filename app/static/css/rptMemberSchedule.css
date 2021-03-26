@@ -1,0 +1,127 @@
+@media screen { 
+	#printPageButton #closePageButton {
+		float: right;
+		display: block;
+	} 
+	.pageButtons {
+		float:right;
+	} 
+
+	body {
+    	background-color: #f5f5f0ea;
+    	color: rgb(40, 5, 97);
+	}
+	
+   	h1, h2, h3 {
+		color: rgb(29, 9, 114);
+		text-align: center;
+		font-family: "Times New Roman",Times, sans-serif,serif;
+   } 
+   
+   	table {
+		width:100%;
+	}
+	
+	th {
+  		background-color: rgb(74, 72, 189);
+  		color: white;
+	}
+	tr:nth-child(even) {
+		background-color: #d5d2dfa6;
+	}
+	th, td {
+  		border-bottom: 1px solid #ddd;
+	}
+      
+} 
+
+@media print {
+	.wholePage {
+		page-break-inside: avoid;
+	}
+ 	/* #content, #page {
+		width: 100%; 
+		margin: 0; 
+		float: none;
+	} */
+
+	/* #printPageButton, #closePageButton{
+		display: none;
+	}
+	#printPageButton {
+		display: none;
+	}
+
+	#closePageButton {
+		display: none; 
+	} */
+
+	.pageButtons {
+		display:none;
+		float: none;
+	}
+	
+	table {
+		width:100%;
+	}
+	
+	table thead th {
+		border-bottom: 1px solid #000;
+	}
+
+	th {
+  		background-color: white;
+  		color: #000000;
+	}
+	
+	tr:nth-child(even) {
+		background-color: #f2f2f23b;
+	}
+
+	tfoot::after {
+		counter-increment:page;
+		content: "Page " counter(page) " of " counter(pages);
+	}
+
+	#reportFooter {
+		color:black;
+	}
+
+	body {
+		border: 1px solid white;
+        height: 100%;
+        page-break-after: avoid;
+        page-break-before: avoid;
+	}
+
+	h1 {
+			font-size: 18pt;
+			break-before: avoid;
+	}
+			
+	h2 {
+			font-size: 16pt;
+			}
+			
+	h3 {
+			font-size: 14pt;
+			}
+			
+	h1, h2, h3, h4, h5 {
+		text-align:center;
+		font-weight: bold;
+		break-after: avoid;
+	}
+}
+
+@page {
+	size: landscape;
+	orientation: landscape;
+	display:block;
+	position:relative;
+	margin: 1cm;
+	counter-increment: page;
+	page-break-before: avoid;
+	page-break-after: avoid;
+	page-break-inside: avoid;
+} 

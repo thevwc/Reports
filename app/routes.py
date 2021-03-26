@@ -400,7 +400,6 @@ def prtMonitorTransactions():
     memberID=request.args.get('memberID')
     destination = request.args.get('destination')
     curYear = request.args.get('year')
-    print('year from form - ',curYear)
     lastYear = int(curYear)-1
 
     # GET TODAYS DATE
@@ -424,9 +423,7 @@ def prtMonitorTransactions():
     transactionDict = []
     transactionItem = []
     for t in transactions:
-        print('year - ',t.Date_Scheduled.year)
         if (str(t.Date_Scheduled.year) == curYear):
-            print('t.Date_Scheduled.year - ',t.Date_Scheduled.year, curYear)
             transDateTime = t.Transaction_Date.strftime('%m-%d-%Y %I:%M %p')
             transType = t.Transaction_Type
             scheduled = t.Date_Scheduled.strftime('%m-%d-%Y')
@@ -487,7 +484,51 @@ def prtMonitorTransactions():
             transactionDict=transactionDict,\
             notesDict=notesDict,displayName=displayName,\
             displayDate=displayDate,memberID=memberID)
-        
+
+# PRINT MEMBER MONITOR DUTY SCHEDULE       
+@app.route ("/prtMemberSchedule")
+def prtMemberSchedule():
+    memberID=request.args.get('memberID')
+    # GET MEMBER NAME
+    member = db.session.query(Member).filter(Member.Member_ID== memberID).first()
+    displayName = member.First_Name + ' ' + member.Last_Name
+    lastTraining = member.Last_Monitor_Training
+
+    # RETRIEVE LAST_ACCEPTABLE_TRAINING_DATE FROM tblControl_Variables
+    lastAcceptableTrainingDate = db.session.query(ControlVariables.Last_Acceptable_Monitor_Training_Date).filter(ControlVariables.Shop_Number == '1').scalar()
+    if lastTraining == None:
+        needsTraining = 'TRAINING IS NEEDED'
+    else:
+        if (lastTraining < lastAcceptableTrainingDate):
+            needsTraining = 'TRAINING IS NEEDED'
+        else:
+            needsTraining = ''
+
+    # RETRIEVE MEMBER SCHEDULE FOR CURRENT YEAR AND FORWARD
+    #est = timezone('EST')
+    todays_date = date.today()
+    currentYear = todays_date.year
+    beginDateDAT = datetime(todays_date.year,1,1)
+    todays_dateSTR = todays_date.strftime('%m-%d-%Y')
+    beginDateSTR = beginDateDAT.strftime('%m-%d-%Y')
+    
+    # BUILD SELECT STATEMENT TO RETRIEVE MEMBERS SCHEDULE FOR CURRENT YEAR FORWARD
+    sqlSelect = "SELECT tblMember_Data.Member_ID as memberID, "
+    sqlSelect += "First_Name + ' ' + Last_Name as displayName, tblShop_Names.Shop_Name, "
+    sqlSelect += "Last_Monitor_Training as trainingDate, tblMonitor_Schedule.Member_ID, "
+    sqlSelect += " format(Date_Scheduled,'MMM d, yyyy') as DateScheduled, AM_PM, Duty, No_Show, tblMonitor_Schedule.Shop_Number "
+    sqlSelect += "FROM tblMember_Data "
+    sqlSelect += "LEFT JOIN tblMonitor_Schedule ON tblMonitor_Schedule.Member_ID = tblMember_Data.Member_ID "
+    sqlSelect += "LEFT JOIN tblShop_Names ON tblMonitor_Schedule.Shop_Number = tblShop_Names.Shop_Number "
+    sqlSelect += "WHERE tblMember_Data.Member_ID = '" + memberID + "' and Date_Scheduled >= '"
+    sqlSelect += beginDateSTR + "' ORDER BY Date_Scheduled desc, AM_PM, Duty"
+
+    schedule = db.engine.execute(sqlSelect)
+    
+    return render_template("rptMemberSchedule.html",displayName=displayName,needsTraining=needsTraining,\
+    schedule=schedule,todays_date=todays_dateSTR)
+
+
 
 @app.route("/eMailCoordinator", methods=["GET","POST"])
 def eMailCoordinator():
