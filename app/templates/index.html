@@ -13,7 +13,7 @@
             <div><h1>AVAILABLE REPORTS</h1></div>
         </div>
         <div class="version">
-            <h3>ver. Mar 26, 2021</h3>
+            <h3>ver. Apr 26, 2021</h3>
         </div>  
     </div>
 
@@ -21,7 +21,8 @@
         <div id="column1">
             <div id="location" style=margin-top:20px>
                 <form class = "filterItems "></form>
-                    <label for="shopChoice">Location: </label>
+                    <input type="hidden" id="loginShopID" value={{shopID}}>
+                    <label for="shopChoice">Location: {{shopID}} </label>
                     <select id="shopChoice" name="shopList" style="height: 25px;font-size: 1em;">
                         <option id='shop1' value="RA">Rolling Acres</option>
                         <option id='shop2' value="BW">Brownwood</option>

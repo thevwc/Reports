@@ -31,6 +31,10 @@ mail=Mail(app)
 @app.route('/index/')
 @app.route('/index', methods=['GET'])
 def index():
+    shopID = getShopID()
+    staffID = getStaffID()
+    print('shopID - ',shopID)
+
     # GET CURRENT TERM
     term = db.session.query(ControlVariables.Current_Course_Term).filter(ControlVariables.Shop_Number == 1).scalar()
     
@@ -114,6 +118,11 @@ def index():
     # RECENT TRAINING DATES, 30 DAYS OR LESS
     firstWeek = date.today() - timedelta(30)
     firstTrainingDate = firstWeek.strftime('%m-%d-%Y')
+    print('firstTrainingDate - ',firstTrainingDate)
+
+    # now showing just RA via Last_Monitor_Training;
+    # need second dropdown for BW Last_Monitor_Training_Shop_2
+
     sqlTrainingDates = "SELECT Last_Monitor_Training, format(Last_Monitor_Training,'MMM d, yyyy') AS displayDate "
     sqlTrainingDates += "FROM tblMember_Data "
     sqlTrainingDates += "WHERE Last_Monitor_Training >= '" + firstTrainingDate  + "' "
@@ -121,8 +130,8 @@ def index():
     sqlTrainingDates += "ORDER BY Last_Monitor_Training"
     
     trainingDates = db.engine.execute(sqlTrainingDates)
-
-    return render_template("index.html",nameList=nameArray,offeringDict=offeringDict,trainingDates=trainingDates)
+   
+    return render_template("index.html",nameList=nameArray,offeringDict=offeringDict,trainingDates=trainingDates,shopID=shopID)
    
 
 #PRINT PRESIDENTS REPORT
@@ -1223,3 +1232,20 @@ def printTrainingClass():
     else:
         return render_template("rptTrainingClass.html",members=members,classDict=classDict,displayTrainingDate=displayTrainingDate,todaysDate=todaysDate)
 
+def getStaffID():
+	if 'staffID' in session:
+		staffID = session['staffID']
+	else:
+		flash('Login ID is missing, will use 604875','danger')
+		staffID = '757856'
+	return staffID
+	
+def getShopID():
+	if 'shopID' in session:
+		shopID = session['shopID']
+	else:
+		# SET RA FOR TESTING; SEND FLASH ERROR MESSAGE FOR PRODUCTION
+		shopID = 'RA'
+		msg = "Missing location information; Rolling Acres assumed."
+		flash(msg,"danger")
+	return shopID 

@@ -10,7 +10,21 @@ var shopNames = ['Rolling Acres', 'Brownwood']
 var curShopNumber = ''
 var curShopName = ''
 
-
+shopChoice = document.getElementById('loginShopID').value
+$("#shopChoice").val(shopChoice)
+console.log('shopChoice - '+shopChoice)
+switch(shopChoice){
+    case 'RA':
+        document.getElementById("shopChoice").selectedIndex = 0; //Option Rolling Acres
+        break;
+    case 'BW':
+        document.getElementById("shopChoice").selectedIndex = 1; //Option Brownwood
+        break;
+    default:
+    document.getElementById("shopChoice").selectedIndex = 0; //Option Both
+    } 
+    
+    
 document.getElementById("selectpicker").addEventListener("change",memberSelectedRtn)
 
 function memberSelectedRtn() {
