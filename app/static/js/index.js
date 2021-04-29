@@ -69,18 +69,20 @@ function OpenClasses() {
 function AllClasses() {
     window.location.href = '/prtAllClasses?destination=PRINT' 
 }
+
 // function printTrainingClassList() {
 //     window.location.href = '/prtTrainingClassList?destination=PRINT'
 // }
-$('#printTrainingClassID').click(function(){
-    classDate = document.getElementById('trainingDateSelected').value
-    if (classDate == ''){
-        alert("Please select a date.")
-        return 
-    }
-    link = '/printTrainingClass?classDate=' + classDate + '&destination=PRINT' 
-    window.location.href = link
-})
+// $('#printTrainingClassID').click(function(){
+//     classDate = document.getElementById('trainingDateSelected').value
+//     if (classDate == ''){
+//         alert("Please select a date.")
+//         return 
+//     }
+//     link = '/printTrainingClass?classDate=' + classDate + '&destination=PRINT' 
+//     window.location.href = link
+// })
+
 function ClassList() {
     window.location.href = '/ClassLists?destination=PRINT'
 }
@@ -94,5 +96,35 @@ function offeringClickRtn(e) {
         document.getElementById('modalCourseDescriptionTitle').innerHTML = courseNumber + ' - ' + courseTitle
     }
 }
+
+$('#beginDateID').change(function(){
+	document.getElementById('endDateID').value = document.getElementById('beginDateID').value
+})
+
+
+
+$('#printTrainingClassID').click(function(){
+	beginDate = document.getElementById('beginDateID').value
+	endDate = document.getElementById('endDateID').value
+	if (beginDate == ''){
+		alert("Please enter a beginning date.")
+	return 
+	}
+	if (endDate == ''){
+		alert("Please enter an ending date.")
+	return 
+	}
+    shopChoice = document.getElementById('shopChoice').value 
+    switch (shopChoice) {
+        case 'RA':
+            shopNumber = '1'
+            break
+        case 'BW':
+            shopNumber = '2'
+    }
+	link = '/printTrainingClass?beginDate=' + beginDate + '&endDate=' + endDate + '&shop=' + shopNumber 
+	window.location.href = link
+})
+
 
 // END OF FUNCTIONS

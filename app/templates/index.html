@@ -13,7 +13,7 @@
             <div><h1>AVAILABLE REPORTS</h1></div>
         </div>
         <div class="version">
-            <h3>ver. Apr 26, 2021</h3>
+            <h3>ver. Apr 29, 2021</h3>
         </div>  
     </div>
 
@@ -29,6 +29,28 @@
                     </select>
                 </form>
             </div>
+            <div id=trainingClass>
+                <div class="row">
+                    <div class="col-2 offset-2" style=text-align:left>
+                        <label> From</label>
+                    </div>
+                    <div class="col-2 offset-2" style=text-align:left>
+                        <label>Through</label>
+                    </div>     
+                </div>
+                <div class="row">
+                    <div class="col-2 offset-2">
+                        <input id='beginDateID' type="date" class="datepick" style=height:30px;width:8em value=""> 
+                    </div>
+                    <div class="col-2 offset-2">
+                        <input id='endDateID' type="date" class="datepick" style=height:30px;width:8em value=""> 
+                    </div> 
+                </div>
+                <div class="row" style=text-align:center;padding-left:100px;padding-top:10px;padding-bottom:10px>
+                    <button id='printTrainingClassID' type="button" class='btn btn-sm btn-primary' style=width:200px;>Print Training Class List</button>
+                </div>
+            </div>
+        
         </div>
    
         <div id="column2">
@@ -37,14 +59,6 @@
                 <ul style="list-style-type:none;">
                     <!-- <li><button id='sendEmail' type="button" class='btn btn-sm btn-success'>SEND EMAIL</button></li>                 -->
                     <li><button id='prtPresidentsReportID' type="button" onclick='PresidentsReport()' class='btn btn-sm btn-primary'>President's Report</button></li>
-                    <li>
-                        <select id='trainingDateSelected' style='margin-bottom:0px' title='Select a date ...' data-live-search=true data-live-search-style="contains" data-width='auto'>
-                            <option class="optTrainingDates" value="">Select a class ...</option>
-                            {% for t in trainingDates %}
-                                <option  class="optTrainingDate" value={{t.Last_Monitor_Training}}>{{t.displayDate}}</option>
-                            {% endfor %}
-                        </select>
-                    </li>
                     <li><button id='printTrainingClassID' type="button" class='btn btn-sm btn-primary'>Monitor Training Class</button></li>
                     <!-- <li><button id='prtMonitorTrainingID' type="button" class='btn btn-sm btn-primary'>Members by Monitor Training Date</button></li> -->
                     <li><button id='prtMentorsID' type="button" onclick='Mentors()' class='btn btn-sm btn-primary'>Mentor List</button></li>

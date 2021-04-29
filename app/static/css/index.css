@@ -47,6 +47,14 @@
     background-color: lightgray;
     color: navy;
 }
+#trainingClass {
+    border:1px solid black;
+    padding-top:10px;
+    margin-top:20px;
+    margin-left:10px;
+    margin-right:10px;
+    
+}
 
 #printReportBtns {
     grid-area:prtRptArea;

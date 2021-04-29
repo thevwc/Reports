@@ -1175,25 +1175,34 @@ def prtClassList(specifiedSection):
 @app.route('/printTrainingClass', methods=['GET'])
 def printTrainingClass():
     # LIST TRAINING CLASS ATTENDEES
-    trainingDate=request.args.get('classDate')
-   
-    if trainingDate == None:
-        flash('The training date is missing','danger')
+    beginDate=request.args.get('beginDate')
+    endDate=request.args.get('endDate')
+    if beginDate == None or endDate == None:
+        flash('The training dates are missing','danger')
         return
 
     shopNumber=request.args.get('shop')
-    destination = request.args.get('destination')
-    trainingDateDAT = datetime.strptime(trainingDate,'%Y-%m-%d')
-    displayTrainingDate = trainingDateDAT.strftime('%B %-d, %Y') 
+    #destination = request.args.get('destination')
+    beginDateDAT = datetime.strptime(beginDate,'%Y-%m-%d')
+    endDateDAT = datetime.strptime(endDate,'%Y-%m-%d')
+    displayTrainingDate = beginDateDAT.strftime('%B %-d, %Y') + " - " + endDateDAT.strftime('%B %-d, %Y') 
     
     # GET TODAYS DATE
     todays_date = date.today()
     todaysDate = todays_date.strftime('%B %-d, %Y')
 
     # GET MEMBERS IN TRAINING CLASS
-    members = db.session.query(Member).filter(Member.Last_Monitor_Training == trainingDate)\
-    .order_by(Member.Last_Name,Member.First_Name).all()
-    
+    if (shopNumber == 1):
+        members = db.session.query(Member)\
+        .filter(Member.Last_Monitor_Training >= beginDate)\
+        .filter(Member.Last_Monitor_Training <= endDate)\
+        .order_by(Member.Last_Name,Member.First_Name).all()
+    else:
+        members = db.session.query(Member)\
+        .filter(Member.Last_Monitor_Training_Shop_2 >= beginDate)\
+        .filter(Member.Last_Monitor_Training_Shop_2 <= endDate)\
+        .order_by(Member.Last_Name,Member.First_Name).all()
+        
     if members == None:
         flash ('No members assigned to this date.','info')
         return redirect(url_for('index'))
@@ -1216,21 +1225,8 @@ def printTrainingClass():
             'memberID':m.Member_ID
         }
         classDict.append(classItem)
-
-    # DISPLAY OR MAKE PDF
-    if (destination == 'PDF'):
-        html = render_template("rptTrainingClass.html",classDict=classDict,displayTrainingDate=displayTrainingDate,todaysDate=todaysDate)
-        # DEFINE PATH TO USE TO STORE PDF
-        currentWorkingDirectory = os.getcwd()
-        pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
-        filePath = pdfDirectoryPath + "/rptTrainingClass.pdf"
-        options = { 
-            "enable-local-file-access": None
-        }
-        pdfkit.from_string(html,filePath, options=options)
-        return redirect(url_for('index'))
-    else:
-        return render_template("rptTrainingClass.html",members=members,classDict=classDict,displayTrainingDate=displayTrainingDate,todaysDate=todaysDate)
+    
+    return render_template("rptTrainingClass.html",members=members,classDict=classDict,displayTrainingDate=displayTrainingDate,todaysDate=todaysDate)
 
 def getStaffID():
 	if 'staffID' in session:
