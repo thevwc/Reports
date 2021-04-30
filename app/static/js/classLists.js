@@ -5,7 +5,7 @@
 
 // EVENT LISTENTERS
 document.getElementById('prtClassListBtn').addEventListener('click',prtClassList)
-document.getElementById('eMailClassListBtn').addEventListener('click',eMailClassList)
+//document.getElementById('eMailClassListBtn').addEventListener('click',eMailClassList)
 //document.getElementById('closeClassListBtn').addEventListener('click',closeClassList)
 
 $(".sectionBtn").click(function(e) {

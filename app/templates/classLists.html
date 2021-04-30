@@ -11,9 +11,6 @@
         <div class="title">
             <div><h1>CLASS LISTS</h1></div>
         </div>
-        <div class="version">
-            <h3>ver. Jan 31, 2021</h3>
-        </div>  
     </div>
 
 
@@ -45,7 +42,7 @@
                             </button>
                         </td>
                         <td>{{offering.title}}</td>
-                        <td>{{offering.instructorName}}</td>
+                        <td class = 'instructorName'>{{offering.instructorName}}</td>
                         <td>{{offering.dates}}</td>
                         <td style=text-align:center>{{offering.capacity}}</td>
                         <td style=text-align:center>{{offering.seatsTaken}}</td>
@@ -74,7 +71,7 @@
     <div class="taskButtons">
         <input id='selectedSectionNumber' type="hidden">
         <button id='prtClassListBtn' type='button' class ='btn btn-primary'>Print Class List</button>
-        <button id='eMailClassListBtn' type='button' class ='btn btn-primary'>Email Class List</button>
+        <!-- <button id='eMailClassListBtn' type='button' class ='btn btn-primary'>Email Class List</button> -->
         <button id='closeClassListBtn' type='button' class ='btn btn-secondary' onclick="window.history.back()">Close</button>
     </div>
 

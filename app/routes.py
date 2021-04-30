@@ -1,4 +1,12 @@
 # routes.py
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email.mime.application import MIMEApplication
+from email import encoders
+import os.path
+from os import path
 
 from flask import session, render_template, flash, redirect, url_for, request, jsonify, json, make_response, after_this_request
 #from flask_weasyprint import HTML, render_pdf
@@ -247,10 +255,14 @@ def prtContacts():
     for c in contacts:
         contactGroup = c.Contact_Group
         position = c.Position
-        displayName = c.Last_Name + ', ' + c.First_Name 
-        if c.Nickname != None:
-            displayName += ' (' + c.Nickname + ')'
-        
+        print(c.Last_Name,c.First_Name)
+        if c.Last_Name == None or c.First_Name == None:
+            displayName = ''
+        else:
+            displayName = c.Last_Name + ', ' + c.First_Name 
+            if c.Nickname != None:
+                displayName += ' (' + c.Nickname + ')'
+            
         if c.Cell_Phone == None:
             cellPhone = ''
         else:
@@ -839,7 +851,7 @@ def prtAllClasses():
 @app.route("/prtOpenClasses", methods=["GET"])
 def prtOpenClasses():
     destination = request.args.get('destination')
-    todays_date = date.today()
+    todays_date = datetime.today()
     displayDate = todays_date.strftime('%-B %d, %Y')
     term = db.session.query(ControlVariables.Current_Course_Term).filter(ControlVariables.Shop_Number == 1).scalar()
 
@@ -865,10 +877,13 @@ def prtOpenClasses():
             capacity = offering.Section_Size
             
             seatsAvailable = capacity - offering.seatsTaken
-            if (offering.Section_Closed_Date):
-                statusClosed = 'C'
+            if (offering.Section_Closed_Date == None):
+                statusClosed=''
             else:
-                statusClosed = ''
+                if (todays_date >= offering.Section_Closed_Date):
+                    statusClosed = 'C'
+                else:
+                    statusClosed = ''
 
             seatsAvailable = capacity - offering.seatsTaken
             if (seatsAvailable > 0):
@@ -905,6 +920,8 @@ def prtOpenClasses():
                 'supplies':offering.Section_Supplies,
                 'suppliesFee':offering.Section_Supplies_Fee,
             }
+            print(offering.courseNumber,statusFull,statusClosed)
+
             if statusFull != 'F' and statusClosed != 'C':
                 offeringDict.append(offeringItems)
             
@@ -914,7 +931,7 @@ def prtOpenClasses():
 @app.route("/ClassLists", methods=["GET"])
 def ClassLists():
     #destination = request.args.get('destination')
-    todays_date = date.today()
+    todays_date = datetime.today()
     displayDate = todays_date.strftime('%-B %d, %Y')
     term = db.session.query(ControlVariables.Current_Course_Term).filter(ControlVariables.Shop_Number == 1).scalar()
 
@@ -940,10 +957,13 @@ def ClassLists():
             capacity = offering.Section_Size
             
             seatsAvailable = capacity - offering.seatsTaken
-            if (offering.Section_Closed_Date):
-                statusClosed = 'C'
-            else:
+            if (offering.Section_Closed_Date == None):
                 statusClosed = ''
+            else:
+                if (todays_date >= offering.Section_Closed_Date):
+                    statusClosed = 'C'
+                else:
+                    statusClosed = ''
 
             seatsAvailable = capacity - offering.seatsTaken
             if (seatsAvailable > 0):
@@ -979,74 +999,12 @@ def ClassLists():
                 'prereq':prereq,
                 'supplies':offering.Section_Supplies,
                 'suppliesFee':offering.Section_Supplies_Fee,
-            }
-            if statusFull != 'F' and statusClosed != 'C':
-                offeringDict.append(offeringItems)
-    # BUILD COURSE OFFERING ARRAY FOR THE CURRENT TERM
-    offeringDict = []
-    offeringItems = []
+                'fullMsg':statusFull,
+                'closedMsg':statusClosed
+            }     
 
-    try:
-        sp = "EXEC offerings '" + term + "'"
-        sql = SQLQuery(sp)
-        offerings = db.engine.execute(sql)
-        
-    except (SQLAlchemyError, DBAPIError) as e:
-        errorMsg = "ERROR retrieving offerings "
-        flash(errorMsg,'danger')
-        return 'ERROR in offering list build.'
-    
-    if offerings == None:
-        flash('There are no courses offerings for this term.','info')
-    else:    
-        for offering in offerings:
-            # GET CLASS SIZE LIMIT
-            capacity = offering.Section_Size
-            
-            seatsAvailable = capacity - offering.seatsTaken
-            if (offering.Section_Closed_Date):
-                statusClosed = 'C'
-            else:
-                statusClosed = ''
-
-            seatsAvailable = capacity - offering.seatsTaken
-            if (seatsAvailable > 0):
-                statusFull = ''
-            else:
-                statusFull = 'F'
-
-            fee = offering.courseFee
-
-            if (offering.datesNote == None):
-                datesNote = ''
-            else:
-                datesNote = 'Meets - ' + offering.datesNote
-
-            if (offering.prereq == None):
-                prereq = ''
-            else:
-                prereq = offering.prereq
-
-
-            offeringItems = {
-                'sectionName':offering.courseNumber + '-' + offering.sectionID,
-                'term':term,
-                'courseNumber':offering.courseNumber,
-                'title':offering.title,
-                'instructorName':offering.instructorName,
-                'dates':offering.Section_Dates,
-                'notes':datesNote,
-                'capacity':capacity,
-                'seatsTaken':offering.seatsTaken,
-                'seatsAvailable':seatsAvailable,
-                'fee':fee,
-                'prereq':prereq,
-                'supplies':offering.Section_Supplies,
-                'suppliesFee':offering.Section_Supplies_Fee,
-            }
-            if statusFull != 'F' and statusClosed != 'C':
-                offeringDict.append(offeringItems)
-            
+            # if statusFull != 'F' and statusClosed != 'C':
+            offeringDict.append(offeringItems)
         
     return render_template("ClassLists.html",offeringDict=offeringDict,term=term,displayDate=displayDate)
 
@@ -1137,7 +1095,7 @@ def prtClassList(specifiedSection):
 
     courseTitle = db.session.query(Course.Course_Title).filter(Course.Course_Number == courseNumber).scalar()
 
-    instructorName = 'Not&nbspassigned.'
+    instructorName = 'Not assigned.'
     classDates = 'N/A'
     classTimes = ''
     maxSize = ''
@@ -1190,14 +1148,19 @@ def printTrainingClass():
     # GET TODAYS DATE
     todays_date = date.today()
     todaysDate = todays_date.strftime('%B %-d, %Y')
+    
+    print(beginDate,endDate,shopNumber)
 
     # GET MEMBERS IN TRAINING CLASS
-    if (shopNumber == 1):
+    if (shopNumber == '1'):
+        print('RA')
+        shopName='Rolling Acres'
         members = db.session.query(Member)\
         .filter(Member.Last_Monitor_Training >= beginDate)\
         .filter(Member.Last_Monitor_Training <= endDate)\
         .order_by(Member.Last_Name,Member.First_Name).all()
     else:
+        shopName = 'Brownwood'
         members = db.session.query(Member)\
         .filter(Member.Last_Monitor_Training_Shop_2 >= beginDate)\
         .filter(Member.Last_Monitor_Training_Shop_2 <= endDate)\
@@ -1226,7 +1189,8 @@ def printTrainingClass():
         }
         classDict.append(classItem)
     
-    return render_template("rptTrainingClass.html",members=members,classDict=classDict,displayTrainingDate=displayTrainingDate,todaysDate=todaysDate)
+    return render_template("rptTrainingClass.html",members=members,classDict=classDict,\
+    displayTrainingDate=displayTrainingDate,todaysDate=todaysDate,shopName=shopName)
 
 def getStaffID():
 	if 'staffID' in session:
@@ -1245,3 +1209,58 @@ def getShopID():
 		msg = "Missing location information; Rolling Acres assumed."
 		flash(msg,"danger")
 	return shopID 
+
+
+def sendMail():
+     # DETERMINE PATH TO PDF FILES
+    currentWorkingDirectory = os.getcwd()
+    dir_path = currentWorkingDirectory + "/app/static/pdf"
+
+    # GET RECIPIENT
+    cc = request.args.get('coordinatorsEmail')
+    subject = request.args.get('subject')
+    recipient = request.args.get('recipient')
+    recipientList = []
+    recipientList.append(recipient)
+
+    # SMTPLIB approach
+    sender = ('frontdesk@thevwc.net')
+    password = 'Dove1234'
+    
+    subject = request.args.get('subject')
+    message = request.args.get('message')
+    msg = MIMEMultipart()
+    msg['From'] = sender
+    msg['To'] = recipient
+    msg['Subject']=subject
+    # Attach the message to the MIMEMultipart object
+    msg.attach(MIMEText(message, 'plain'))
+    
+    # SETUP ATTACHMENTS
+    for f in files:
+        file_path = os.path.join(dir_path,f)
+        # attachment = MIMEApplication(open(file_path, "rb").read(), _subtype="pdf")
+        # attachment.add_header('Content-Disposition', 'attachment', filename=f)
+        # msg.attach(attachment)
+
+        pdfName = file_path
+        binary_pdf = open(pdfName, 'rb')
+        payload = MIMEBase('application', 'octate-stream', Name=pdfName)
+        payload.set_payload((binary_pdf).read())
+        encoders.encode_base64(payload)
+        payload.add_header('Content-Decomposition', 'attachment', filename=pdfName)
+        msg.attach(payload)
+
+    # AFTER ADDING ATTACHMENTS, IF ANY
+    server = smtplib.SMTP('outlook.office365.com',587)
+    server.starttls()
+    server.login(sender,password)
+    text = msg.as_string() # Convert the MIMEMultipart object to a string to send
+
+    server.sendmail(sender,recipient,text)
+    server.quit()
+
+    response = "Email sent."
+    #except (Exception) as e:
+    #    response = "ERROR - Message could not be sent."
+    return make_response (f"{response}")    
