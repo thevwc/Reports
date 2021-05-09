@@ -1172,12 +1172,12 @@ def printTrainingClass():
     
     for m in members:
         displayName = m.Last_Name
-        print('m.Last_Monitor_Training - ',m.Last_Monitor_Training)
+        
         if m.Last_Monitor_Training != None:
             lastMonitorTraining = m.Last_Monitor_Training.strftime('%m-%d-%Y')
         else:
             lastMonitorTraining = ''
-        print('lastMonitorTraining - ',lastMonitorTraining)
+    
 
         if m.Nickname != None:
             displayName += ' (' + m.Nickname + ')'
