@@ -41,7 +41,6 @@ mail=Mail(app)
 def index():
     shopID = getShopID()
     staffID = getStaffID()
-    print('shopID - ',shopID)
 
     # GET CURRENT TERM
     term = db.session.query(ControlVariables.Current_Course_Term).filter(ControlVariables.Shop_Number == 1).scalar()
@@ -126,7 +125,7 @@ def index():
     # RECENT TRAINING DATES, 30 DAYS OR LESS
     firstWeek = date.today() - timedelta(30)
     firstTrainingDate = firstWeek.strftime('%m-%d-%Y')
-    print('firstTrainingDate - ',firstTrainingDate)
+    
 
     # now showing just RA via Last_Monitor_Training;
     # need second dropdown for BW Last_Monitor_Training_Shop_2
@@ -1149,8 +1148,6 @@ def printTrainingClass():
     todays_date = date.today()
     todaysDate = todays_date.strftime('%B %-d, %Y')
     
-    print(beginDate,endDate,shopNumber)
-
     # GET MEMBERS IN TRAINING CLASS
     if (shopNumber == '1'):
         print('RA')
@@ -1175,17 +1172,21 @@ def printTrainingClass():
     
     for m in members:
         displayName = m.Last_Name
+        print('m.Last_Monitor_Training - ',m.Last_Monitor_Training)
         if m.Last_Monitor_Training != None:
             lastMonitorTraining = m.Last_Monitor_Training.strftime('%m-%d-%Y')
         else:
             lastMonitorTraining = ''
+        print('lastMonitorTraining - ',lastMonitorTraining)
+
         if m.Nickname != None:
             displayName += ' (' + m.Nickname + ')'
         displayName += ' ' + m.First_Name
     
         classItem = {
             'name': displayName,
-            'memberID':m.Member_ID
+            'memberID':m.Member_ID,
+            'trainingDate':lastMonitorTraining
         }
         classDict.append(classItem)
     
@@ -1196,8 +1197,8 @@ def getStaffID():
 	if 'staffID' in session:
 		staffID = session['staffID']
 	else:
-		flash('Login ID is missing, will use 604875','danger')
-		staffID = '757856'
+		flash('Login ID is missing.','danger')
+		staffID = ''
 	return staffID
 	
 def getShopID():
