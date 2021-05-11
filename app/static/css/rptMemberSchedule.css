@@ -34,6 +34,26 @@
 	}
       
 } 
+.training {
+	margin:0 auto;
+}
+#RAtraining {
+	width:135px;
+	font-size:1.5rem;
+	color:green;
+	border:1px solid navy;
+	text-align:center;
+}
+#BWtraining {
+	width:135px;
+	font-size:1.5rem;
+	color:green;
+	border:1px solid navy;
+	text-align:center;
+}
+.needsTraining {
+	color:red !important;
+}
 
 @media print {
 	.wholePage {
