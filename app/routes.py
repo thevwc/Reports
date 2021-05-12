@@ -534,7 +534,7 @@ def prtMemberSchedule():
 
 
     # RETRIEVE MEMBER SCHEDULE FOR CURRENT YEAR AND FORWARD
-    #est = timezone('EST')
+    #est = timezone('America/New_York')
     todays_date = date.today()
     currentYear = todays_date.year
     beginDateDAT = datetime(todays_date.year,1,1)
@@ -548,6 +548,7 @@ def prtMemberSchedule():
         lastTrainingBWstr = lastTrainingBW.strftime('%m-%d-%Y')
     else:
         lastTrainingBWstr = ''
+        
     # BUILD SELECT STATEMENT TO RETRIEVE MEMBERS SCHEDULE FOR CURRENT YEAR FORWARD
     sqlSelect = "SELECT tblMember_Data.Member_ID as memberID, "
     sqlSelect += "First_Name + ' ' + Last_Name as displayName, tblShop_Names.Shop_Name, "
