@@ -5,7 +5,7 @@
 
 // EVENT LISTENTERS
 document.getElementById('prtClassListBtn').addEventListener('click',prtClassList)
-//document.getElementById('eMailClassListBtn').addEventListener('click',eMailClassList)
+document.getElementById('eMailClassListBtn').addEventListener('click',eMailClassList)
 //document.getElementById('closeClassListBtn').addEventListener('click',closeClassList)
 
 $(".sectionBtn").click(function(e) {
@@ -82,10 +82,12 @@ $(".sectionBtn").click(function(e) {
 
 function prtClassList() {
     sectionNumber= document.getElementById('selectedSectionNumber').value
-    window.location.href = '/prtClassList/' + sectionNumber
+    //window.location.href = '/prtClassList/' + sectionNumber + 'destination=PRINT'
+    window.location.href = '/prtClassList?sectionNumber=' + sectionNumber + '&destination=PRINT'
 }
 function eMailClassList() {
-    alert('Routine not implemented.')
+    sectionNumber= document.getElementById('selectedSectionNumber').value
+    window.location.href = '/prtClassList?sectionNumber=' + sectionNumber + '&destination=PDF'
 }
 function closeClassList() {
     window.history.back()

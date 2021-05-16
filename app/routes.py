@@ -10,7 +10,7 @@ from os import path
 
 from flask import session, render_template, flash, redirect, url_for, request, jsonify, json, make_response, after_this_request
 #from flask_weasyprint import HTML, render_pdf
-#import pdfkit
+import pdfkit
 
 
 from flask_bootstrap import Bootstrap
@@ -254,7 +254,6 @@ def prtContacts():
     for c in contacts:
         contactGroup = c.Contact_Group
         position = c.Position
-        print(c.Last_Name,c.First_Name)
         if c.Last_Name == None or c.First_Name == None:
             displayName = ''
         else:
@@ -286,132 +285,132 @@ def prtContacts():
            
 
 #PRINT WEEKLY LIST OF CONTACTS FOR COORDINATOR
-@app.route("/printWeeklyMonitorContacts", methods=['GET'])
-def printWeeklyMonitorContacts():
-    dateScheduled=request.args.get('date')
-    shopNumber=request.args.get('shop')
-    destination = request.args.get('destination')
+# @app.route("/printWeeklyMonitorContacts", methods=['GET'])
+# def printWeeklyMonitorContacts():
+#     dateScheduled=request.args.get('date')
+#     shopNumber=request.args.get('shop')
+#     destination = request.args.get('destination')
 
-    # GET LOCATION NAME FOR REPORT HEADING
-    shopRecord = db.session.query(ShopName).filter(ShopName.Shop_Number==shopNumber).first()
-    shopName = shopRecord.Shop_Name
+#     # GET LOCATION NAME FOR REPORT HEADING
+#     shopRecord = db.session.query(ShopName).filter(ShopName.Shop_Number==shopNumber).first()
+#     shopName = shopRecord.Shop_Name
     
-    #  DETERMINE START OF WEEK DATE
-    #  CONVERT TO DATE TYPE
-    dateScheduledDat = datetime.strptime(dateScheduled,'%Y-%m-%d')
-    dayOfWeek = dateScheduledDat.weekday()
+#     #  DETERMINE START OF WEEK DATE
+#     #  CONVERT TO DATE TYPE
+#     dateScheduledDat = datetime.strptime(dateScheduled,'%Y-%m-%d')
+#     dayOfWeek = dateScheduledDat.weekday()
 
-    # GET BEGIN, END DATES FOR REPORT HEADING
-    beginDateDAT = dateScheduledDat 
-    beginDateSTR = beginDateDAT.strftime('%m-%d-%Y')
+#     # GET BEGIN, END DATES FOR REPORT HEADING
+#     beginDateDAT = dateScheduledDat 
+#     beginDateSTR = beginDateDAT.strftime('%m-%d-%Y')
 
-    endDateDAT = beginDateDAT + timedelta(days=6)
-    endDateSTR = endDateDAT.strftime('%m-%d-%Y')
+#     endDateDAT = beginDateDAT + timedelta(days=6)
+#     endDateSTR = endDateDAT.strftime('%m-%d-%Y')
 
-    weekOfHdg = beginDateDAT.strftime('%B %d, %Y')
+#     weekOfHdg = beginDateDAT.strftime('%B %d, %Y')
     
-    # RETRIEVE SCHEDULE FOR SPECIFIC WEEK
-    todays_date = date.today()
-    todays_dateSTR = todays_date.strftime('%-m-%-d-%Y')
+#     # RETRIEVE SCHEDULE FOR SPECIFIC WEEK
+#     todays_date = date.today()
+#     todays_dateSTR = todays_date.strftime('%-m-%-d-%Y')
 
-    # VARIABLES FOR DUPLICATE NAME CHECK
-    savedSMname=''
-    savedTCname=''
+#     # VARIABLES FOR DUPLICATE NAME CHECK
+#     savedSMname=''
+#     savedTCname=''
     
-    # BUILD SELECT STATEMENT TO RETRIEVE SM MEMBERS SCHEDULE FOR CURRENT YEAR FORWARD
-    sqlSelectSM = "SELECT tblMember_Data.Member_ID as memberID, "
-    sqlSelectSM += "First_Name + ' ' + Last_Name as displayName, "
-    sqlSelectSM += "Last_Monitor_Training as trainingDate, DATEPART(year,Last_Monitor_Training) as trainingYear, "
-    sqlSelectSM += "'N' as trainingNeeded,"
-    sqlSelectSM += " format(Date_Scheduled,'M/d/yyyy') as DateScheduled, DATEPART(year,Date_Scheduled) as scheduleYear, "
-    sqlSelectSM += "Duty, eMail, Home_Phone, Cell_Phone,tblMember_Data.Monitor_Duty_Waiver_Expiration_Date as waiver "
-    sqlSelectSM += "FROM tblMember_Data "
-    sqlSelectSM += "LEFT JOIN tblMonitor_Schedule ON tblMonitor_Schedule.Member_ID = tblMember_Data.Member_ID "
-    sqlSelectSM += "WHERE Date_Scheduled between '" + beginDateSTR + "' and '" + endDateSTR + "' "
-    sqlSelectSM += " and (tblMonitor_Schedule.Duty = 'Shop Monitor' or tblMonitor_Schedule.Duty = 'Tool Crib') "
-    sqlSelectSM += " and tblMonitor_Schedule.Shop_Number = " + shopNumber 
-    sqlSelectSM += "ORDER BY Duty, Last_Name, First_Name"
-    monitors = db.engine.execute(sqlSelectSM)
+#     # BUILD SELECT STATEMENT TO RETRIEVE SM MEMBERS SCHEDULE FOR CURRENT YEAR FORWARD
+#     sqlSelectSM = "SELECT tblMember_Data.Member_ID as memberID, "
+#     sqlSelectSM += "First_Name + ' ' + Last_Name as displayName, "
+#     sqlSelectSM += "Last_Monitor_Training as trainingDate, DATEPART(year,Last_Monitor_Training) as trainingYear, "
+#     sqlSelectSM += "'N' as trainingNeeded,"
+#     sqlSelectSM += " format(Date_Scheduled,'M/d/yyyy') as DateScheduled, DATEPART(year,Date_Scheduled) as scheduleYear, "
+#     sqlSelectSM += "Duty, eMail, Home_Phone, Cell_Phone,tblMember_Data.Monitor_Duty_Waiver_Expiration_Date as waiver "
+#     sqlSelectSM += "FROM tblMember_Data "
+#     sqlSelectSM += "LEFT JOIN tblMonitor_Schedule ON tblMonitor_Schedule.Member_ID = tblMember_Data.Member_ID "
+#     sqlSelectSM += "WHERE Date_Scheduled between '" + beginDateSTR + "' and '" + endDateSTR + "' "
+#     sqlSelectSM += " and (tblMonitor_Schedule.Duty = 'Shop Monitor' or tblMonitor_Schedule.Duty = 'Tool Crib') "
+#     sqlSelectSM += " and tblMonitor_Schedule.Shop_Number = " + shopNumber 
+#     sqlSelectSM += "ORDER BY Duty, Last_Name, First_Name"
+#     monitors = db.engine.execute(sqlSelectSM)
     
-    SMmonitors = []
-    TCmonitors = []
+#     SMmonitors = []
+#     TCmonitors = []
 
-    # STEP THROUGH RESULT SET, DETERMINE IF TRAINING IS NEEDED, BUILD 2D ARRAY (LIST WITHIN LIST)
-    for m in monitors:
-        # IS TRAINING NEEDED?
-        if (m.waiver == None):  # if no waiver 
-            if (m.trainingYear == None):  # if last training year is blank
-                needsTraining = 'Y'
-            else:
-                intTrainingYear = int(m.trainingYear) +2  # int of last training year
-                intScheduleYear = int(m.scheduleYear) # int of schedule year
-                if (intTrainingYear <= intScheduleYear):
-                    needsTraining = 'Y'
-                else:
-                    needsTraining = 'N'
-        else:
-            needsTraining = 'N'
+#     # STEP THROUGH RESULT SET, DETERMINE IF TRAINING IS NEEDED, BUILD 2D ARRAY (LIST WITHIN LIST)
+#     for m in monitors:
+#         # IS TRAINING NEEDED?
+#         if (m.waiver == None):  # if no waiver 
+#             if (m.trainingYear == None):  # if last training year is blank
+#                 needsTraining = 'Y'
+#             else:
+#                 intTrainingYear = int(m.trainingYear) +2  # int of last training year
+#                 intScheduleYear = int(m.scheduleYear) # int of schedule year
+#                 if (intTrainingYear <= intScheduleYear):
+#                     needsTraining = 'Y'
+#                 else:
+#                     needsTraining = 'N'
+#         else:
+#             needsTraining = 'N'
 
-        #   BUILD SHOP MONITOR ARRAYS
-        #   PUT DATA INTO ROW OF ARRAY (SMnames or TCnames)
+#         #   BUILD SHOP MONITOR ARRAYS
+#         #   PUT DATA INTO ROW OF ARRAY (SMnames or TCnames)
 
-        #   Group - Shop Monitor; 
-        if (m.Duty == 'Shop Monitor' and m.displayName != savedSMname):  # ELIMINATE DUPLICATE NAMES
-            savedSMname = m.displayName
-            SMmonitor = {'name':m.displayName,
-                'trainingYear': m.trainingYear,
-                'eMail': m.eMail,
-                'homePhone':m.Home_Phone,
-                'cellPhone':m.Cell_Phone,
-                'needsTraining':needsTraining}
-            if SMmonitor['trainingYear'] == None:
-                SMmonitor['trainingYear'] = ''
-            if SMmonitor['homePhone'] == None:
-                SMmonitor['homePhone'] = ''
-            if SMmonitor['cellPhone'] == None:
-                SMmonitor['cellPhone'] = ''
-            SMmonitors.append(SMmonitor)
+#         #   Group - Shop Monitor; 
+#         if (m.Duty == 'Shop Monitor' and m.displayName != savedSMname):  # ELIMINATE DUPLICATE NAMES
+#             savedSMname = m.displayName
+#             SMmonitor = {'name':m.displayName,
+#                 'trainingYear': m.trainingYear,
+#                 'eMail': m.eMail,
+#                 'homePhone':m.Home_Phone,
+#                 'cellPhone':m.Cell_Phone,
+#                 'needsTraining':needsTraining}
+#             if SMmonitor['trainingYear'] == None:
+#                 SMmonitor['trainingYear'] = ''
+#             if SMmonitor['homePhone'] == None:
+#                 SMmonitor['homePhone'] = ''
+#             if SMmonitor['cellPhone'] == None:
+#                 SMmonitor['cellPhone'] = ''
+#             SMmonitors.append(SMmonitor)
 
-        #   Group - Tool Crib;  
-        if (m.Duty == 'Tool Crib' and m.displayName != savedTCname):    # ELIMINATE DUPLICATE NAMES
-            savedTCname = m.displayName 
-            TCmonitor = {'name':m.displayName,
-                'trainingYear': m.trainingYear,
-                'eMail': m.eMail,
-                'homePhone':m.Home_Phone,
-                'cellPhone':m.Cell_Phone,
-                'needsTraining':needsTraining}
-            if TCmonitor['trainingYear'] == None:
-                TCmonitor['trainingYear'] = ''
-            if TCmonitor['homePhone'] == None:
-                TCmonitor['homePhone'] = ''
-            if TCmonitor['cellPhone'] == None:
-                TCmonitor['cellPhone'] = ''
-            TCmonitors.append(TCmonitor)
+#         #   Group - Tool Crib;  
+#         if (m.Duty == 'Tool Crib' and m.displayName != savedTCname):    # ELIMINATE DUPLICATE NAMES
+#             savedTCname = m.displayName 
+#             TCmonitor = {'name':m.displayName,
+#                 'trainingYear': m.trainingYear,
+#                 'eMail': m.eMail,
+#                 'homePhone':m.Home_Phone,
+#                 'cellPhone':m.Cell_Phone,
+#                 'needsTraining':needsTraining}
+#             if TCmonitor['trainingYear'] == None:
+#                 TCmonitor['trainingYear'] = ''
+#             if TCmonitor['homePhone'] == None:
+#                 TCmonitor['homePhone'] = ''
+#             if TCmonitor['cellPhone'] == None:
+#                 TCmonitor['cellPhone'] = ''
+#             TCmonitors.append(TCmonitor)
             
     
-    if (destination == 'PDF'):
-        #html =  render_template("rptWeeklyMonitorSchedule.h
-        html = render_template("rptWeeklyContacts.html",\
-            beginDate=beginDateSTR,endDate=endDateSTR,todaysDate=todays_dateSTR,\
-            locationName=shopName,\
-            SMmonitors=SMmonitors,TCmonitors=TCmonitors
-            )
-        # DEFINE PATH TO USE TO STORE PDF
-        currentWorkingDirectory = os.getcwd()
-        pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
-        filePath = pdfDirectoryPath + "/rptWeeklyContacts.pdf"
-        options = { 
-            "enable-local-file-access": None
-        }
-        #pdfkit.from_string(html,filePath, options=options)
-        return redirect(url_for('index'))
-    else:
-        return render_template("rptWeeklyContacts.html",\
-            beginDate=beginDateSTR,endDate=endDateSTR,todaysDate=todays_dateSTR,\
-            locationName=shopName,\
-            SMmonitors=SMmonitors,TCmonitors=TCmonitors
-            )
+#     if (destination == 'PDF'):
+#         #html =  render_template("rptWeeklyMonitorSchedule.h
+#         html = render_template("rptWeeklyContacts.html",\
+#             beginDate=beginDateSTR,endDate=endDateSTR,todaysDate=todays_dateSTR,\
+#             locationName=shopName,\
+#             SMmonitors=SMmonitors,TCmonitors=TCmonitors
+#             )
+#         # DEFINE PATH TO USE TO STORE PDF
+#         currentWorkingDirectory = os.getcwd()
+#         pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
+#         filePath = pdfDirectoryPath + "/rptWeeklyContacts.pdf"
+#         options = { 
+#             "enable-local-file-access": None
+#         }
+#         #pdfkit.from_string(html,filePath, options=options)
+#         return redirect(url_for('index'))
+#     else:
+#         return render_template("rptWeeklyContacts.html",\
+#             beginDate=beginDateSTR,endDate=endDateSTR,todaysDate=todays_dateSTR,\
+#             locationName=shopName,\
+#             SMmonitors=SMmonitors,TCmonitors=TCmonitors
+#             )
     
     
 #PRINT MEMBER MONITOR SCHEDULE TRANSACTIONS AND NOTES
@@ -815,8 +814,7 @@ def prtAllClasses():
             capacity = offering.Section_Size
             
             seatsAvailable = capacity - offering.seatsTaken
-            print('offering.Section_Closed_Date -', offering.courseNumber, offering.Section_Closed_Date )
-
+           
             if offering.Section_Closed_Date == None:
                 statusClosed = ''
             else:
@@ -938,7 +936,6 @@ def prtOpenClasses():
                 'supplies':offering.Section_Supplies,
                 'suppliesFee':offering.Section_Supplies_Fee,
             }
-            print(offering.courseNumber,statusFull,statusClosed)
 
             if statusFull != 'F' and statusClosed != 'C':
                 offeringDict.append(offeringItems)
@@ -948,7 +945,7 @@ def prtOpenClasses():
 
 @app.route("/ClassLists", methods=["GET"])
 def ClassLists():
-    #destination = request.args.get('destination')
+    destination = request.args.get('destination')
     todays_date = datetime.today()
     displayDate = todays_date.strftime('%-B %d, %Y')
     term = db.session.query(ControlVariables.Current_Course_Term).filter(ControlVariables.Shop_Number == 1).scalar()
@@ -1024,7 +1021,7 @@ def ClassLists():
             # if statusFull != 'F' and statusClosed != 'C':
             offeringDict.append(offeringItems)
         
-    return render_template("ClassLists.html",offeringDict=offeringDict,term=term,displayDate=displayDate)
+    return render_template("classLists.html",offeringDict=offeringDict,term=term,displayDate=displayDate)
 
 @app.route("/getCourseMembers", methods=["GET"])
 def getCourseMembers():
@@ -1069,8 +1066,11 @@ def getCourseMembers():
     return jsonify(classListDict=classListDict)        
        
 
-@app.route("/prtClassList/<specifiedSection>", methods=["GET"])
-def prtClassList(specifiedSection):
+@app.route("/prtClassList", methods=["GET"])
+def prtClassList():
+    specifiedSection = request.args.get('sectionNumber')
+    destination = request.args.get('destination')
+
     todays_date = date.today()
     displayDate = todays_date.strftime('%-B %d, %Y')
     term = db.session.query(ControlVariables.Current_Course_Term).filter(ControlVariables.Shop_Number == 1).scalar()
@@ -1131,6 +1131,7 @@ def prtClassList(specifiedSection):
             if member.Nickname != None and member.Nickname != '':
                 instructorName += ' (' + member.Nickname + ')'
             instructorName += " " + member.Last_Name
+            instructorEmail = member.eMail
 
         classDates = section.Section_Dates
         classTimes = section.Section_Dates_Note
@@ -1142,11 +1143,79 @@ def prtClassList(specifiedSection):
             .filter(CourseEnrollee.Section_ID == sectionID).scalar()
 
         available = maxSize - enrolled
-    return render_template("rptClassList.html",enrolleeDict=classListDict,\
+    html = render_template("rptClassList.html",enrolleeDict=classListDict,\
     sectionNumber=specifiedSection,courseTitle=courseTitle,\
     instructor=instructorName,classDates=classDates,classTimes=classTimes,\
     maxSize=maxSize,enrolled=enrolled,available=available,displayDate=displayDate)        
-       
+
+    if destination != 'PDF':
+        return html
+
+
+
+    # CREATE PDF FROM HTML VARIABLE
+    # use rptClassListPDF for creating PDF; it has no external CSS file
+    html = render_template("rptClassListPDF.html",enrolleeDict=classListDict,\
+    sectionNumber=specifiedSection,courseTitle=courseTitle,\
+    instructor=instructorName,classDates=classDates,classTimes=classTimes,\
+    maxSize=maxSize,enrolled=enrolled,available=available,displayDate=displayDate)
+    currentWorkingDirectory = os.getcwd()
+    pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
+    filePath = pdfDirectoryPath + "/rptClassList.pdf"
+    options = { 
+            'enable-local-file-access': None,
+            'quiet':'',
+            '--print-media-type':''
+        }
+    pdfkit.from_string(html,filePath, options=options)
+
+
+
+    # GET RECIPIENT
+    cc = ''
+    subject = 'Class list for ' + specifiedSection
+    recipient = instructorEmail
+    recipientList = []
+    recipientList.append(recipient)
+    message = 'Attached is a list of the members enrolled in ' + specifiedSection + '.'
+    # SMTPLIB approach; call function sendMail()
+    response = sendMail(recipient, subject, message, filePath, html)
+    if (response == "ERROR - Message could not be sent."):
+        return make_response (f"{response}") 
+    else:
+        flash("Email sent.",'success')
+        return redirect(url_for('ClassLists'))
+
+def sendMail(recipient, subject, message, filePath, html):
+    sender = ('frontdesk@thevwc.net')
+    password = 'Dove1234'
+    msg = MIMEMultipart()
+    msg['From'] = sender
+    msg['To'] = recipient
+    msg['Subject']=subject
+    # Attach the message to the MIMEMultipart object
+    msg.attach(MIMEText(message, 'plain'))
+    pdfName = filePath
+    binary_pdf = open(pdfName, 'rb')
+    payload = MIMEBase('application', 'octate-stream', Name=pdfName)
+    payload.set_payload((binary_pdf).read())
+    encoders.encode_base64(payload)
+    payload.add_header('Content-Decomposition', 'attachment', filename=pdfName)
+    msg.attach(payload)
+
+    # AFTER ADDING ATTACHMENTS, IF ANY
+    server = smtplib.SMTP('outlook.office365.com',587)
+    server.starttls()
+    server.login(sender,password)
+    text = msg.as_string() # Convert the MIMEMultipart object to a string to send
+    try:
+        server.sendmail(sender,recipient,text)
+        server.quit()
+        response = "Email sent."
+        return response
+    except (Exception) as e:
+        response = "ERROR - Message could not be sent."
+        return response  
 
 @app.route('/printTrainingClass', methods=['GET'])
 def printTrainingClass():
@@ -1169,7 +1238,6 @@ def printTrainingClass():
     
     # GET MEMBERS IN TRAINING CLASS
     if (shopNumber == '1'):
-        print('RA')
         shopName='Rolling Acres'
         members = db.session.query(Member)\
         .filter(Member.Last_Monitor_Training >= beginDate)\
@@ -1231,56 +1299,56 @@ def getShopID():
 	return shopID 
 
 
-def sendMail():
-     # DETERMINE PATH TO PDF FILES
-    currentWorkingDirectory = os.getcwd()
-    dir_path = currentWorkingDirectory + "/app/static/pdf"
+# def sendMail():
+#      # DETERMINE PATH TO PDF FILES
+#     currentWorkingDirectory = os.getcwd()
+#     dir_path = currentWorkingDirectory + "/app/static/pdf"
 
-    # GET RECIPIENT
-    cc = request.args.get('coordinatorsEmail')
-    subject = request.args.get('subject')
-    recipient = request.args.get('recipient')
-    recipientList = []
-    recipientList.append(recipient)
+#     # GET RECIPIENT
+#     cc = request.args.get('coordinatorsEmail')
+#     subject = request.args.get('subject')
+#     recipient = request.args.get('recipient')
+#     recipientList = []
+#     recipientList.append(recipient)
 
-    # SMTPLIB approach
-    sender = ('frontdesk@thevwc.net')
-    password = 'Dove1234'
+#     # SMTPLIB approach
+#     sender = ('frontdesk@thevwc.net')
+#     password = 'Dove1234'
     
-    subject = request.args.get('subject')
-    message = request.args.get('message')
-    msg = MIMEMultipart()
-    msg['From'] = sender
-    msg['To'] = recipient
-    msg['Subject']=subject
-    # Attach the message to the MIMEMultipart object
-    msg.attach(MIMEText(message, 'plain'))
+#     subject = request.args.get('subject')
+#     message = request.args.get('message')
+#     msg = MIMEMultipart()
+#     msg['From'] = sender
+#     msg['To'] = recipient
+#     msg['Subject']=subject
+#     # Attach the message to the MIMEMultipart object
+#     msg.attach(MIMEText(message, 'plain'))
     
-    # SETUP ATTACHMENTS
-    for f in files:
-        file_path = os.path.join(dir_path,f)
-        # attachment = MIMEApplication(open(file_path, "rb").read(), _subtype="pdf")
-        # attachment.add_header('Content-Disposition', 'attachment', filename=f)
-        # msg.attach(attachment)
+#     # SETUP ATTACHMENTS
+#     for f in files:
+#         file_path = os.path.join(dir_path,f)
+#         # attachment = MIMEApplication(open(file_path, "rb").read(), _subtype="pdf")
+#         # attachment.add_header('Content-Disposition', 'attachment', filename=f)
+#         # msg.attach(attachment)
 
-        pdfName = file_path
-        binary_pdf = open(pdfName, 'rb')
-        payload = MIMEBase('application', 'octate-stream', Name=pdfName)
-        payload.set_payload((binary_pdf).read())
-        encoders.encode_base64(payload)
-        payload.add_header('Content-Decomposition', 'attachment', filename=pdfName)
-        msg.attach(payload)
+#         pdfName = file_path
+#         binary_pdf = open(pdfName, 'rb')
+#         payload = MIMEBase('application', 'octate-stream', Name=pdfName)
+#         payload.set_payload((binary_pdf).read())
+#         encoders.encode_base64(payload)
+#         payload.add_header('Content-Decomposition', 'attachment', filename=pdfName)
+#         msg.attach(payload)
 
-    # AFTER ADDING ATTACHMENTS, IF ANY
-    server = smtplib.SMTP('outlook.office365.com',587)
-    server.starttls()
-    server.login(sender,password)
-    text = msg.as_string() # Convert the MIMEMultipart object to a string to send
+#     # AFTER ADDING ATTACHMENTS, IF ANY
+#     server = smtplib.SMTP('outlook.office365.com',587)
+#     server.starttls()
+#     server.login(sender,password)
+#     text = msg.as_string() # Convert the MIMEMultipart object to a string to send
 
-    server.sendmail(sender,recipient,text)
-    server.quit()
+#     server.sendmail(sender,recipient,text)
+#     server.quit()
 
-    response = "Email sent."
-    #except (Exception) as e:
-    #    response = "ERROR - Message could not be sent."
-    return make_response (f"{response}")    
+#     response = "Email sent."
+#     #except (Exception) as e:
+#     #    response = "ERROR - Message could not be sent."
+#     return make_response (f"{response}")    

@@ -37,6 +37,9 @@
                             <button type='button'
                                 id="{{offering.sectionName}}" 
                                 class='sectionBtn btn btn-primary btn-sm'
+                                {% if offering.seatsTaken == 0 %}
+                                disabled
+                                {% endif %}
                                 style="height:20px;padding-top:0">
                                 {{offering.sectionName}}
                             </button>
@@ -71,7 +74,7 @@
     <div class="taskButtons">
         <input id='selectedSectionNumber' type="hidden">
         <button id='prtClassListBtn' type='button' class ='btn btn-primary'>Print Class List</button>
-        <!-- <button id='eMailClassListBtn' type='button' class ='btn btn-primary'>Email Class List</button> -->
+        <button id='eMailClassListBtn' type='button' class ='btn btn-success'>Email Class List</button>
         <button id='closeClassListBtn' type='button' class ='btn btn-secondary' onclick="window.history.back()">Close</button>
     </div>
 

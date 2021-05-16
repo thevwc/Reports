@@ -26,11 +26,23 @@
 		padding-right:20px;
 	} 
 	.sectionSummary {
-		width:70%;		
+		width:40%;		
 		border:2px solid black;
 		margin:0 auto;
-		margin-top:1em;
-		padding-left:8em;
+	}
+	
+	.c1 .c3{
+		min-width:250px !important;
+		font-weight: normal !important;
+		color:gray;
+	}
+	.c3 {
+		padding-left:50px;
+	}
+	.c2 .c4 {
+		min-width:700px;
+		color:navy;
+		font-weight: bolder;
 	}
 	label {
 		padding-top:0em;
@@ -107,32 +119,18 @@
 		font-weight: bold;
 		color:black;
 	}
-	table {
-		margin:0 auto;
-	}
 	
-	.wholePage {
+	
+	/* .wholePage {
 		margin-left:1em;
 		margin-right:1em;
-	}
-	.detail {
-		line-height: 2;
-	}
-	.detail .row:nth-child(even) {
-		background-color:lightgray;
-	}
+	} */
 	
 	.pageButtons {
 		display:none;
 		float:none;
 	}
-	.sectionSummary {
-		width:70%;		
-		border:2px solid black;
-		margin:0 auto;
-		margin-top:1em;
-		padding-left:8em;
-	}
+	
 	label {
 		padding-top:0em;
 	}
@@ -142,10 +140,14 @@
 		font-weight:700;
 		width:100px;	
 	}
+	table {
+		margin:0 auto;
+	}
 }
 
 @page {
-	size:landscape;
+	size:portrait;
+	orientation: portrait;
 	display:block;
 	position:relative;
 	counter-increment: page;

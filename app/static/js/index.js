@@ -70,19 +70,6 @@ function AllClasses() {
     window.location.href = '/prtAllClasses?destination=PRINT' 
 }
 
-// function printTrainingClassList() {
-//     window.location.href = '/prtTrainingClassList?destination=PRINT'
-// }
-// $('#printTrainingClassID').click(function(){
-//     classDate = document.getElementById('trainingDateSelected').value
-//     if (classDate == ''){
-//         alert("Please select a date.")
-//         return 
-//     }
-//     link = '/printTrainingClass?classDate=' + classDate + '&destination=PRINT' 
-//     window.location.href = link
-// })
-
 function ClassList() {
     window.location.href = '/ClassLists?destination=PRINT'
 }
