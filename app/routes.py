@@ -1114,6 +1114,7 @@ def prtClassList():
     courseTitle = db.session.query(Course.Course_Title).filter(Course.Course_Number == courseNumber).scalar()
 
     instructorName = 'Not assigned.'
+    instructorEmail = ''
     classDates = 'N/A'
     classTimes = ''
     maxSize = ''
@@ -1143,6 +1144,10 @@ def prtClassList():
             .filter(CourseEnrollee.Section_ID == sectionID).scalar()
 
         available = maxSize - enrolled
+    else:
+        response = 'Section " + courseNumber + sectionID + " not found.  Process aborted.'
+        return make_response (f"{response}") 
+
     html = render_template("rptClassList.html",enrolleeDict=classListDict,\
     sectionNumber=specifiedSection,courseTitle=courseTitle,\
     instructor=instructorName,classDates=classDates,classTimes=classTimes,\
@@ -1174,6 +1179,9 @@ def prtClassList():
     # GET RECIPIENT
     cc = ''
     subject = 'Class list for ' + specifiedSection
+    if instructorEmail == None or instructorEmail == '':
+        response = "ERROR - Missing email address. Mail not sent."
+        return make_response (f"{response}") 
     recipient = instructorEmail
     recipientList = []
     recipientList.append(recipient)
@@ -1187,8 +1195,8 @@ def prtClassList():
         return redirect(url_for('ClassLists'))
 
 def sendMail(recipient, subject, message, filePath, html):
-    sender = ('frontdesk@thevwc.net')
-    password = 'Dove1234'
+    sender = app.config['MAIL_USERNAME']
+    password = app.config['MAIL_PASSWORD']
     msg = MIMEMultipart()
     msg['From'] = sender
     msg['To'] = recipient
