@@ -1245,7 +1245,7 @@ def printTrainingClass():
     todaysDate = todays_date.strftime('%B %-d, %Y')
     
     # GET MEMBERS IN TRAINING CLASS
-    if (shopNumber == '1'):
+    if (str(shopNumber) == '1'):
         shopName='Rolling Acres'
         members = db.session.query(Member)\
         .filter(Member.Last_Monitor_Training >= beginDate)\
@@ -1268,11 +1268,16 @@ def printTrainingClass():
     for m in members:
         displayName = m.Last_Name
         
-        if m.Last_Monitor_Training != None:
-            lastMonitorTraining = m.Last_Monitor_Training.strftime('%m-%d-%Y')
+        if (str(shopNumber) == '1'):
+            if m.Last_Monitor_Training != None:
+                lastMonitorTraining = m.Last_Monitor_Training.strftime('%m-%d-%Y')
+            else:
+                lastMonitorTraining = ''
         else:
-            lastMonitorTraining = ''
-    
+            if m.Last_Monitor_Training_Shop_2 != None:
+                lastMonitorTraining = m.Last_Monitor_Training_Shop_2.strftime('%m-%d-%Y')
+            else:
+                lastMonitorTraining = ''
 
         if m.Nickname != None:
             displayName += ' (' + m.Nickname + ')'
