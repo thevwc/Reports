@@ -1175,7 +1175,6 @@ def prtClassList():
     pdfkit.from_string(html,filePath, options=options)
 
 
-
     # GET RECIPIENT
     cc = ''
     subject = 'Class list for ' + specifiedSection
@@ -1201,6 +1200,7 @@ def sendMail(recipient, subject, message, filePath, html):
     msg['From'] = sender
     msg['To'] = recipient
     msg['Subject']=subject
+
     # Attach the message to the MIMEMultipart object
     msg.attach(MIMEText(message, 'plain'))
     pdfName = filePath
@@ -1311,57 +1311,3 @@ def getShopID():
 		flash(msg,"danger")
 	return shopID 
 
-
-# def sendMail():
-#      # DETERMINE PATH TO PDF FILES
-#     currentWorkingDirectory = os.getcwd()
-#     dir_path = currentWorkingDirectory + "/app/static/pdf"
-
-#     # GET RECIPIENT
-#     cc = request.args.get('coordinatorsEmail')
-#     subject = request.args.get('subject')
-#     recipient = request.args.get('recipient')
-#     recipientList = []
-#     recipientList.append(recipient)
-
-#     # SMTPLIB approach
-#     sender = ('frontdesk@thevwc.net')
-#     password = 'Dove1234'
-    
-#     subject = request.args.get('subject')
-#     message = request.args.get('message')
-#     msg = MIMEMultipart()
-#     msg['From'] = sender
-#     msg['To'] = recipient
-#     msg['Subject']=subject
-#     # Attach the message to the MIMEMultipart object
-#     msg.attach(MIMEText(message, 'plain'))
-    
-#     # SETUP ATTACHMENTS
-#     for f in files:
-#         file_path = os.path.join(dir_path,f)
-#         # attachment = MIMEApplication(open(file_path, "rb").read(), _subtype="pdf")
-#         # attachment.add_header('Content-Disposition', 'attachment', filename=f)
-#         # msg.attach(attachment)
-
-#         pdfName = file_path
-#         binary_pdf = open(pdfName, 'rb')
-#         payload = MIMEBase('application', 'octate-stream', Name=pdfName)
-#         payload.set_payload((binary_pdf).read())
-#         encoders.encode_base64(payload)
-#         payload.add_header('Content-Decomposition', 'attachment', filename=pdfName)
-#         msg.attach(payload)
-
-#     # AFTER ADDING ATTACHMENTS, IF ANY
-#     server = smtplib.SMTP('outlook.office365.com',587)
-#     server.starttls()
-#     server.login(sender,password)
-#     text = msg.as_string() # Convert the MIMEMultipart object to a string to send
-
-#     server.sendmail(sender,recipient,text)
-#     server.quit()
-
-#     response = "Email sent."
-#     #except (Exception) as e:
-#     #    response = "ERROR - Message could not be sent."
-#     return make_response (f"{response}")    

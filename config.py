@@ -10,12 +10,6 @@ from dotenv import load_dotenv
 basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, '.env'))
 
-# print (os.getenv('Driver'))
-# print (os.getenv('Server'))
-# print (os.getenv('Database'))
-# print (os.getenv('Username'))
-# print (os.getenv('Password'))
-
 params = urllib.parse.quote_plus('DRIVER=' +  os.getenv('Driver') + ';'
                                     'SERVER=' + os.getenv('Server') + ';'
                                     'DATABASE=' + os.getenv('Database') + ';'
@@ -36,4 +30,4 @@ class Config(object):
     MAIL_USERNAME = os.getenv('MAIL_USERNAME')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
     MAIL_ASCII_ATTACHMENTS = False
-    ADMINS = ['hartl1r@gmail.com']
+    
