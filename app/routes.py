@@ -10,8 +10,8 @@ from os import path
 
 from flask import session, render_template, flash, redirect, url_for, request, jsonify, json, make_response, after_this_request
 #from flask_weasyprint import HTML, render_pdf
-import pdfkit
-
+#import pdfkit
+import headless_pdfkit
 
 from flask_bootstrap import Bootstrap
 from werkzeug.urls import url_parse
@@ -494,8 +494,14 @@ def prtMonitorTransactions():
             )
         currentWorkingDirectory = os.getcwd()
         pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
-        filePath = pdfDirectoryPath + "/rptWeeklyNotes.pdf"    
-        options = {"enable-local-file-access": None}
+        filePath = pdfDirectoryPath + "/rptWeeklyNotes.pdf" 
+        options = {
+            'quiet': ''
+        }   
+        ret = headless_pdfkit.generate_pdf(html, options=options)
+        with open(filePath, 'wb') as w:
+            w.write(ret)
+        #options = {"enable-local-file-access": None}
         #pdfkit.from_string(html,filePath, options=options)
         return redirect(url_for('index'))
     else:
@@ -1168,11 +1174,14 @@ def prtClassList():
     pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
     filePath = pdfDirectoryPath + "/rptClassList.pdf"
     options = { 
-            'enable-local-file-access': None,
             'quiet':'',
             '--print-media-type':''
         }
-    pdfkit.from_string(html,filePath, options=options)
+    ret = headless_pdfkit.generate_pdf(html, options=options)
+    with open(filePath, 'wb') as w:
+        w.write(ret)
+        
+    #pdfkit.from_string(html,filePath, options=options)
 
 
     # GET RECIPIENT
