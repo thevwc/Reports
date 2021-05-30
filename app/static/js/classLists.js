@@ -6,7 +6,6 @@
 // EVENT LISTENTERS
 document.getElementById('prtClassListBtn').addEventListener('click',prtClassList)
 document.getElementById('eMailClassListBtn').addEventListener('click',eMailClassList)
-//document.getElementById('closeClassListBtn').addEventListener('click',closeClassList)
 
 $(".sectionBtn").click(function(e) {
     sectionNumber = e.target.id
@@ -89,6 +88,7 @@ function eMailClassList() {
     sectionNumber= document.getElementById('selectedSectionNumber').value
     window.location.href = '/prtClassList?sectionNumber=' + sectionNumber + '&destination=PDF'
 }
+
 function closeClassList() {
     window.history.back()
 }
