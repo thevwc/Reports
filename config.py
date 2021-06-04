@@ -30,4 +30,4 @@ class Config(object):
     MAIL_USERNAME = os.getenv('MAIL_USERNAME')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
     MAIL_ASCII_ATTACHMENTS = False
-    
+    PDF_API = os.getenv('pdf_api')

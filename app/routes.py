@@ -9,10 +9,6 @@ import os.path
 from os import path
 
 from flask import session, render_template, flash, redirect, url_for, request, jsonify, json, make_response, after_this_request
-#from flask_weasyprint import HTML, render_pdf
-#import pdfkit
-import headless_pdfkit
-
 from flask_bootstrap import Bootstrap
 from werkzeug.urls import url_parse
 from app.models import CourseEnrollee, CourseOffering, ShopName, Member, MemberActivity,\
@@ -31,6 +27,10 @@ from datetime import date, datetime, timedelta
 import os.path
 from os import path
 
+if (app.config['PDF_API'] == 'pdfkit'):
+    import pdfkit
+else:
+    import headless_pdfkit
 
 from flask_mail import Mail, Message
 mail=Mail(app)
@@ -137,8 +137,9 @@ def index():
     sqlTrainingDates += "ORDER BY Last_Monitor_Training"
     
     trainingDates = db.engine.execute(sqlTrainingDates)
-   
-    return render_template("index.html",nameList=nameArray,offeringDict=offeringDict,trainingDates=trainingDates,shopID=shopID)
+  
+    return render_template("index.html",nameList=nameArray,offeringDict=offeringDict,\
+    trainingDates=trainingDates,shopID=shopID,courseTerm=term)
    
 
 #PRINT PRESIDENTS REPORT
@@ -236,9 +237,6 @@ def prtContacts():
           
     # GET LIST OF CONTACT GROUPS
     groups = db.session.query(func.count(Contact.Contact_Group).label('count'),Contact.Contact_Group).group_by(Contact.Contact_Group).all()
-    # for g in groups:
-    #     print (g.Contact_Group,g.count)
-
 
     sqlContacts = "SELECT Contact_Group, Position, "
     sqlContacts += "tblContact_List.Member_ID as MemberID, [Last_Name], [First_Name],[Middle_Name],Nickname, "
@@ -955,7 +953,7 @@ def ClassLists():
     todays_date = datetime.today()
     displayDate = todays_date.strftime('%-B %d, %Y')
     term = db.session.query(ControlVariables.Current_Course_Term).filter(ControlVariables.Shop_Number == 1).scalar()
-
+  
     # BUILD COURSE OFFERING ARRAY FOR THE CURRENT TERM
     offeringDict = []
     offeringItems = []
@@ -976,7 +974,7 @@ def ClassLists():
         for offering in offerings:
             # GET CLASS SIZE LIMIT
             capacity = offering.Section_Size
-            
+           
             seatsAvailable = capacity - offering.seatsTaken
             if (offering.Section_Closed_Date == None):
                 statusClosed = ''
@@ -1173,17 +1171,26 @@ def prtClassList():
     currentWorkingDirectory = os.getcwd()
     pdfDirectoryPath = currentWorkingDirectory + "/app/static/pdf"
     filePath = pdfDirectoryPath + "/rptClassList.pdf"
-    options = { 
+
+
+    # GET EITHER 'pdfkit' OR 'headless' FROM .env FILE
+    pdf_api = app.config['PDF_API']
+   
+    if pdf_api == 'headless':
+        options = { 
+                'quiet':''
+            }
+        ret = headless_pdfkit.generate_pdf(html, options=options)
+        with open(filePath, 'wb') as w:
+            w.write(ret) 
+    else:
+        options = { 
+            'enable-local-file-access': None,
             'quiet':'',
-            '--print-media-type':''
+            'print-media-type':''
         }
-    ret = headless_pdfkit.generate_pdf(html, options=options)
-    with open(filePath, 'wb') as w:
-        w.write(ret)
-        
-    #pdfkit.from_string(html,filePath, options=options)
-
-
+        pdfkit.from_string(html,filePath, options=options)
+    
     # GET RECIPIENT
     cc = ''
     subject = 'Class list for ' + specifiedSection

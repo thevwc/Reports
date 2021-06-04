@@ -85,7 +85,7 @@ class Member(db.Model):
     Nov_resident = db.Column(db.Boolean)
     Dec_resident = db.Column(db.Boolean)
 
-    Alt_Adddress = db.Column(db.String(30))
+    Alt_Address = db.Column(db.String(30))
     Alt_City = db.Column(db.String(25))
     Alt_State = db.Column(db.String(2))
     Alt_Zip = db.Column(db.String(10))
