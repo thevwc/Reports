@@ -1137,7 +1137,6 @@ def prtClassList():
                 instructorName += ' (' + member.Nickname + ')'
             instructorName += " " + member.Last_Name
             instructorEmail = member.eMail
-
         classDates = section.Section_Dates
         classTimes = section.Section_Dates_Note
         maxSize= section.Section_Size

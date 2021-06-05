@@ -69,8 +69,9 @@ $(".sectionBtn").click(function(e) {
                 tableRow.appendChild(col5)
                
             }
-
-                
+            // Turn of disabled for print and email buttons
+            document.getElementById('prtClassListBtn').disabled = false    
+            document.getElementById('eMailClassListBtn').disabled = false 
         },
         error: function (jqXHR, textStatus, errorThrown) {
             alert("Error getting course members.\n"+errorThrown + '\n'+textStatus)
@@ -90,6 +91,8 @@ function eMailClassList() {
 }
 
 function closeClassList() {
-    window.history.back()
+    link = '/index/'
+    window.location.href = link
+    //window.history.back()
 }
 // END OF FUNCTIONS
