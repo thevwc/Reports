@@ -432,7 +432,7 @@ def prtMemberSchedule():
     sqlSelect += "LEFT JOIN tblMonitor_Schedule ON tblMonitor_Schedule.Member_ID = tblMember_Data.Member_ID "
     sqlSelect += "LEFT JOIN tblShop_Names ON tblMonitor_Schedule.Shop_Number = tblShop_Names.Shop_Number "
     sqlSelect += "WHERE tblMember_Data.Member_ID = '" + memberID + "' and Date_Scheduled >= '"
-    sqlSelect += beginDateSTR + "' ORDER BY Date_Scheduled desc, AM_PM, Duty"
+    sqlSelect += beginDateSTR + "' ORDER BY Date_Scheduled, AM_PM, Duty"
 
     schedule = db.engine.execute(sqlSelect)
     
