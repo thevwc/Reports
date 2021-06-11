@@ -817,7 +817,7 @@ def prtClassList():
         .filter(CourseOffering.Course_Number == courseNumber)\
         .filter(CourseOffering.Section_ID == sectionID).first()
     if section:
-        instructorID =section.Instructor_ID
+        instructorID = section.Instructor_ID
         member = db.session.query(Member).filter(Member.Member_ID == instructorID).first()
         if member:
             instructorName = member.First_Name
@@ -882,7 +882,7 @@ def prtClassList():
     cc = ''
     subject = 'Class list for ' + specifiedSection
     if instructorEmail == None or instructorEmail == '':
-        response = "ERROR - Missing email address. Mail not sent."
+        response = "ERROR - Missing email address for member ID " + instructorID + ".  Mail not sent."
         return make_response (f"{response}") 
     recipient = instructorEmail
     recipientList = []
