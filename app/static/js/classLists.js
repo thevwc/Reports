@@ -1,7 +1,4 @@
 // classLists.js
-// $("#offeringsDetail").on("change", function() {
-//     alert('something changed')
-// })
 
 // EVENT LISTENTERS
 document.getElementById('prtClassListBtn').addEventListener('click',prtClassList)
@@ -10,8 +7,6 @@ document.getElementById('eMailClassListBtn').addEventListener('click',eMailClass
 $(".sectionBtn").click(function(e) {
     sectionNumber = e.target.id
     document.getElementById('selectedSectionNumber').value = sectionNumber
-    //parentTD = e.target.parentElement
-    //titleTD = parentTD.nextElementSibling
     
     // AJAX
     // BUILD TABLE OF ENROLLEES

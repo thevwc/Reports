@@ -289,10 +289,11 @@ def prtMonitorTransactions():
     destination = request.args.get('destination')
     curYear = request.args.get('year')
     lastYear = int(curYear)-1
+    firstOfLastYearSTR="01-01-" + str(lastYear)
+    firstOfLastYear = datetime.strptime(firstOfLastYearSTR,"%m-%d-%Y")
 
     # GET TODAYS DATE
     todays_date = date.today()
-    #todaysDate = todays_date.strftime('%-m-%-d-%Y')
     displayDate = todays_date.strftime('%B %-d, %Y') 
 
     # GET MEMBER NAME
@@ -306,7 +307,6 @@ def prtMonitorTransactions():
     transactions = db.session.query(MonitorScheduleTransaction)\
     .filter(MonitorScheduleTransaction.Member_ID == memberID)\
     .all()
-    # .filter(MonitorScheduleTransaction.Date_Scheduled.year == curYear)\
     
     transactionDict = []
     transactionItem = []
@@ -336,17 +336,18 @@ def prtMonitorTransactions():
     # BUILD SELECT STATEMENT TO RETRIEVE NOTES FOR SPECIFIED MEMBER
     notes = db.session.query(MonitorWeekNote)\
     .all()
-    #.filter(MonitorWeekNote.Date_Of_Change.year == curYear or MonitorWeekNote.Date_Of_Change == pastYear)\
+    
     if notes == None:
         flash("There are no notes for this member.")
     notesDict = []
     notesItem = []
-    for n in notes:
-        note = str(n.Schedule_Note)    
-        if note.find(memberID) != -1\
-        and (n.Date_Of_Change.year == curYear or n.Date_Of_Change.year == lastYear):
-            initials = db.session.query(Member.Initials).filter(Member.Member_ID == n.Author_ID).scalar()
-            
+    
+    for n in notes:   
+        note = str(n.Schedule_Note) 
+        if note.find(memberID) == -1:
+            continue
+        if (n.Date_Of_Change >= firstOfLastYear):
+            initials = db.session.query(Member.Initials).filter(Member.Member_ID == n.Author_ID).scalar()    
             notesItem = {
                 'noteDateTime':n.Date_Of_Change.strftime('%m-%d-%Y %I:%M %p'),
                 'noteText':n.Schedule_Note,
@@ -812,8 +813,9 @@ def prtClassList():
     maxSize = ''
     enrolled = ''
     available = ''
-
+    
     section = db.session.query(CourseOffering)\
+        .filter(CourseOffering.Course_Term == term)\
         .filter(CourseOffering.Course_Number == courseNumber)\
         .filter(CourseOffering.Section_ID == sectionID).first()
     if section:
