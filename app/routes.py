@@ -534,9 +534,14 @@ def prtAllClasses():
             else:
                 prereq = offering.prereq
 
+            if offering.Section_Supplies_Fee != None:
+                suppliesFee = offering.Section_Supplies_Fee
+            else:
+                suppliesFee = 0
 
             offeringItems = {
                 'sectionName':offering.courseNumber + '-' + offering.sectionID,
+                'location':offering.location,
                 'term':term,
                 'courseNumber':offering.courseNumber,
                 'title':offering.title,
@@ -549,7 +554,7 @@ def prtAllClasses():
                 'fee':fee,
                 'prereq':prereq,
                 'supplies':offering.Section_Supplies,
-                'suppliesFee':offering.Section_Supplies_Fee,
+                'suppliesFee':suppliesFee,
                 'fullMsg':statusFull,
                 'closedMsg':statusClosed
             }
@@ -612,11 +617,15 @@ def prtOpenClasses():
             else:
                 prereq = offering.prereq
 
-
+            if offering.Section_Supplies_Fee != None:
+                suppliesFee = offering.Section_Supplies_Fee
+            else:
+                suppliesFee = 0
             offeringItems = {
                 'sectionName':offering.courseNumber + '-' + offering.sectionID,
                 'term':term,
                 'courseNumber':offering.courseNumber,
+                'location':offering.location,
                 'title':offering.title,
                 'instructorName':offering.instructorName,
                 'dates':offering.Section_Dates,
@@ -627,7 +636,7 @@ def prtOpenClasses():
                 'fee':fee,
                 'prereq':prereq,
                 'supplies':offering.Section_Supplies,
-                'suppliesFee':offering.Section_Supplies_Fee,
+                'suppliesFee':suppliesFee,
             }
 
             if statusFull != 'F' and statusClosed != 'C':

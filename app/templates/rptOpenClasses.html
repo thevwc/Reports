@@ -20,7 +20,7 @@
     </div>
 
     <div class= "subTitles" text-align:center>
-        <h3>Open Classes - {{term}}</h3>
+        <h2><strong> Open Classes - {{term}}</strong></h2>
         <h3>As of {{displayDate}}</h3>
     </div>
     
@@ -30,6 +30,7 @@
         <th>
             <tr>
                 <th style=text-align:center>Section</th>
+                <th>Loc</th>
                 <th style=text-align:center>Title</th>
                 <th style=text-align:center>Instructor</th>
                 <th style=text-align:center>Dates</th>
@@ -52,6 +53,7 @@
                     style="border-top:1px solid black">
                     
                     <td class='offeringSectionName'>{{offering.sectionName}}</td>
+                    <td class='offeringLocation' style=width:50px;text-align:left>{{offering.location}}</td>
                     <td class='offeringTitle'>{{offering.title}}</td>
                     <td class='offeringInstructor'>{{offering.instructorName}}</td>
                     <td>{{offering.dates}}</td>
@@ -72,10 +74,11 @@
                         class=" {{offering.fullMsg}} {{offering.closedMsg}}">
                         {% if offering.notes != '' %}
                             <td></td>
+                            <td></td>
                             <td style='color:green'>{{offering.notes}}</td>
                         {% endif %}
                         {% if offering.prereq != '' %}
-                            <td colspan="6" id='p{{offering.sectionName}}' style='color:red'>Prerequisite -  {{offering.prereq}}</td>
+                            <td colspan="4" id='p{{offering.sectionName}}' style='color:red'>Prerequisite -  {{offering.prereq}}</td>
                         {% endif %}
                     </tr>                    
                 {% endif %}
