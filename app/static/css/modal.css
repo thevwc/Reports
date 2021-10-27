@@ -5,7 +5,7 @@
 .modal-content {
     width:100%;
     border:2px solid blue;
-    background-color: lightgreen;
+    background-color: lightgrey;
 }
 .modal-header {
     text-align:center;
@@ -23,22 +23,9 @@
     vertical-align:middle;
 } */
 .modal-footer {
-    display:grid;
-    grid-template-rows: 50px;
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas: "footer-left  footer-right";
-    background-color:lightgrey;
+    background-color:white;
     height:50px;
-    margin-top:20px;
-    padding-top:0px;
+    justify-content: center;
 }
-.footer-left-col {
-    grid-area: footer-left;
-    text-align:left;
-    padding-top:2em;
-}
-.footer-right-col {
-      grid-area: footer-right;
-      text-align: right;
-  }
+
 

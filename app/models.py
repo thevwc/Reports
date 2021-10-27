@@ -136,7 +136,7 @@ class Member(db.Model):
     isSpecialProjects = db.Column(db.Boolean)
     Manager = db.Column(db.Boolean)
     isVP = db.Column(db.Boolean)
-
+    LightspeedID = db.Column(db.String(20))
     fullName = column_property(First_Name + " " + Last_Name)
     # Relationships
     #activities = db.relationship('MemberActivity', backref='member')

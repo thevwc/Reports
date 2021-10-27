@@ -12,7 +12,6 @@ var curShopName = ''
 
 shopChoice = document.getElementById('loginShopID').value
 $("#shopChoice").val(shopChoice)
-console.log('shopChoice - '+shopChoice)
 switch(shopChoice){
     case 'RA':
         document.getElementById("shopChoice").selectedIndex = 0; //Option Rolling Acres
@@ -31,7 +30,8 @@ function memberSelectedRtn() {
     selectedMember = this.value
 	lastEight = selectedMember.slice(-8)
 	currentMemberID= lastEight.slice(1,7)
-	//document.getElementById('selectpicker').value=''
+    
+    document.getElementById('getMemberContactInfoID').removeAttribute('disabled')
     document.getElementById('prtMonitorTransactionsID').removeAttribute('disabled')
     document.getElementById('prtMemberScheduleID').removeAttribute('disabled')
 
@@ -46,6 +46,48 @@ function Mentors() {
 
 function Contacts() {
     window.location.href = '/prtContacts?destination=PRINT'
+}
+
+function ContactInfo() {
+    villageID = currentMemberID
+    var dataToSend = {
+        villageID: villageID
+    };
+    fetch(`${window.origin}/getMemberContactInfo`, {
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify(dataToSend),
+        cache: "no-cache",
+        headers: new Headers({
+            "content-type": "application/json"
+        })
+    })
+    .then(function (response) {
+        if (response.status != 200) {
+            console.log(`Response status was not 200: ${response.status}`);
+            return ;
+        }
+        response.json().then(function (data) {
+            // Was the member found in the lightspeed database?
+            if (data.hasOwnProperty('msg')){
+                modalAlert('ERROR',data.msg)
+                return
+            }
+           
+            
+            msg = `
+                <ul class="list-group mb=3">
+                    <li class="list-group-item"style=text-align:left>Village ID - ${data.memberID}</li>
+                    <li class="list-group-item"style=text-align:left>Lightspeed ID - ${data.lightspeedID}</li>
+                    <li class="list-group-item"style=text-align:left>Home phone - ${data.homePhone}</li>
+                    <li class="list-group-item"style=text-align:left>Mobile phone - ${data.cellPhone}</li>
+                    <li class="list-group-item"style=text-align:left>Email - ${data.eMail}</li>
+                </ul>   
+            `   
+            modalAlert(data.memberName,msg)
+            
+        })
+    })
 }
 
 function Transactions() {
@@ -113,5 +155,16 @@ $('#printTrainingClassID').click(function(){
 	window.location.href = link
 })
 
+
+function modalAlert(title,msg) {
+	document.getElementById("modalTitle").innerHTML = title
+	document.getElementById("modalBody").innerHTML= msg
+	$('#myModalMsg').modal('show')
+}
+
+
+function closeModal() {
+	$('#myModalMsg').modal('hide')
+}
 
 // END OF FUNCTIONS

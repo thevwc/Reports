@@ -249,20 +249,14 @@ textarea {
 }
 #modalLookupID {
     height:600px;
+    background-color: lightgray;
 }
 #memberSelectID {
     width:200px;
     height:600px;
 
 }
-.modal-dialog {
-    width:360px;
-    height:600px !important;
-}
-.modal-content {
-    height:60%;
-    background-color:#BBD6EC;
-}
+
 /* iPad portrait */
 @media (min-width: 768px) {
     .parent {
@@ -280,25 +274,7 @@ textarea {
         margin-top: 100px;
         
     }
-    /* .hdg {
-        grid-area: hdgArea; 
-        display:grid;
-        grid-template-rows: 1fr 1fr 1fr 1fr;
-        grid-template-columns:1fr 1fr;
-        grid-template-areas: " searchArea searchArea",
-                                "memberNameArea memberNameArea",
-                                "versionArea staffNameArea",
-                                ".  menuArea";
-        height:4rem;
-        background-color: var(--main-hdg-bg-color); 
-        color:var(--main-hdg-txt-color);
-        
-    } */
-
-    /* body {font-size:.75rem}
-    .localContactInfo {
-        font-size:.75rem;
-    } */
+   
 }
 
 /* Laptop to monitor size */

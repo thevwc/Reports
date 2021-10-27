@@ -380,6 +380,28 @@ def prtMonitorTransactions():
             notesDict=notesDict,displayName=displayName,\
             displayDate=displayDate,memberID=memberID)
 
+# DISPLAY MEMBER CONTACT INFO
+@app.route("/getMemberContactInfo",methods=['POST'])
+def getMemberContactInfo():
+    req = request.get_json()
+    memberID = req["villageID"]
+
+    # GET MEMBER NAME
+    member = db.session.query(Member).filter(Member.Member_ID== memberID).first()
+    if member == None:
+        msg = "ERROR - Member not found"
+        return jsonify(msg=msg)
+    
+    memberName = member.First_Name + ' ' + member.Last_Name
+    if member.Nickname != '' and member.Nickname != None:
+        memberName = member.First_Name + ' (' + member.Nickname + ') ' + member.Last_Name
+    
+    return jsonify(eMail=member.eMail,memberName=memberName,memberID=member.Member_ID,lightspeedID=member.LightspeedID, homePhone=member.Home_Phone,cellPhone=member.Cell_Phone)
+    
+   
+        
+
+
 # PRINT MEMBER MONITOR DUTY SCHEDULE       
 @app.route ("/prtMemberSchedule")
 def prtMemberSchedule():
