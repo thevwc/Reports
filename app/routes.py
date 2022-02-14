@@ -161,30 +161,38 @@ def prtPresidentsReport():
     
     mbrsNotCertified = db.session.query(func.count(Member.Member_ID)).filter(Member.Certified != True).filter(Member.Dues_Paid == True).scalar()
    
-    curYrInactive = db.session.query(func.count(Member.Member_ID)).filter(extract('year',Member.Inactive_Date)  == curYear).scalar()
+    curYrInactive = db.session.query(func.count(Member.Member_ID)).filter(Member.Inactive == True)\
+        .filter(extract('year',Member.Inactive_Date)  == curYear).scalar()
     
     pastYrPaid = db.session.query(func.count(DuesPaidYears.Member_ID)).filter(DuesPaidYears.Dues_Year_Paid == pastYear).scalar()
     
-    pastYrInactive = db.session.query(func.count(Member.Member_ID)).filter(extract('year',Member.Inactive_Date)  == pastYear).scalar()
+    pastYrInactive = db.session.query(func.count(Member.Member_ID)).filter(Member.Inactive == True)\
+        .filter(extract('year',Member.Inactive_Date)  == pastYear).scalar()
     
     
     # SQL QUERY TO COMPUTE THOSE PAID LAST YEAR, NOT PAID THIS YEAR
-    sqlCompute = "SELECT tblDues_Paid_Years.Member_ID, tblDues_Paid_Years.Dues_Year_Paid "
-    sqlCompute += "FROM tblDues_Paid_Years "
-    sqlCompute += "WHERE (((tblDues_Paid_Years.Member_ID) Not In "
-    sqlCompute += "(Select Member_ID from tblDues_Paid_Years where Dues_Year_Paid = '" + str(pastYear) + "')) "
-    sqlCompute += "AND ((tblDues_Paid_Years.Dues_Year_Paid)='" + curYear + "'))"
-    records = db.engine.execute(sqlCompute)
-    pdPastNotCur = 0
-    for r in records:
-        pdPastNotCur += 1
+    # sqlCompute = "SELECT Member_ID as Member_In_2021, Dues_Year_Paid "
+    # sqlCompute += "FROM tblDues_Paid_Years "
+    # sqlCompute += "WHERE Dues_Year_Paid = '" + str(pastYear)
+    # sqlCompute += "' and Member_ID Not In "
+    # sqlCompute += "(Select Member_ID from tblDues_Paid_Years where Dues_Year_Paid = '" + str(curYear) + "') "
+    # print(sqlCompute)
+    # records = db.engine.execute(sqlCompute)
+    # pdPastNotCur = 0
+    # for r in records:
+    #     print(r.Member_In_2021)
+    #     pdPastNotCur += 1
+
+    # Changed the meaning of paid last year not paid this year (3) to just showing the
+    # difference in the total number paid each year
+    pdPastNotCur = curYrPd -pastYrPaid 
 
     pastYrNewMbrs = db.session.query(func.count(Member.Member_ID)).filter(extract('year',Member.Date_Joined)  == pastYear).scalar()
     
     volunteers = db.session.query(func.count(Member.Member_ID)).filter(Member.NonMember_Volunteer == True).scalar()
 
     recordsInDB = db.session.query(func.count(Member.Member_ID)).scalar()
-    
+
     return render_template("rptPresident.html",todaysDate=todays_dateSTR,curYear=curYear,pastYear=pastYear,\
     curYrPd=curYrPd,curYrNewMbrs=curYrNewMbrs,mbrsNotCertified=mbrsNotCertified,curYrInactive=curYrInactive,\
     pastYrPaid=pastYrPaid,pastYrInactive=pastYrInactive,pdPastNotCur=pdPastNotCur,pastYrNewMbrs=pastYrNewMbrs,\
